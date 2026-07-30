@@ -1,0 +1,109 @@
+/* Tecnomart Premium Design System */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap');
+
+:root {
+    --primary: #4F46E5;
+    --primary-hover: #4338CA;
+    --secondary: #10B981;
+    --dark-bg: #0F172A;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --text-light: #F8FAFC;
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, var(--dark-bg) 0%, #1E1B4B 100%);
+    color: var(--text-light);
+    min-height: 100vh;
+}
+
+/* Override Breeze bg-gray-100 defaults where possible by making backgrounds transparent */
+.min-h-screen.bg-gray-100 {
+    background: transparent !important;
+}
+
+/* Glassmorphism Cards */
+.bg-white {
+    background: var(--card-bg) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    color: var(--text-light) !important;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.bg-white:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Headings */
+h2, h3, h4 {
+    color: var(--text-light) !important;
+    letter-spacing: -0.02em;
+}
+
+.text-gray-900, .text-gray-800, .text-gray-700, .text-gray-600 {
+    color: var(--text-light) !important;
+}
+
+/* Buttons */
+button, .bg-blue-500, .bg-gray-800 {
+    background: linear-gradient(135deg, var(--primary) 0%, #818CF8 100%) !important;
+    border: none !important;
+    color: white !important;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+}
+
+button:hover, .bg-blue-500:hover, .bg-gray-800:hover {
+    background: linear-gradient(135deg, var(--primary-hover) 0%, #6366F1 100%) !important;
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.6);
+}
+
+/* Inputs & Forms */
+input, select, textarea {
+    background: rgba(0, 0, 0, 0.2) !important;
+    border: 1px solid var(--glass-border) !important;
+    color: var(--text-light) !important;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3) !important;
+    outline: none;
+}
+
+/* Tables */
+th {
+    background: rgba(0, 0, 0, 0.3) !important;
+    color: #94A3B8 !important;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+}
+
+td {
+    border-bottom: 1px solid var(--glass-border) !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.py-12 > div {
+    animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Navigation */
+nav {
+    background: rgba(15, 23, 42, 0.8) !important;
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--glass-border) !important;
+}
