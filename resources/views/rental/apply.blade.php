@@ -155,6 +155,18 @@
                     </div>
                 </div>
 
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="password">Create Password</label>
+                        <input type="password" class="form-input" id="password" name="password" placeholder="At least 8 characters" required>
+                        @error('password') <div class="form-error">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="password_confirmation">Confirm Password</label>
+                        <input type="password" class="form-input" id="password_confirmation" name="password_confirmation" placeholder="Confirm your password" required>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label class="form-label" for="rental_duration">Rental Duration</label>
                     <select class="form-select" id="rental_duration" name="rental_duration" required>

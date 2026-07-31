@@ -30,14 +30,12 @@
             <p>Your tenant account has been created successfully.</p>
         </div>
         <div class="body">
-            <h2>Your Login Credentials</h2>
-            <p style="font-size: 14px; color: #475569;">Use the credentials below to sign in to your tenant dashboard. We recommend changing your password after your first login.</p>
+            <h2>Account Activated</h2>
+            <p style="font-size: 14px; color: #475569;">Your rental application has been approved and your tenant account is now active. You may log in using the email address and password you provided during application.</p>
 
             <div class="credentials">
-                <div class="label">Username / Email</div>
-                <div class="value">{{ $application->generated_username }}</div>
-                <div class="label">Password</div>
-                <div class="value">{{ $application->generated_password }}</div>
+                <div class="label">Email Address</div>
+                <div class="value">{{ $application->email }}</div>
             </div>
 
             <div class="receipt">

@@ -341,9 +341,6 @@ class ManagerController extends Controller
             ->where('manager_id', auth()->id())
             ->firstOrFail();
 
-        // Generate credentials
-        $plainPassword = Str::random(10);
-        
         $user = User::where('email', $application->email)->first();
         $isNewUser = false;
 
@@ -352,36 +349,47 @@ class ManagerController extends Controller
             $user = User::create([
                 'name' => $application->name,
                 'email' => $application->email,
-                'password' => Hash::make($plainPassword),
+                'password' => $application->password_hash,
                 'role' => 'tenant',
+                'is_active' => true,
             ]);
             $isNewUser = true;
+        } else {
+            // Ensure they are active
+            $user->update(['is_active' => true]);
         }
 
         // Create contract
         $startDate = Carbon::today();
         $endDate = $startDate->copy()->addMonths($application->rental_duration);
+        $paymentMethodText = $application->payment_method === 'gcash' ? 'Payment via GCash.' : 'Payment in person.';
 
         $contract = Contract::create([
             'tenant_id' => $user->id,
             'stall_id' => $application->stall_id,
             'start_date' => $startDate,
             'end_date' => $endDate,
-            'terms' => 'Rental duration: ' . $application->rental_duration . ' month(s). Payment in person.',
+            'terms' => 'Rental duration: ' . $application->rental_duration . ' month(s). ' . $paymentMethodText,
             'status' => 'active',
         ]);
         
         // Generate monthly payments
         for ($i = 0; $i < $application->rental_duration; $i++) {
             $dueDate = $startDate->copy()->addMonths($i);
+            
+            $isPaid = false;
+            if ($application->payment_method === 'gcash' && $i === 0) {
+                $isPaid = true;
+            }
+
             \App\Models\Payment::create([
                 'tenant_id' => $user->id,
                 'manager_id' => $stall->manager_id,
                 'stall_id' => $application->stall_id,
                 'amount' => $stall->price,
                 'due_date' => $dueDate,
-                // In-person payments are pending until the manager manually marks them as paid
-                'status' => 'pending',
+                'status' => $isPaid ? 'paid' : 'pending',
+                'paid_date' => $isPaid ? Carbon::now() : null,
             ]);
         }
 
@@ -393,10 +401,10 @@ class ManagerController extends Controller
             'status' => 'approved',
             'payment_status' => 'paid',
             'generated_username' => $application->email,
-            'generated_password' => $isNewUser ? $plainPassword : null,
+            'generated_password' => null, // No longer auto-generating
         ]);
 
-        // Send credentials email
+        // Send approval email
         Mail::to($application->email)->send(new TenantCredentialsMail($application));
 
         // Send approval notification
@@ -404,7 +412,7 @@ class ManagerController extends Controller
 
         $this->logActivity('approved_application', auth()->user()->name . ' approved rental application from ' . $application->name . ' for stall "' . $stall->name . '"', $application);
 
-        return back()->with('success', 'Application approved! Tenant account created and credentials sent to ' . $application->email);
+        return back()->with('success', 'Application approved! Tenant account activated and email sent to ' . $application->email);
     }
 
     /**

@@ -50,9 +50,10 @@ class StallRentalController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255'],
             'phone' => 'required|string|max:20',
             'address' => 'required|string|max:1000',
+            'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
             'rental_duration' => 'required|integer|min:1|max:12',
             'terms' => 'accepted',
         ], [
@@ -63,6 +64,7 @@ class StallRentalController extends Controller
             'stall_id' => $stall->id,
             'name' => $request->name,
             'email' => $request->email,
+            'password_hash' => Hash::make($request->password),
             'phone' => $request->phone,
             'address' => $request->address,
             'rental_duration' => $request->rental_duration,
@@ -95,66 +97,14 @@ class StallRentalController extends Controller
         // Generate GCash reference
         $gcashRef = 'GCASH-' . strtoupper(Str::random(8));
 
-        // Generate random credentials
-        $plainPassword = Str::random(10);
-        
-        $user = User::where('email', $application->email)->first();
-        $isNewUser = false;
-        
-        if (!$user) {
-            // Create tenant user
-            $user = User::create([
-                'name' => $application->name,
-                'email' => $application->email,
-                'password' => Hash::make($plainPassword),
-                'role' => 'tenant',
-            ]);
-            $isNewUser = true;
-        }
-
-        // Create contract
-        $startDate = Carbon::today();
-        $endDate = $startDate->copy()->addMonths($application->rental_duration);
-
-        Contract::create([
-            'tenant_id' => $user->id,
-            'stall_id' => $application->stall_id,
-            'start_date' => $startDate,
-            'end_date' => $endDate,
-            'terms' => 'Rental duration: ' . $application->rental_duration . ' month(s). Payment via GCash.',
-            'status' => 'active',
-        ]);
-        
-        // Generate monthly payments
-        for ($i = 0; $i < $application->rental_duration; $i++) {
-            $dueDate = $startDate->copy()->addMonths($i);
-            \App\Models\Payment::create([
-                'tenant_id' => $user->id,
-                'manager_id' => $application->stall->manager_id,
-                'stall_id' => $application->stall_id,
-                'amount' => $application->stall->price,
-                'due_date' => $dueDate,
-                // First month is paid via GCash, subsequent months are pending
-                'status' => $i === 0 ? 'paid' : 'pending',
-                'paid_date' => $i === 0 ? Carbon::now() : null,
-            ]);
-        }
-
-        // Mark stall as occupied
-        $application->stall->update(['status' => 'occupied']);
-
         // Update application
         $application->update([
             'payment_method' => 'gcash',
             'payment_status' => 'paid',
-            'status' => 'approved',
+            // Still pending manager approval
+            'status' => 'pending_approval',
             'gcash_reference' => $gcashRef,
-            'generated_username' => $application->email,
-            'generated_password' => $isNewUser ? $plainPassword : null,
         ]);
-
-        // Send credentials email
-        Mail::to($application->email)->send(new TenantCredentialsMail($application));
 
         return redirect()->route('rental.success', $application);
     }

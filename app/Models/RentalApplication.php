@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class RentalApplication extends Model
 {
     protected $fillable = [
-        'stall_id', 'name', 'email', 'phone', 'address',
+        'stall_id', 'name', 'email', 'password_hash', 'phone', 'address',
         'rental_duration', 'payment_method', 'payment_status',
         'status', 'gcash_reference', 'generated_username', 'generated_password',
     ];

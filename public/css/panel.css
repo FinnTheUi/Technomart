@@ -257,9 +257,57 @@ select.status-select:focus{border-color:#4f46e5}
 .new-chat-btn{width:100%;margin-top:8px;background:#eef2ff;border:1px solid #c7d2fe;color:#4f46e5;border-radius:10px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:.2s}
 .new-chat-btn:hover{background:#e0e7ff}
 
+/* ---- Notification Bell ---- */
+.notif-section{padding:0 8px;margin-top:8px;margin-bottom:4px;position:relative}
+.notif-trigger{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;font-size:14px;font-weight:500;color:#64748b;cursor:pointer;transition:all .2s;border:1px solid transparent;background:none;width:100%;font-family:'Inter',sans-serif;position:relative}
+.notif-trigger:hover{color:#0f172a;background:#f1f5f9}
+.notif-trigger svg{width:20px;height:20px;flex-shrink:0}
+.notif-trigger .notif-badge{margin-left:auto;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;padding:0 6px;border-radius:10px;background:#ef4444;color:#fff;font-size:11px;font-weight:700;line-height:1;animation:notifPulse 2s ease-in-out infinite}
+.notif-trigger .notif-badge.hidden{display:none}
+@keyframes notifPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.3)}50%{box-shadow:0 0 0 6px rgba(239,68,68,0)}}
+.notif-dropdown{display:none;position:absolute;left:14px;bottom:calc(100% + 8px);width:360px;max-height:460px;background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.15);z-index:200;overflow:hidden;flex-direction:column}
+.notif-dropdown.open{display:flex}
+.notif-dropdown-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #e2e8f0}
+.notif-dropdown-header h3{font-size:15px;font-weight:700;color:#0f172a}
+.notif-mark-all{font-size:12px;color:#4f46e5;font-weight:600;cursor:pointer;background:none;border:none;font-family:'Inter',sans-serif;padding:4px 8px;border-radius:6px;transition:.2s}
+.notif-mark-all:hover{background:#eef2ff}
+.notif-list{flex:1;overflow-y:auto;max-height:340px}
+.notif-item{display:flex;gap:12px;padding:14px 20px;border-bottom:1px solid #f8fafc;transition:background .15s;cursor:pointer;align-items:flex-start}
+.notif-item:hover{background:#f8fafc}
+.notif-item.unread{background:#f0f4ff}
+.notif-item.unread:hover{background:#e8edff}
+.notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:6px}
+.notif-item.unread .notif-dot{background:#4f46e5}
+.notif-item:not(.unread) .notif-dot{background:#e2e8f0}
+.notif-item-content{flex:1;min-width:0}
+.notif-item-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.notif-item-icon.icon-payment{background:#ecfdf5;color:#059669}
+.notif-item-icon.icon-application{background:#eef2ff;color:#4f46e5}
+.notif-item-icon.icon-lease{background:#fffbeb;color:#d97706}
+.notif-item-icon.icon-stall{background:#f0f9ff;color:#0284c7}
+.notif-item-icon.icon-default{background:#f1f5f9;color:#64748b}
+.notif-item-icon svg{width:18px;height:18px}
+.notif-msg{font-size:13px;color:#334155;line-height:1.4;font-weight:500}
+.notif-item.unread .notif-msg{font-weight:600;color:#0f172a}
+.notif-time{font-size:11px;color:#94a3b8;margin-top:4px}
+.notif-dropdown-footer{border-top:1px solid #e2e8f0;padding:12px 20px;text-align:center}
+.notif-dropdown-footer a{font-size:13px;color:#4f46e5;font-weight:600;text-decoration:none;transition:.2s}
+.notif-dropdown-footer a:hover{color:#4338ca}
+.notif-empty{padding:40px 20px;text-align:center;color:#94a3b8;font-size:13px}
+.notif-empty svg{width:40px;height:40px;margin:0 auto 12px;opacity:.4}
+
+/* ---- Notifications Full Page ---- */
+.notif-page-item{display:flex;gap:16px;padding:20px 24px;border-bottom:1px solid #f1f5f9;transition:background .15s;align-items:flex-start}
+.notif-page-item:hover{background:#f8fafc}
+.notif-page-item.unread{background:#f0f4ff;border-left:3px solid #4f46e5}
+.notif-page-item .notif-msg{font-size:14px}
+.notif-page-item .notif-time{font-size:12px}
+.notif-page-actions{margin-left:auto;flex-shrink:0;display:flex;align-items:center;gap:8px}
+
 /* ---- Responsive ---- */
 @media(max-width:768px){
     .sidebar{width:200px}
     .main{margin-left:200px;padding:20px}
     .stats-grid{grid-template-columns:repeat(2,1fr)}
+    .notif-dropdown{width:300px;left:8px}
 }

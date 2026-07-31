@@ -11,5 +11,6 @@
         @endif
         <a href="{{ route('messages.index') }}" class="nav-item {{ ($active ?? '') === 'messages' ? 'active' : '' }}"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>Messages</a>
     </nav>
+    @include('partials.notification-bell')
     <div class="sidebar-footer"><div class="user-info"><div class="user-avatar">{{ strtoupper(substr(auth()->user()->name,0,1)) }}</div><div class="user-meta"><div class="uname">{{ auth()->user()->name }}</div><div class="urole">Tenant</div></div></div><form method="POST" action="{{ route('logout') }}">@csrf<button type="submit" class="logout-btn"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>Log Out</button></form></div>
 </aside>

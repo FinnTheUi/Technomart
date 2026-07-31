@@ -9,6 +9,7 @@ use App\Http\Controllers\StallRentalController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -126,5 +127,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/payments/{payment}/pay', [PaymentController::class, 'pay'])->name('payments.pay');
     Route::get('/payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('payments.receipt');
 });
+
+// ── Notifications ──
+Route::middleware('auth')->group(function () {
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.markAllRead');
+});
+Route::middleware('auth')->get('/api/notifications', [NotificationController::class, 'apiUnread'])->name('api.notifications');
 
 require __DIR__.'/auth.php';
