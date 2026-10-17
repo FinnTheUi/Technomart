@@ -28,8 +28,9 @@ class OrderController extends Controller
                 ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
                 ->orderByRaw('CASE status WHEN ? THEN 0 WHEN ? THEN 1 ELSE 2 END', [OrderStatus::ForVerification->value, OrderStatus::Paid->value])
                 ->latest()
-                ->paginate(30)
-                ->withQueryString(),
+                ->paginate(10)
+                ->withQueryString()
+                ->fragment('order-records'),
             'statuses' => OrderStatus::cases(),
         ]);
     }

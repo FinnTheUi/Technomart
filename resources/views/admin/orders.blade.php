@@ -34,7 +34,7 @@
             <div class="alert alert-error">{{ $errors->first() }}</div>
         @endif
 
-        <div class="panel">
+        <div class="panel" id="order-records">
             <div class="filters">
                 <a href="{{ route('admin.orders.index') }}" class="{{ request('status') ? '' : 'active' }}">All</a>
                 @foreach($statuses as $status)
@@ -76,7 +76,7 @@
                     @endforeach
                 </tbody>
             </table>
-            <div style="margin-top:16px;">{{ $orders->links() }}</div>
+            {{ $orders->links('partials.pagination') }}
             @else
             <p class="empty">No orders found.</p>
             @endif

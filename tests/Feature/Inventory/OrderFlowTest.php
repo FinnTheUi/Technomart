@@ -10,6 +10,7 @@ use App\Models\StockMovement;
 use App\Models\User;
 use App\Services\Inventory\OrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Notification;
 use RuntimeException;
 use Tests\TestCase;
@@ -110,6 +111,33 @@ class OrderFlowTest extends TestCase
         $this->actingAs($this->tenant)->patch("/billing/order/{$order->id}/submit", ['reference_number' => '1234567890123']);
 
         $this->actingAs(User::factory()->create(['role' => 'manager']))->patch("/billing/order/{$order->id}/verify")->assertForbidden();
+    }
+
+    public function test_admin_orders_are_paginated_ten_per_page(): void
+    {
+        foreach (range(1, 11) as $number) {
+            Order::create([
+                'user_id' => $this->tenant->id,
+                'product_id' => $this->product->id,
+                'quantity' => 1,
+                'total_price' => 20 + $number,
+                'status' => OrderStatus::Pending,
+            ]);
+        }
+
+        $this->actingAs($this->admin)->get('/admin/orders?status=pending')
+            ->assertOk()
+            ->assertViewHas('orders', fn (LengthAwarePaginator $orders) => $orders->count() === 10
+                && $orders->total() === 11
+                && $orders->currentPage() === 1)
+            ->assertSee('Showing 1')
+            ->assertSee('status=pending&amp;page=2', false);
+
+        $this->actingAs($this->admin)->get('/admin/orders?status=pending&page=2')
+            ->assertOk()
+            ->assertViewHas('orders', fn (LengthAwarePaginator $orders) => $orders->count() === 1
+                && $orders->total() === 11
+                && $orders->currentPage() === 2);
     }
 
     public function test_stale_unpaid_orders_are_cancelled_and_release_stock(): void
