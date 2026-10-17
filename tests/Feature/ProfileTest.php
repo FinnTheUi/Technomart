@@ -23,15 +23,17 @@ class ProfileTest extends TestCase
         $response->assertOk();
     }
 
-    public function test_admin_profile_has_social_style_photo_controls(): void
+    public function test_every_role_has_social_style_photo_controls(): void
     {
-        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        foreach ([User::ROLE_ADMIN, User::ROLE_MANAGER, User::ROLE_TENANT] as $role) {
+            $user = User::factory()->create(['role' => $role]);
 
-        $this->actingAs($admin)->get('/profile')
-            ->assertOk()
-            ->assertSee('social-profile-card', false)
-            ->assertSee('Change profile photo')
-            ->assertSee('profile_photo');
+            $this->actingAs($user)->get('/profile')
+                ->assertOk()
+                ->assertSee('social-profile-card', false)
+                ->assertSee('Change profile photo')
+                ->assertSee('profile_photo');
+        }
     }
 
     public function test_profile_information_can_be_updated(): void
@@ -77,7 +79,7 @@ class ProfileTest extends TestCase
     public function test_admin_can_upload_a_sanitized_profile_photo(): void
     {
         Storage::fake('public');
-        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $admin = User::factory()->create(['name' => 'Admin User', 'role' => User::ROLE_ADMIN]);
 
         $this->actingAs($admin)->patch('/profile', [
             'name' => $admin->name,
@@ -91,24 +93,30 @@ class ProfileTest extends TestCase
         Storage::disk('public')->assertExists($path);
     }
 
-    public function test_non_admin_cannot_upload_a_profile_photo(): void
+    public function test_manager_and_tenant_can_upload_a_sanitized_profile_photo(): void
     {
         Storage::fake('public');
-        $tenant = User::factory()->create(['role' => User::ROLE_TENANT]);
 
-        $this->actingAs($tenant)->patch('/profile', [
-            'name' => $tenant->name,
-            'email' => $tenant->email,
-            'profile_photo' => UploadedFile::fake()->image('avatar.jpg'),
-        ])->assertSessionHasErrors('profile_photo');
+        foreach ([User::ROLE_MANAGER, User::ROLE_TENANT] as $role) {
+            $user = User::factory()->create(['name' => ucfirst($role).' User', 'role' => $role]);
 
-        $this->assertNull($tenant->refresh()->avatar_url);
+            $this->actingAs($user)->patch('/profile', [
+                'name' => $user->name,
+                'email' => $user->email,
+                'profile_photo' => UploadedFile::fake()->image($role.'-avatar.jpg', 300, 300),
+            ])->assertSessionHasNoErrors()->assertRedirect('/profile');
+
+            $path = $user->refresh()->avatar_url;
+            $this->assertNotNull($path);
+            $this->assertStringEndsWith('.jpg', $path);
+            Storage::disk('public')->assertExists($path);
+        }
     }
 
     public function test_admin_profile_photo_rejects_non_image_files(): void
     {
         Storage::fake('public');
-        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $admin = User::factory()->create(['name' => 'Admin User', 'role' => User::ROLE_ADMIN]);
 
         $this->actingAs($admin)->patch('/profile', [
             'name' => $admin->name,

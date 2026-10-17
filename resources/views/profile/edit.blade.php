@@ -84,11 +84,9 @@
                             <span id="profileAvatarFallback">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
                         @endif
                     </div>
-                    @if($user->isAdmin())
-                        <button type="button" class="profile-camera" onclick="startPhotoChange()" aria-label="Change profile photo" title="Change profile photo">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h2l2-3h6l2 3h2a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="3" stroke-width="2"/></svg>
-                        </button>
-                    @endif
+                    <button type="button" class="profile-camera" onclick="startPhotoChange()" aria-label="Change profile photo" title="Change profile photo">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h2l2-3h6l2 3h2a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="3" stroke-width="2"/></svg>
+                    </button>
                 </div>
                 <div class="profile-meta">
                     <h2>{{ $user->name }}</h2>
@@ -143,13 +141,11 @@
                             <label class="form-label">Address</label>
                             <textarea name="address" class="form-input" rows="3">{{ old('address', $user->address) }}</textarea>
                         </div>
-                        @if($user->isAdmin())
-                            <div class="form-group wide">
-                                <label class="form-label" for="profile_photo">Profile Photo</label>
-                                <input id="profile_photo" type="file" name="profile_photo" class="form-input profile-photo-input" accept="image/jpeg,image/png,image/webp" onchange="previewProfilePhoto(this)">
-                                <div class="detail-sub">JPG, PNG or WebP, up to 2 MB and 2000 × 2000 pixels.</div>
-                            </div>
-                        @endif
+                        <div class="form-group wide">
+                            <label class="form-label" for="profile_photo">Profile Photo</label>
+                            <input id="profile_photo" type="file" name="profile_photo" class="form-input profile-photo-input" accept="image/jpeg,image/png,image/webp" onchange="previewProfilePhoto(this)">
+                            <div class="detail-sub">JPG, PNG or WebP, up to 2 MB and 2000 × 2000 pixels.</div>
+                        </div>
                         <div class="profile-edit-actions" style="display:flex;gap:12px;margin-top:8px;">
                             <button type="submit" class="btn-submit">Save Changes</button>
                             <button type="button" class="btn-outline" onclick="toggleEdit()">Cancel</button>

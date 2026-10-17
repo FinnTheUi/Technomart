@@ -29,9 +29,7 @@ class ProfileUpdateRequest extends FormRequest
             ],
             'phone_number' => ['nullable', 'string', 'regex:/^(09|\+639)\d{9}$/'],
             'address' => ['nullable', 'string', 'max:100'],
-            'profile_photo' => $this->user()->isAdmin()
-                ? ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048', 'dimensions:max_width=2000,max_height=2000']
-                : ['prohibited'],
+            'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048', 'dimensions:max_width=2000,max_height=2000'],
         ];
     }
 }

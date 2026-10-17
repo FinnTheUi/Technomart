@@ -17,7 +17,7 @@
     <div class="sidebar-footer">
         <a href="{{ route('profile.edit') }}" style="text-decoration:none; color:inherit; display:block;">
             <div class="user-info" style="cursor:pointer; transition:0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
-                <div class="user-avatar">{{ strtoupper(substr(auth()->user()->name,0,1)) }}</div>
+                <div class="user-avatar">@if(auth()->user()->profilePhotoUrl())<img src="{{ auth()->user()->profilePhotoUrl() }}" alt="">@else{{ strtoupper(substr(auth()->user()->name,0,1)) }}@endif</div>
                 <div class="user-meta">
                     <div class="uname">{{ auth()->user()->name }}</div>
                     <div class="urole">Tenant</div>
