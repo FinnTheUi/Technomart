@@ -21,14 +21,24 @@ class OrderController extends Controller
     public function catalog(): View
     {
         return view('tenant.products', [
-            'products' => Product::where('is_active', true)->where('stock', '>', 0)->orderBy('name')->get(),
+            'products' => Product::where('is_active', true)
+                ->where('stock', '>', 0)
+                ->orderBy('name')
+                ->paginate(10)
+                ->withQueryString()
+                ->fragment('product-list'),
         ]);
     }
 
     public function index(Request $request, OnlinePaymentService $online): View
     {
         return view('tenant.orders', [
-            'orders' => Order::with(['product', 'latestActivity'])->where('user_id', $request->user()->id)->latest()->get(),
+            'orders' => Order::with(['product', 'latestActivity'])
+                ->where('user_id', $request->user()->id)
+                ->latest()
+                ->paginate(10)
+                ->withQueryString()
+                ->fragment('order-records'),
             'onlinePayments' => $online->isEnabled(),
         ]);
     }

@@ -33,7 +33,7 @@
             <div class="alert alert-error">{{ $errors->first() }}</div>
         @endif
 
-        <div class="panel">
+        <div class="panel" id="bill-records">
             @if($bills->count() > 0)
             <table class="data-table">
                 <thead><tr><th>#</th><th>Stall</th><th>Amount Due</th><th>Due Date</th><th>Paid</th><th>Status</th><th>Action</th></tr></thead>
@@ -56,6 +56,7 @@
                     @endforeach
                 </tbody>
             </table>
+            {{ $bills->links('partials.pagination') }}
             @else
             <p class="empty">No bills yet. Your manager will create bills when rent is due.</p>
             @endif

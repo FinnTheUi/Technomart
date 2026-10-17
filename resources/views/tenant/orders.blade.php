@@ -35,7 +35,7 @@
             <div class="alert alert-error">{{ $errors->first() }}</div>
         @endif
 
-        <div class="panel">
+        <div class="panel" id="order-records">
             @if($orders->count() > 0)
             <table class="data-table">
                 <thead><tr><th>#</th><th>Product</th><th>Qty</th><th>Total</th><th>Placed</th><th>Status</th><th>Payment</th><th></th></tr></thead>
@@ -68,6 +68,7 @@
                     @endforeach
                 </tbody>
             </table>
+            {{ $orders->links('partials.pagination') }}
             @else
             <p class="empty">You haven't ordered anything yet.</p>
             @endif

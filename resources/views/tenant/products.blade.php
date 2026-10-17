@@ -43,7 +43,7 @@
         @endif
 
         @if($products->count() > 0)
-        <div class="product-grid">
+        <div class="product-grid" id="product-list">
             @foreach($products as $product)
             <div class="product-card">
                 <div class="product-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></div>
@@ -63,6 +63,7 @@
             </div>
             @endforeach
         </div>
+        {{ $products->links('partials.pagination') }}
         @else
         <div style="text-align:center;padding:80px 20px;">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="48" height="48" style="color:#94a3b8;margin-bottom:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>

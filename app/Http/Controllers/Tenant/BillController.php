@@ -19,7 +19,12 @@ class BillController extends Controller
     public function index(Request $request): View
     {
         return view('tenant.bills', [
-            'bills' => Payment::with(['stall', 'manager'])->where('tenant_id', $request->user()->id)->orderByDesc('due_date')->get(),
+            'bills' => Payment::with(['stall', 'manager'])
+                ->where('tenant_id', $request->user()->id)
+                ->orderByDesc('due_date')
+                ->paginate(10)
+                ->withQueryString()
+                ->fragment('bill-records'),
             'onlinePayments' => $this->online->isEnabled(),
         ]);
     }
@@ -27,7 +32,12 @@ class BillController extends Controller
     public function electricBills(Request $request): View
     {
         return view('tenant.electric-bills', [
-            'bills' => ElectricBill::with(['stall', 'manager'])->where('tenant_id', $request->user()->id)->orderByDesc('billing_date')->get(),
+            'bills' => ElectricBill::with(['stall', 'manager'])
+                ->where('tenant_id', $request->user()->id)
+                ->orderByDesc('billing_date')
+                ->paginate(10)
+                ->withQueryString()
+                ->fragment('electric-bill-records'),
             'onlinePayments' => $this->online->isEnabled(),
         ]);
     }

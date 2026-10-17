@@ -48,6 +48,7 @@
             <div class="alert alert-error">{{ $errors->first() }}</div>
         @endif
 
+        <div id="electric-bill-records">
         @if($bills->count() > 0)
             @foreach($bills as $bill)
             <div class="bill-card">
@@ -114,11 +115,13 @@
                 </div>
             </div>
             @endforeach
+            {{ $bills->links('partials.pagination') }}
         @else
             <div class="panel">
                 <p class="empty">No electric bills yet. Your manager will issue bills based on meter readings.</p>
             </div>
         @endif
+        </div>
     </div>
 </body>
 </html>
