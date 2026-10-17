@@ -39,7 +39,7 @@
         @endif
 
         <!-- Create Electric Bill -->
-        <div class="panel">
+        <div class="panel" id="electric-bill-records">
             <h3 class="panel-title" style="margin-bottom:20px;">Issue Electric Power Bill</h3>
             <form method="POST" action="{{ route('manager.electric-bills.store') }}">
                 @csrf
@@ -157,6 +157,7 @@
                     </tbody>
                 </table>
             </div>
+            {{ $bills->links('partials.pagination') }}
             @else
             <p style="text-align:center;padding:40px;color:#64748b;">No electric bills issued yet.</p>
             @endif

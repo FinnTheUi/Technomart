@@ -36,7 +36,7 @@
             <div class="alert alert-error">{{ $errors->first() }}</div>
         @endif
 
-        <div class="panel">
+        <div class="panel" id="lease-records">
             @if($contracts->count() > 0)
             <table class="data-table">
                 <thead><tr><th>#</th><th>Tenant</th><th>Stall</th><th>Term</th><th>Status</th><th>Actions</th></tr></thead>
@@ -93,6 +93,7 @@
                     @endforeach
                 </tbody>
             </table>
+            {{ $contracts->links('partials.pagination') }}
             @else
             <p class="empty">No leases yet. Leases are created when you approve rental applications.</p>
             @endif

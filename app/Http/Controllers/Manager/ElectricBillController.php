@@ -28,7 +28,9 @@ class ElectricBillController extends Controller
                 ->where('manager_id', $managerId)
                 ->orderByRaw('CASE WHEN status = ? THEN 0 ELSE 1 END', [PaymentStatus::ForVerification->value])
                 ->latest()
-                ->get(),
+                ->paginate(10)
+                ->withQueryString()
+                ->fragment('electric-bill-records'),
             'tenants' => User::where('role', User::ROLE_TENANT)->orderBy('name')->get(),
             'stalls' => Stall::where('manager_id', $managerId)->get(),
         ]);

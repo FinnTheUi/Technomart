@@ -27,7 +27,9 @@ class ContractController extends Controller
             ->whereHas('stall', fn ($q) => $q->where('manager_id', $request->user()->id))
             ->orderByRaw('CASE WHEN renewal_requested_at IS NOT NULL THEN 0 WHEN status = ? THEN 1 ELSE 2 END', [ContractStatus::Active->value])
             ->orderBy('end_date')
-            ->get();
+            ->paginate(10)
+            ->withQueryString()
+            ->fragment('lease-records');
 
         return view('manager.contracts', compact('contracts'));
     }

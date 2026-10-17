@@ -27,7 +27,7 @@
         @endif
 
         <!-- Create Payment Bill -->
-        <div class="panel">
+        <div class="panel" id="payment-records">
             <h3 class="panel-title" style="margin-bottom:20px;">Create Payment Bill</h3>
             <form method="POST" action="{{ route('manager.payments.store') }}">@csrf
                 <div class="form-row-inline">
@@ -82,6 +82,7 @@
                     @endforeach
                 </tbody>
             </table>
+            {{ $payments->links('partials.pagination') }}
             @else
             <p style="text-align:center;padding:40px;color:#64748b;">No payment records yet.</p>
             @endif

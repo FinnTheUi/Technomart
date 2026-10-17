@@ -32,7 +32,9 @@ class PaymentController extends Controller
                 ->where('manager_id', $managerId)
                 ->orderByRaw('CASE WHEN status = ? THEN 0 ELSE 1 END', [PaymentStatus::ForVerification->value])
                 ->orderByDesc('due_date')
-                ->get(),
+                ->paginate(10)
+                ->withQueryString()
+                ->fragment('payment-records'),
             'tenants' => User::where('role', User::ROLE_TENANT)->orderBy('name')->get(),
             'stalls' => Stall::where('manager_id', $managerId)->get(),
         ]);
