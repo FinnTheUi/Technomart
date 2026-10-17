@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Technomart — Smart Stall Rental Platform</title>
     <meta name="description" content="Technomart is the modern platform for stall rental management. Real-time analytics, automated billing, and predictive insights for managers and tenants.">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         /* ===== RESET & BASE ===== */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

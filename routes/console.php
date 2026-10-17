@@ -31,6 +31,9 @@ Schedule::command('ml:train')->weeklyOn(0, '02:00')->withoutOverlapping()->onOne
 // Low-stock digest for admins.
 Schedule::command('inventory:check-low-stock')->dailyAt('07:00')->onOneServer();
 
+// Keep seven verified daily restore points on the local machine.
+Schedule::command('app:backup --keep=7')->dailyAt('01:00')->withoutOverlapping()->onOneServer();
+
 // Records proof that the scheduler is actually running; shown on the admin health page.
 Schedule::call(fn () => cache()->put('system.scheduler_last_seen', now()->toIso8601String(), now()->addMinutes(10)))
     ->name('system-health-heartbeat')->everyMinute()->withoutOverlapping();

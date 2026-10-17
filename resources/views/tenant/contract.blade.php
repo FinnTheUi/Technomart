@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Contract #{{ $contract->id }} — Technomart</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>
         .contract-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 36px; max-width: 800px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }

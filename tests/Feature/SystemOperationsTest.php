@@ -63,6 +63,59 @@ class SystemOperationsTest extends TestCase
         }
     }
 
+    public function test_backup_rotation_retains_only_requested_number_of_archives(): void
+    {
+        $root = storage_path('framework/testing/rotation-'.uniqid());
+        File::ensureDirectoryExists($root.'/archives');
+        $database = $root.'/database.sqlite';
+        File::put($database, 'sqlite-test-content');
+        $originalDatabase = config('database.connections.sqlite.database');
+        $originalBackupPath = config('filesystems.backup_path');
+        config([
+            'database.default' => 'sqlite',
+            'database.connections.sqlite.database' => $database,
+            'filesystems.backup_path' => $root.'/archives',
+        ]);
+
+        try {
+            foreach ([1, 2, 3] as $index) {
+                $old = $root.'/archives/technomart-20200101-00000'.$index.'.zip';
+                File::put($old, 'old');
+                touch($old, time() - (100 + $index));
+            }
+
+            $this->artisan('app:backup', ['--keep' => 2])->assertSuccessful();
+            $this->assertCount(2, File::glob($root.'/archives/technomart-*.zip'));
+        } finally {
+            config([
+                'database.connections.sqlite.database' => $originalDatabase,
+                'filesystems.backup_path' => $originalBackupPath,
+            ]);
+            File::deleteDirectory($root);
+        }
+    }
+
+    public function test_system_doctor_reports_a_healthy_test_environment(): void
+    {
+        $this->artisan('app:doctor')
+            ->expectsOutputToContain('All system integrity checks passed')
+            ->assertSuccessful();
+    }
+
+    public function test_release_safeguards_are_present(): void
+    {
+        $javascript = File::get(resource_path('js/app.js'));
+        $phpunit = File::get(base_path('phpunit.xml'));
+        $templates = collect(File::allFiles(resource_path('views')))
+            ->map(fn ($file) => File::get($file->getPathname()))
+            ->implode("\n");
+
+        $this->assertStringContainsString("form.dataset.submitting === 'true'", $javascript);
+        $this->assertStringContainsString('DB_DATABASE" value=":memory:"', $phpunit);
+        $this->assertStringNotContainsString('fonts.googleapis.com', $templates);
+        $this->assertStringNotContainsString('fonts.gstatic.com', $templates);
+    }
+
     public function test_demo_seeder_is_idempotent_and_builds_complete_scenarios(): void
     {
         $originalEnvironment = $this->app->environment();

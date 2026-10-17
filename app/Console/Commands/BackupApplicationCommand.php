@@ -8,7 +8,7 @@ use ZipArchive;
 
 class BackupApplicationCommand extends Command
 {
-    protected $signature = 'app:backup';
+    protected $signature = 'app:backup {--keep=10 : Number of newest backups to retain}';
 
     protected $description = 'Create a local ZIP backup of the SQLite database, uploads, and risk model';
 
@@ -45,9 +45,47 @@ class BackupApplicationCommand extends Command
         }
         $zip->close();
 
+        if (! $this->archiveIsReadable($path)) {
+            File::delete($path);
+            $this->components->error('Backup verification failed; the incomplete archive was removed.');
+
+            return self::FAILURE;
+        }
+
+        $removed = $this->rotateBackups($directory, max(1, (int) $this->option('keep')));
+
         $this->components->info('Backup created: '.$path);
+        $this->components->info("Backup verified. Removed {$removed} expired archive(s).");
 
         return self::SUCCESS;
+    }
+
+    private function archiveIsReadable(string $path): bool
+    {
+        $zip = new ZipArchive;
+        $opened = $zip->open($path);
+        if ($opened !== true) {
+            return false;
+        }
+
+        $hasDatabase = $zip->locateName('database/database.sqlite') !== false;
+        $zip->close();
+
+        return $hasDatabase;
+    }
+
+    private function rotateBackups(string $directory, int $keep): int
+    {
+        $archives = collect(File::glob($directory.'/technomart-*.zip'))
+            ->sortByDesc(fn (string $path) => File::lastModified($path))
+            ->values();
+        $expired = $archives->slice($keep);
+
+        foreach ($expired as $path) {
+            File::delete($path);
+        }
+
+        return $expired->count();
     }
 
     private function addDirectory(ZipArchive $zip, string $directory, string $prefix): void
