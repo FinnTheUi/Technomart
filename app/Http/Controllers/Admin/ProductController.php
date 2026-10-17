@@ -23,9 +23,11 @@ class ProductController extends Controller
 
     public function index(InventoryReport $report): View
     {
+        $products = Product::with('supplier')->orderBy('name')->paginate(10)->withQueryString();
+
         return view('admin.products', [
-            'products' => Product::with('supplier')->orderBy('name')->get(),
-            'inventoryReport' => $report->daily(3),
+            'products' => $products,
+            'inventoryReport' => $report->daily(3, $products->getCollection()),
         ]);
     }
 

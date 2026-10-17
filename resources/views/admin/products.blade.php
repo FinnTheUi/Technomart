@@ -121,12 +121,13 @@
                     @endforelse
                 </tbody>
             </table>
+            {{ $products->links('partials.pagination') }}
         </div>
         <div class="spreadsheet-container">
             <table class="spreadsheet-table">
                 <thead>
                     <tr class="header-title-row">
-                        <th colspan="12">PEPSI-COLA PRODUCTS<br><span style="font-size: 14px; font-weight: normal;">STOCK INVENTORY</span></th>
+                        <th colspan="12">STOCK INVENTORY</th>
                     </tr>
                     <tr class="header-col-row">
                         <th>DATE</th>

@@ -18,9 +18,9 @@ class InventoryReport
      *
      * @return array<string, array<string, mixed>>
      */
-    public function daily(int $days = 3): array
+    public function daily(int $days = 3, ?Collection $products = null): array
     {
-        $products = Product::orderBy('name')->get();
+        $products ??= Product::orderBy('name')->get();
         $since = Carbon::today()->subDays($days - 1);
 
         // Every movement from the first reported day onwards, grouped per product.

@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>
         .profile-header { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid #e2e8f0; }
-        .profile-avatar { width: 80px; height: 80px; background: linear-gradient(135deg, #6366f1, #06b6d4); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: bold; }
+        .profile-avatar { width: 80px; height: 80px; background: linear-gradient(135deg, #6366f1, #06b6d4); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: bold; overflow:hidden; flex-shrink:0; }
+        .profile-avatar img { width:100%; height:100%; object-fit:cover; }
         .profile-meta h2 { font-size: 24px; font-weight: 700; color: #0f172a; margin: 0 0 4px 0; }
         .profile-meta p { font-size: 14px; color: #64748b; margin: 0; }
         .btn-outline { padding: 8px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; font-weight: 500; color: #334155; background: white; cursor: pointer; transition: 0.2s; }
@@ -61,7 +62,13 @@
 
         <div class="panel" id="profilePanel">
             <div class="profile-header">
-                <div class="profile-avatar">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
+                <div class="profile-avatar">
+                    @if($user->profilePhotoUrl())
+                        <img src="{{ $user->profilePhotoUrl() }}" alt="{{ $user->name }} profile photo">
+                    @else
+                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                    @endif
+                </div>
                 <div class="profile-meta" style="flex: 1;">
                     <h2>{{ $user->name }}</h2>
                     <p>{{ ucfirst($user->role) }} Account</p>
@@ -93,7 +100,7 @@
 
             <!-- EDIT MODE -->
             <div class="edit-mode">
-                <form method="post" action="{{ route('profile.update') }}">
+                <form method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data">
                     @csrf
                     @method('patch')
                     <div style="max-width: 500px; display: flex; flex-direction: column; gap: 16px;">
@@ -113,6 +120,13 @@
                             <label class="form-label">Address</label>
                             <textarea name="address" class="form-input" rows="3">{{ old('address', $user->address) }}</textarea>
                         </div>
+                        @if($user->isAdmin())
+                            <div class="form-group">
+                                <label class="form-label" for="profile_photo">Profile Photo</label>
+                                <input id="profile_photo" type="file" name="profile_photo" class="form-input" accept="image/jpeg,image/png,image/webp">
+                                <div class="detail-sub">JPG, PNG or WebP, up to 2 MB and 2000 × 2000 pixels.</div>
+                            </div>
+                        @endif
                         <div style="display: flex; gap: 12px; margin-top: 8px;">
                             <button type="submit" class="btn-submit">Save Changes</button>
                             <button type="button" class="btn-outline" onclick="toggleEdit()">Cancel</button>
@@ -177,7 +191,7 @@
         }
         
         // If there are validation errors on update, automatically open edit mode
-        @if($errors->has('name') || $errors->has('email') || $errors->has('phone_number') || $errors->has('address'))
+        @if($errors->has('name') || $errors->has('email') || $errors->has('phone_number') || $errors->has('address') || $errors->has('profile_photo'))
             document.getElementById('profilePanel').classList.add('is-editing');
         @endif
     </script>

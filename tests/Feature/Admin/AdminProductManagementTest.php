@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Models\User;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -24,6 +24,27 @@ class AdminProductManagementTest extends TestCase
         $response = $this->actingAs($this->admin)->get('/admin/products');
 
         $response->assertStatus(200);
+    }
+
+    public function test_stock_inventory_is_paginated_and_uses_the_generic_title(): void
+    {
+        foreach (range(1, 12) as $number) {
+            Product::create([
+                'name' => sprintf('Inventory Item %02d', $number),
+                'price' => 10,
+                'stock' => 5,
+                'is_active' => true,
+            ]);
+        }
+
+        $response = $this->actingAs($this->admin)->get('/admin/products');
+
+        $response->assertOk()
+            ->assertSee('STOCK INVENTORY')
+            ->assertDontSee('PEPSI-COLA PRODUCTS')
+            ->assertSee('Inventory Item 10')
+            ->assertDontSee('Inventory Item 11')
+            ->assertSee('Showing 1');
     }
 
     public function test_admin_can_create_a_product(): void

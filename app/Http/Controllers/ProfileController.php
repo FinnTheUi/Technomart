@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Services\Uploads\ImageSanitizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use RuntimeException;
 
 class ProfileController extends Controller
 {
@@ -24,15 +28,31 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(ProfileUpdateRequest $request, ImageSanitizer $images): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $user->fill($request->safe()->except('profile_photo'));
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($request->hasFile('profile_photo')) {
+            try {
+                $newPhoto = $images->store($request->file('profile_photo'), 'profile-photos');
+            } catch (RuntimeException) {
+                throw ValidationException::withMessages(['profile_photo' => 'The profile photo could not be processed.']);
+            }
+
+            $oldPhoto = $user->avatar_url;
+            $user->avatar_url = $newPhoto;
+
+            if ($oldPhoto && ! str_starts_with($oldPhoto, 'http://') && ! str_starts_with($oldPhoto, 'https://')) {
+                Storage::disk('public')->delete($oldPhoto);
+            }
         }
 
-        $request->user()->save();
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }

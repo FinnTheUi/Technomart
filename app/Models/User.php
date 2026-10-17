@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable(['name', 'email', 'phone_number', 'address', 'password', 'role', 'is_active', 'privacy_consented_at'])]
 #[Hidden(['password', 'remember_token', 'google_id'])]
@@ -59,6 +60,17 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasGoogleAccount(): bool
     {
         return $this->google_id !== null;
+    }
+
+    public function profilePhotoUrl(): ?string
+    {
+        if (! $this->avatar_url) {
+            return null;
+        }
+
+        return str_starts_with($this->avatar_url, 'http://') || str_starts_with($this->avatar_url, 'https://')
+            ? $this->avatar_url
+            : Storage::disk('public')->url($this->avatar_url);
     }
 
     public function managedStalls(): HasMany

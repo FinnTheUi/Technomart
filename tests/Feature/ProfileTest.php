@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ProfileTest extends TestCase
@@ -59,6 +61,51 @@ class ProfileTest extends TestCase
             ->assertRedirect('/profile');
 
         $this->assertNotNull($user->refresh()->email_verified_at);
+    }
+
+    public function test_admin_can_upload_a_sanitized_profile_photo(): void
+    {
+        Storage::fake('public');
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $this->actingAs($admin)->patch('/profile', [
+            'name' => $admin->name,
+            'email' => $admin->email,
+            'profile_photo' => UploadedFile::fake()->image('avatar.png', 300, 300),
+        ])->assertSessionHasNoErrors()->assertRedirect('/profile');
+
+        $path = $admin->refresh()->avatar_url;
+        $this->assertNotNull($path);
+        $this->assertStringEndsWith('.jpg', $path);
+        Storage::disk('public')->assertExists($path);
+    }
+
+    public function test_non_admin_cannot_upload_a_profile_photo(): void
+    {
+        Storage::fake('public');
+        $tenant = User::factory()->create(['role' => User::ROLE_TENANT]);
+
+        $this->actingAs($tenant)->patch('/profile', [
+            'name' => $tenant->name,
+            'email' => $tenant->email,
+            'profile_photo' => UploadedFile::fake()->image('avatar.jpg'),
+        ])->assertSessionHasErrors('profile_photo');
+
+        $this->assertNull($tenant->refresh()->avatar_url);
+    }
+
+    public function test_admin_profile_photo_rejects_non_image_files(): void
+    {
+        Storage::fake('public');
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $this->actingAs($admin)->patch('/profile', [
+            'name' => $admin->name,
+            'email' => $admin->email,
+            'profile_photo' => UploadedFile::fake()->create('payload.php', 10, 'application/x-php'),
+        ])->assertSessionHasErrors('profile_photo');
+
+        $this->assertNull($admin->refresh()->avatar_url);
     }
 
     public function test_user_can_delete_their_account(): void

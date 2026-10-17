@@ -26,6 +26,7 @@ a{color:inherit;text-decoration:none}
 .sidebar-footer{border-top:1px solid #e2e8f0;padding-top:16px;margin-top:16px}
 .user-info{display:flex;align-items:center;gap:12px;padding:8px}
 .user-avatar{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff}
+.user-avatar{overflow:hidden;flex-shrink:0}.user-avatar img{width:100%;height:100%;object-fit:cover}
 .user-meta .uname{font-size:13px;font-weight:600;color:#0f172a}
 .user-meta .urole{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em}
 .logout-btn{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;font-size:14px;font-weight:500;color:#ef4444;background:none;border:none;cursor:pointer;width:100%;font-family:'Inter',sans-serif}
