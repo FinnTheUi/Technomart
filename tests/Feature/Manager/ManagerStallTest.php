@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Manager;
 
-use App\Models\User;
 use App\Models\Stall;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -42,6 +42,20 @@ class ManagerStallTest extends TestCase
             'size' => '3x3m',
             'location' => 'Near entrance',
         ]);
+    }
+
+    public function test_manager_stalls_are_paginated(): void
+    {
+        $firstPage = $this->actingAs($this->manager)->get('/manager/stalls');
+        $firstPage->assertOk()
+            ->assertSee('Showing 1')
+            ->assertSee('>Stall 12<', false)
+            ->assertDontSee('>Stall 13<', false);
+
+        $this->actingAs($this->manager)->get('/manager/stalls?page=2')
+            ->assertOk()
+            ->assertSee('>Stall 13<', false)
+            ->assertDontSee('>Stall 12<', false);
     }
 
     public function test_manager_cannot_set_a_negative_price(): void

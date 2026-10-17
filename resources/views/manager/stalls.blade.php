@@ -39,7 +39,7 @@
         <div class="panel">
             <div class="floor-title">
                 {{ config("stalls.floors.{$floor}.label", "Floor {$floor}") }}
-                <span class="floor-count">{{ $floorStalls->count() }} units · {{ $floorStalls->where('status', \App\Enums\StallStatus::Available)->count() }} available</span>
+                <span class="floor-count">{{ $floorStalls->count() }} shown · {{ $floorStalls->where('status', \App\Enums\StallStatus::Available)->count() }} available</span>
             </div>
             <table class="data-table">
                 <thead><tr><th>#</th><th>Name</th><th>Tenant</th><th>Price/mo</th><th>Size</th><th>Status</th><th>Actions</th></tr></thead>
@@ -84,6 +84,7 @@
             <p style="text-align:center;padding:40px;color:#64748b;">No stalls are assigned to you. The floor layout's stalls belong to the mall's manager.</p>
         </div>
         @endforelse
+        {{ $stallPage->links('partials.pagination') }}
     </div>
 </body>
 </html>

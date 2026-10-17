@@ -33,13 +33,16 @@ class StallController extends Controller
     {
         $layout->sync($request->user());
 
+        $stallPage = Stall::with('activeContract.tenant')
+            ->where('manager_id', $request->user()->id)
+            ->orderBy('floor_number')
+            ->orderBy('stall_number')
+            ->paginate(12)
+            ->withQueryString();
+
         return view('manager.stalls', [
-            'stalls' => Stall::with('activeContract.tenant')
-                ->where('manager_id', $request->user()->id)
-                ->orderBy('floor_number')
-                ->orderBy('stall_number')
-                ->get()
-                ->groupBy('floor_number'),
+            'stalls' => $stallPage->getCollection()->groupBy('floor_number'),
+            'stallPage' => $stallPage,
         ]);
     }
 

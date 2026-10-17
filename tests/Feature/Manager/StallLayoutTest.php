@@ -159,7 +159,9 @@ class StallLayoutTest extends TestCase
 
         $this->get('/stalls?floor=2')->assertOk()->assertSee('stall-card occupied', false)->assertSee('Cart 1');
         $this->actingAs($this->manager)->get('/manager/floor-plan')->assertOk()->assertSee('fp-bubble', false);
-        $this->actingAs($this->manager)->get('/manager/stalls')->assertOk()->assertSee('Stall 24')->assertSee('Cart 10');
+        $this->actingAs($this->manager)->get('/manager/stalls')->assertOk()->assertSee('Stall 12')->assertDontSee('Stall 13');
+        $this->actingAs($this->manager)->get('/manager/stalls?page=2')->assertOk()->assertSee('Stall 24')->assertDontSee('Cart 1');
+        $this->actingAs($this->manager)->get('/manager/stalls?page=3')->assertOk()->assertSee('Cart 10')->assertDontSee('Stall 24');
         $this->actingAs($this->manager)->get('/manager/stalls/'.Stall::first()->id.'/edit')->assertOk()->assertSee('Assign tenant');
     }
 }
