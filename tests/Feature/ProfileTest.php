@@ -23,6 +23,17 @@ class ProfileTest extends TestCase
         $response->assertOk();
     }
 
+    public function test_admin_profile_has_social_style_photo_controls(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $this->actingAs($admin)->get('/profile')
+            ->assertOk()
+            ->assertSee('social-profile-card', false)
+            ->assertSee('Change profile photo')
+            ->assertSee('profile_photo');
+    }
+
     public function test_profile_information_can_be_updated(): void
     {
         $user = User::factory()->create();
