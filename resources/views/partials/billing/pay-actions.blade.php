@@ -8,8 +8,10 @@
     $gcash = config('billing.gcash');
 @endphp
 
-@if($payable->isPaid())
+@if($payable->isPaid() && $payable->receipt_number)
     <a href="{{ route('receipts.show', $params) }}" class="btn-sm btn-view">Receipt {{ $payable->receipt_number }}</a>
+@elseif($payable->isPaid())
+    <span class="detail-sub">Paid · Receipt is being prepared</span>
 @elseif($payable->isAwaitingVerification())
     <span class="detail-sub">Awaiting verification<br>Ref {{ $payable->reference_number }}</span>
 @elseif($payable->canBePaid())

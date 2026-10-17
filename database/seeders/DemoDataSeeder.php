@@ -15,6 +15,7 @@ use App\Models\Product;
 use App\Models\Stall;
 use App\Models\StockMovement;
 use App\Models\User;
+use App\Services\Billing\ReceiptBackfillService;
 use App\Services\Rental\StallLayoutService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
@@ -94,6 +95,7 @@ class DemoDataSeeder extends Seeder
             }
         });
 
+        app(ReceiptBackfillService::class)->run();
         Artisan::call('ml:score');
         $this->command?->info('Demo accounts use password: Password123!');
     }
