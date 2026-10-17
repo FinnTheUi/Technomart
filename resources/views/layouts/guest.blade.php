@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <title>{{ config('app.name', 'Tecnomart') }}</title>
+        <title>{{ config('app.name', 'Technomart') }}</title>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -58,8 +58,16 @@
             .auth-link:hover { color: #4338ca; text-decoration: underline; }
             .auth-link strong { font-weight: 700; }
 
+            /* Google sign-in */
+            .btn-google { width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 24px; font-size: 15px; font-weight: 600; color: #0f172a; background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; transition: 0.2s; }
+            .btn-google:hover { background: #f8fafc; border-color: #94a3b8; }
+            .btn-google svg { width: 20px; height: 20px; }
+            .auth-divider { display: flex; align-items: center; gap: 12px; margin: 22px 0; font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+            .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
+
             /* Error */
             .form-error { font-size: 13px; color: #ef4444; margin-top: 6px; }
+            .form-error-block { padding: 12px 16px; margin: 0 0 20px; border-radius: 12px; background: #fef2f2; border: 1px solid #fecaca; }
 
             /* Session status */
             .session-status { padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; background: #d1fae5; border: 1px solid #a7f3d0; color: #059669; font-size: 14px; font-weight: 500; }
@@ -82,7 +90,7 @@
                     <path d="M 50 30 L 50 74" stroke="white" stroke-width="8" stroke-linecap="round" />
                     <circle cx="50" cy="26" r="4" fill="rgba(255,255,255,0.4)" />
                 </svg>
-                <span>Tecnomart</span>
+                <span>Technomart</span>
             </a>
 
             <div class="auth-card">

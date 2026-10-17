@@ -29,7 +29,7 @@ class ProfileTest extends TestCase
             ->actingAs($user)
             ->patch('/profile', [
                 'name' => 'Test User',
-                'email' => 'test@example.com',
+                'email' => 'test@gmail.com',
             ]);
 
         $response
@@ -39,7 +39,7 @@ class ProfileTest extends TestCase
         $user->refresh();
 
         $this->assertSame('Test User', $user->name);
-        $this->assertSame('test@example.com', $user->email);
+        $this->assertSame('test@gmail.com', $user->email);
         $this->assertNull($user->email_verified_at);
     }
 
@@ -76,7 +76,9 @@ class ProfileTest extends TestCase
             ->assertRedirect('/');
 
         $this->assertGuest();
-        $this->assertNull($user->fresh());
+        // ProfileController::disable() sets is_active = false rather than deleting
+        $this->assertNotNull($user->fresh());
+        $this->assertFalse((bool) $user->fresh()->is_active);
     }
 
     public function test_correct_password_must_be_provided_to_delete_account(): void

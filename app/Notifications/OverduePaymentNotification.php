@@ -2,18 +2,21 @@
 
 namespace App\Notifications;
 
-use App\Models\Payment;
+use App\Contracts\Payable;
+use App\Services\Billing\PayableResolver;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class OverduePaymentNotification extends Notification
+/**
+ * Sent to the tenant when a rent or electric bill becomes overdue.
+ */
+class OverduePaymentNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public Payment $payment)
-    {
-    }
+    public function __construct(public Payable $payment) {}
 
     public function via(object $notifiable): array
     {
@@ -22,12 +25,18 @@ class OverduePaymentNotification extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
-            ->subject('⚠️ Overdue Payment Notice — Tecnomart')
-            ->greeting('Hello ' . $notifiable->name . ',')
-            ->line('Your payment of ₱' . number_format($this->payment->amount, 2) . ' for stall "' . ($this->payment->stall->name ?? 'N/A') . '" was due on ' . $this->payment->due_date->format('M d, Y') . ' and is now overdue.')
-            ->line('Please settle your balance as soon as possible to avoid any service disruptions.')
-            ->action('View My Bills', url('/tenant/bills'))
+        $mail = (new MailMessage)
+            ->subject('Overdue Payment Notice - Technomart')
+            ->greeting('Hello '.$notifiable->name.',')
+            ->line($this->payment->paymentDescription().' was due on '.$this->payment->due_date->format('M d, Y').' and is now overdue.');
+
+        if ($this->payment->lateFee() > 0) {
+            $mail->line('A late fee of PHP '.number_format($this->payment->lateFee(), 2).' has been added.');
+        }
+
+        return $mail
+            ->line('Amount due: PHP '.number_format($this->payment->amountDue(), 2))
+            ->action('View My Bills', PayableResolver::payerUrl($this->payment))
             ->line('If you have already paid, please disregard this notice.');
     }
 
@@ -35,10 +44,13 @@ class OverduePaymentNotification extends Notification
     {
         return [
             'type' => 'overdue_payment',
-            'payment_id' => $this->payment->id,
-            'amount' => $this->payment->amount,
+            'payable_type' => $this->payment::payableType(),
+            'payment_id' => $this->payment->getKey(),
+            'amount' => $this->payment->amountDue(),
+            'late_fee' => $this->payment->lateFee(),
             'due_date' => $this->payment->due_date->toDateString(),
-            'message' => 'Your payment of ₱' . number_format($this->payment->amount, 2) . ' is overdue.',
+            'url' => PayableResolver::payerUrl($this->payment),
+            'message' => $this->payment->paymentDescription().' is overdue. Amount due: PHP '.number_format($this->payment->amountDue(), 2).'.',
         ];
     }
 }

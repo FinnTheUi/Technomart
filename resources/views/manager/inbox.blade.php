@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Maintenance Inbox — Tecnomart</title>
+    <title>Maintenance Inbox — Technomart</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>
@@ -48,7 +48,7 @@
                     </div>
                     <div style="display:flex;gap:8px;">
                         <span class="badge {{ $req->priority==='urgent'?'badge-red':($req->priority==='high'?'badge-yellow':($req->priority==='medium'?'badge-blue':'badge-green')) }}">{{ ucfirst($req->priority) }}</span>
-                        <span class="badge {{ $req->status==='pending'?'badge-yellow':($req->status==='in_progress'?'badge-purple':($req->status==='resolved'?'badge-green':'badge-red')) }}">{{ ucfirst(str_replace('_',' ',$req->status)) }}</span>
+                        <x-status-badge :status="$req->status" />
                     </div>
                 </div>
                 <div class="request-desc">{{ $req->description }}</div>
@@ -56,10 +56,10 @@
                     <form method="POST" action="{{ route('manager.maintenance.updateStatus', $req) }}" style="display:flex;gap:8px;align-items:center;">
                         @csrf @method('PATCH')
                         <select name="status" class="status-select">
-                            <option value="pending" {{ $req->status==='pending'?'selected':'' }}>Pending</option>
-                            <option value="in_progress" {{ $req->status==='in_progress'?'selected':'' }}>In Progress</option>
-                            <option value="resolved" {{ $req->status==='resolved'?'selected':'' }}>Resolved</option>
-                            <option value="closed" {{ $req->status==='closed'?'selected':'' }}>Closed</option>
+                            <option value="pending" {{ $req->status->value==='pending'?'selected':'' }}>Pending</option>
+                            <option value="in_progress" {{ $req->status->value==='in_progress'?'selected':'' }}>In Progress</option>
+                            <option value="resolved" {{ $req->status->value==='resolved'?'selected':'' }}>Resolved</option>
+                            <option value="closed" {{ $req->status->value==='closed'?'selected':'' }}>Closed</option>
                         </select>
                         <button type="submit" class="btn-sm btn-view">Update</button>
                     </form>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Payments — Tecnomart</title>
+    <title>Payments — Technomart</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>
@@ -63,35 +63,21 @@
             <h3 class="panel-title" style="margin-bottom:20px;">Payment Records</h3>
             @if($payments->count() > 0)
             <table class="data-table">
-                <thead><tr><th>#</th><th>Tenant</th><th>Stall</th><th>Amount</th><th>Due Date</th><th>Paid Date</th><th>Status</th><th>Actions</th></tr></thead>
+                <thead><tr><th>#</th><th>Tenant</th><th>Stall</th><th>Amount Due</th><th>Due Date</th><th>Paid Date</th><th>Status</th><th>Actions</th></tr></thead>
                 <tbody>
                     @foreach($payments as $p)
                     <tr>
                         <td style="font-weight:600;">{{ $p->id }}</td>
                         <td style="font-weight:600;color:#0f172a;">{{ $p->tenant->name ?? 'N/A' }}</td>
                         <td>{{ $p->stall->name ?? 'N/A' }}</td>
-                        <td style="font-weight:600;">₱{{ number_format($p->amount, 2) }}</td>
-                        <td>{{ \Carbon\Carbon::parse($p->due_date)->format('M d, Y') }}</td>
-                        <td>{{ $p->paid_date ? \Carbon\Carbon::parse($p->paid_date)->format('M d, Y') : '—' }}</td>
-                        <td><span class="badge {{ $p->status==='paid'?'badge-green':($p->status==='pending'?'badge-yellow':'badge-red') }}">{{ ucfirst($p->status) }}</span></td>
-                        <td>
-                            @if($p->status !== 'paid')
-                            <div style="display:flex;gap:6px;">
-                                <form method="POST" action="{{ route('manager.payments.markPaid', $p) }}">
-                                    @csrf @method('PATCH')
-                                    <button type="submit" class="btn-sm btn-paid">✓ Paid</button>
-                                </form>
-                                @if($p->status !== 'overdue')
-                                <form method="POST" action="{{ route('manager.payments.markOverdue', $p) }}">
-                                    @csrf @method('PATCH')
-                                    <button type="submit" class="btn-sm btn-overdue">✗ Overdue</button>
-                                </form>
-                                @endif
-                            </div>
-                            @else
-                            <span style="font-size:13px;color:#059669;font-weight:500;">Settled</span>
-                            @endif
+                        <td style="font-weight:600;">
+                            ₱{{ number_format($p->amountDue(), 2) }}
+                            @if($p->lateFee() > 0)<div class="detail-sub">incl. ₱{{ number_format($p->lateFee(), 2) }} late fee</div>@endif
                         </td>
+                        <td>{{ $p->due_date->format('M d, Y') }}</td>
+                        <td>{{ $p->paid_date?->format('M d, Y') ?? '—' }}</td>
+                        <td><x-status-badge :status="$p->status" />@if($p->latestActivity)<div class="detail-sub" title="{{ $p->latestActivity->description }}">{{ $p->latestActivity->created_at->diffForHumans() }}</div>@endif</td>
+                        <td>@include('partials.billing.review-actions', ['payable' => $p, 'overdueUrl' => route('manager.payments.markOverdue', $p)])</td>
                     </tr>
                     @endforeach
                 </tbody>

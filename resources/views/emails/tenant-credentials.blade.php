@@ -26,50 +26,57 @@
 <body>
     <div class="wrapper">
         <div class="header">
-            <h1>Welcome to Tecnomart!</h1>
-            <p>Your tenant account has been created successfully.</p>
+            <h1>Your application was approved!</h1>
+            <p>Welcome to Technomart, {{ $application->name }}.</p>
         </div>
         <div class="body">
-            <h2>Account Activated</h2>
-            <p style="font-size: 14px; color: #475569;">Your rental application has been approved and your tenant account is now active. You may log in using the email address and password you provided during application.</p>
+            <h2>{{ $stall->name }} is yours</h2>
+            <p style="font-size: 14px; color: #475569; line-height: 1.6;">
+                Your rental application has been approved and your tenant account is active.
+                Sign in with this email address and the password you chose when you applied.
+            </p>
 
             <div class="credentials">
-                <div class="label">Email Address</div>
+                <div class="label">Sign-in email</div>
                 <div class="value">{{ $application->email }}</div>
             </div>
 
+            <p style="text-align: center; margin: 28px 0;">
+                <a href="{{ route('login') }}" style="display: inline-block; background: #4f46e5; color: #fff; text-decoration: none; font-weight: 700; padding: 12px 28px; border-radius: 10px;">Sign in to your dashboard</a>
+            </p>
+
+            <p style="font-size: 13px; color: #64748b; line-height: 1.6;">
+                If this is your first time signing in, we've also sent a separate email with a link to verify your address.
+            </p>
+
             <div class="receipt">
-                <h2>Payment Receipt</h2>
+                <h2>Lease &amp; first payment</h2>
                 <table>
-                    <tr>
-                        <td>Stall</td>
-                        <td>{{ $stall->name }}</td>
-                    </tr>
-                    <tr>
-                        <td>Location</td>
-                        <td>{{ $stall->location ?? 'N/A' }}</td>
-                    </tr>
-                    <tr>
-                        <td>Monthly Rate</td>
-                        <td>₱{{ number_format($stall->price, 2) }}</td>
-                    </tr>
-                    <tr>
-                        <td>Duration</td>
-                        <td>{{ $application->rental_duration }} month(s)</td>
-                    </tr>
-                    <tr>
-                        <td>GCash Reference</td>
-                        <td>{{ $application->gcash_reference }}</td>
-                    </tr>
-                    <tr class="total">
-                        <td>Total Paid</td>
-                        <td>₱{{ number_format($stall->price * $application->rental_duration, 2) }}</td>
-                    </tr>
+                    <tr><td>Stall</td><td>{{ $stall->name }}</td></tr>
+                    @if($stall->location)
+                    <tr><td>Location</td><td>{{ $stall->location }}</td></tr>
+                    @endif
+                    <tr><td>Monthly rent</td><td>₱{{ number_format($stall->price, 2) }}</td></tr>
+                    <tr><td>Lease term</td><td>{{ $application->rental_duration }} month(s)</td></tr>
+                    @if($contract)
+                    <tr><td>Lease period</td><td>{{ $contract->start_date->format('M d, Y') }} – {{ $contract->end_date->format('M d, Y') }}</td></tr>
+                    @endif
+                    <tr><td>Paid via</td><td>{{ $paymentMethod }}</td></tr>
+                    @if($application->gcash_reference)
+                    <tr><td>Reference no.</td><td>{{ $application->gcash_reference }}</td></tr>
+                    @endif
+                    @if($firstPayment?->receipt_number)
+                    <tr><td>Official receipt</td><td>{{ $firstPayment->receipt_number }}</td></tr>
+                    @endif
+                    <tr class="total"><td>First month paid</td><td>₱{{ number_format($firstPayment?->amountDue() ?? $stall->price, 2) }}</td></tr>
                 </table>
+                @if($application->rental_duration > 1)
+                <p style="font-size: 13px; color: #64748b; margin-top: 12px;">The remaining {{ $application->rental_duration - 1 }} month(s) are billed monthly — you'll find them under <strong>My Bills</strong>.</p>
+                @endif
             </div>
         </div>
         <div class="footer">
-            &copy; {{ date('Y') }} Tecnomart. All rights reserved.
+            &copy; {{ date('Y') }} Technomart. All rights reserved.
         </div>
     </div>
 </body>

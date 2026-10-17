@@ -18,7 +18,7 @@ class MessageController extends Controller
         // Get unique conversation partners
         $conversationPartnerIds = Message::where(function ($q) use ($userId) {
             $q->where('sender_id', $userId)
-              ->orWhere('receiver_id', $userId);
+                ->orWhere('receiver_id', $userId);
         })
             ->get()
             ->map(function ($msg) use ($userId) {
@@ -43,6 +43,7 @@ class MessageController extends Controller
 
             $user->last_message = $lastMessage;
             $user->unread_count = $unreadCount;
+
             return $user;
         })->sortByDesc(function ($u) {
             return $u->last_message?->created_at;
@@ -69,6 +70,8 @@ class MessageController extends Controller
      */
     public function conversation(User $user)
     {
+        abort_unless($this->canContact(auth()->user(), $user), 403);
+
         $userId = auth()->id();
 
         $messages = Message::where(function ($outer) use ($userId, $user) {
@@ -98,7 +101,7 @@ class MessageController extends Controller
         // Get conversation list
         $conversationPartnerIds = Message::where(function ($q) use ($userId) {
             $q->where('sender_id', $userId)
-              ->orWhere('receiver_id', $userId);
+                ->orWhere('receiver_id', $userId);
         })
             ->get()
             ->map(function ($msg) use ($userId) {
@@ -123,6 +126,7 @@ class MessageController extends Controller
 
             $u->last_message = $lastMessage;
             $u->unread_count = $unreadCount;
+
             return $u;
         })->sortByDesc(function ($u) {
             return $u->last_message?->created_at;
@@ -141,9 +145,12 @@ class MessageController extends Controller
             'message' => 'required|string|max:2000',
         ]);
 
+        $receiver = User::findOrFail($request->integer('receiver_id'));
+        abort_unless($this->canContact($request->user(), $receiver), 403);
+
         Message::create([
             'sender_id' => auth()->id(),
-            'receiver_id' => $request->receiver_id,
+            'receiver_id' => $receiver->id,
             'message' => $request->message,
         ]);
 
@@ -155,6 +162,8 @@ class MessageController extends Controller
      */
     public function apiMessages(User $user)
     {
+        abort_unless($this->canContact(auth()->user(), $user), 403);
+
         $userId = auth()->id();
 
         $messages = Message::where(function ($outer) use ($userId, $user) {
@@ -181,5 +190,19 @@ class MessageController extends Controller
             ->update(['read_at' => now()]);
 
         return response()->json($messages);
+    }
+
+    private function canContact(User $sender, User $receiver): bool
+    {
+        if ($sender->is($receiver) || ! $receiver->is_active) {
+            return false;
+        }
+
+        return match ($sender->role) {
+            User::ROLE_ADMIN => true,
+            User::ROLE_MANAGER => $receiver->isAdmin() || $receiver->isTenant(),
+            User::ROLE_TENANT => $receiver->isManager(),
+            default => false,
+        };
     }
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $product ? 'Edit Product' : 'Add Product' }} — Tecnomart</title>
+    <title>{{ $product ? 'Edit Product' : 'Add Product' }} — Technomart</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>
@@ -51,10 +51,29 @@
                     <div class="form-group">
                         <label class="form-label">Stock Quantity</label>
                         <input type="number" name="stock" class="form-input" min="0" value="{{ old('stock', $product->stock ?? 0) }}" required>
+                        @if($product)<div style="font-size:12px;color:#64748b;margin-top:4px;">Changing this records a stock adjustment in the ledger.</div>@endif
                         @error('stock') <div class="form-error">{{ $message }}</div> @enderror
                     </div>
                 </div>
 
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Supplier</label>
+                        <select name="supplier_id" class="form-input">
+                            <option value="">— None —</option>
+                            @foreach($suppliers as $supplier)
+                                <option value="{{ $supplier->id }}" @selected(old('supplier_id', $product->supplier_id ?? null) == $supplier->id)>{{ $supplier->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('supplier_id') <div class="form-error">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Reorder level</label>
+                        <input type="number" name="reorder_level" class="form-input" min="0" value="{{ old('reorder_level', $product->reorder_level ?? 10) }}">
+                        <div style="font-size:12px;color:#64748b;margin-top:4px;">Admins are alerted when stock falls to this level.</div>
+                        @error('reorder_level') <div class="form-error">{{ $message }}</div> @enderror
+                    </div>
+                </div>
                 <div class="form-group">
                     <label class="form-label">Category</label>
                     <input type="text" name="category" class="form-input" value="{{ old('category', $product->category ?? '') }}" placeholder="e.g. Food, Merchandise, Supplies">

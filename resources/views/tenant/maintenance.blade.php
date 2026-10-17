@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Maintenance Requests — Tecnomart</title>
+    <title>Maintenance Requests — Technomart</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>
@@ -90,7 +90,7 @@
                             </div>
                             <div style="display:flex;gap:6px;flex-direction:column;align-items:flex-end;">
                                 <span class="badge {{ $req->priority==='urgent'?'badge-red':($req->priority==='high'?'badge-yellow':($req->priority==='medium'?'badge-blue':'badge-green')) }}">{{ ucfirst($req->priority) }} Priority</span>
-                                <span class="badge {{ $req->status==='pending'?'badge-yellow':($req->status==='in_progress'?'badge-purple':($req->status==='resolved'?'badge-green':'badge-red')) }}">{{ ucfirst(str_replace('_',' ',$req->status)) }}</span>
+                                <x-status-badge :status="$req->status" />
                             </div>
                         </div>
                         <div class="request-desc">{{ Str::limit($req->description, 100) }}</div>

@@ -2,6 +2,8 @@
 
 return [
 
+    'backup_path' => env('BACKUP_PATH', storage_path('app/backups')),
+
     /*
     |--------------------------------------------------------------------------
     | Default Filesystem Disk

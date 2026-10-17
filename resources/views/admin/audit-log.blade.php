@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Audit Log — Tecnomart</title>
+    <title>Audit Log — Technomart</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>
@@ -51,6 +51,7 @@
                     <input type="date" name="date_to" value="{{ request('date_to') }}" placeholder="To">
                     <button type="submit" class="filter-btn">Filter</button>
                     <a href="{{ route('admin.audit-log') }}" class="filter-clear">Clear</a>
+                    <a href="{{ route('admin.audit-log.export', request()->only(['action', 'user_id', 'date_from', 'date_to'])) }}" class="filter-clear">Export CSV</a>
                 </div>
             </form>
 

@@ -3,10 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Tenant Dashboard — Tecnomart</title>
+    <title>Tenant Dashboard — Technomart</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    @vite('resources/js/app.js')
     <style>
         .empty { text-align: center; padding: 40px; color: #64748b; font-size: 14px; }
     </style>
@@ -94,7 +94,7 @@
                         <td style="font-weight:500;color:#0f172a;">{{ $b->stall->name ?? 'N/A' }}</td>
                         <td style="font-weight:600;">₱{{ number_format($b->amount,2) }}</td>
                         <td style="color:#64748b;">{{ \Carbon\Carbon::parse($b->due_date)->format('M d, Y') }}</td>
-                        <td><span class="badge {{ $b->status==='paid'?'badge-green':($b->status==='pending'?'badge-yellow':'badge-red') }}">{{ ucfirst($b->status) }}</span></td>
+                        <td><x-status-badge :status="$b->status" /></td>
                     </tr>
                     @endforeach
                     </tbody>
@@ -145,7 +145,7 @@
                     <td style="font-weight:600;color:#0f172a;"><a href="{{ route('tenant.maintenance.detail', $m) }}" style="text-decoration:none;color:#0f172a;">{{ $m->subject }}</a></td>
                     <td>{{ $m->stall->name ?? 'N/A' }}</td>
                     <td><span class="badge {{ $m->priority==='urgent'?'badge-red':($m->priority==='high'?'badge-yellow':'badge-blue') }}">{{ ucfirst($m->priority) }}</span></td>
-                    <td><span class="badge {{ $m->status==='pending'?'badge-yellow':($m->status==='resolved'?'badge-green':'badge-purple') }}">{{ ucfirst(str_replace('_',' ',$m->status)) }}</span></td>
+                    <td><x-status-badge :status="$m->status" /></td>
                     <td style="color:#64748b;">{{ $m->created_at->diffForHumans() }}</td>
                 </tr>
                 @endforeach

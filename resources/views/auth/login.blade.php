@@ -5,7 +5,9 @@
     @endif
 
     <h2>Welcome back</h2>
-    <p class="auth-subtitle">Sign in to your Tecnomart account</p>
+    <p class="auth-subtitle">Sign in to your Technomart account</p>
+
+    @include('auth.partials.google-button', ['label' => 'Sign in with Google'])
 
     <form method="POST" action="{{ route('login') }}">
         @csrf

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Manage Users — Tecnomart</title>
+    <title>Manage Users — Technomart</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>
@@ -78,7 +78,7 @@
         <div class="panel">
             <table class="data-table">
                 <thead>
-                    <tr><th>Name</th><th>Email</th><th>Current Role</th><th>Change Role</th><th>Actions</th></tr>
+                    <tr><th>Name</th><th>Email</th><th>Current Role</th><th>Status</th><th>Change Role</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                     @foreach($users as $user)
@@ -86,6 +86,10 @@
                         <td style="font-weight:600;color:#0f172a;">{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
                         <td><span class="badge badge-{{ $user->role }}">{{ ucfirst($user->role) }}</span></td>
+                        <td>
+                            <span class="badge {{ $user->is_active ? 'badge-green' : 'badge-red' }}">{{ $user->is_active ? 'Active' : 'Inactive' }}</span>
+                            @unless($user->hasVerifiedEmail())<div style="font-size:11px;color:#94a3b8;">email unverified</div>@endunless
+                        </td>
                         <td>
                             <form method="POST" action="{{ route('admin.users.updateRole', $user) }}" class="actions-cell" id="role-form-{{ $user->id }}">
                                 @csrf @method('PATCH')
@@ -99,10 +103,26 @@
                         </td>
                         <td>
                             @if($user->id !== auth()->id())
-                            <form method="POST" action="{{ route('admin.users.delete', $user) }}" onsubmit="return confirm('Delete {{ $user->name }}? This cannot be undone.');">
+                            <div style="display:flex;gap:6px;">
+                            @unless($user->hasVerifiedEmail())
+                            <form method="POST" action="{{ route('admin.users.resendVerification', $user) }}">
+                                @csrf
+                                <button type="submit" class="btn-save">Resend verification</button>
+                            </form>
+                            @endunless
+                            <form method="POST" action="{{ route('admin.users.toggleActive', $user) }}" onsubmit="return confirm('{{ $user->is_active ? 'Deactivate' : 'Reactivate' }} {{ $user->name }}?{{ $user->is_active ? ' Active leases will be terminated.' : '' }}');">
+                                @csrf @method('PATCH')
+                                <button type="submit" class="btn-save">{{ $user->is_active ? 'Deactivate' : 'Activate' }}</button>
+                            </form>
+                            <form method="POST" action="{{ route('admin.users.invalidateSessions', $user) }}" onsubmit="return confirm('Sign {{ $user->name }} out on all devices?');">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="btn-save">Sign out devices</button>
+                            </form>
+                            <form method="POST" action="{{ route('admin.users.delete', $user) }}" onsubmit="return confirm('Delete {{ $user->name }}? Accounts with billing or lease history are deactivated instead, so records are kept.');">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn-delete">Delete</button>
                             </form>
+                            </div>
                             @else
                             <span style="font-size:12px;color:#94a3b8;">You</span>
                             @endif

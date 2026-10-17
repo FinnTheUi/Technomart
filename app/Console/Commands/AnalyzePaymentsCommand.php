@@ -2,96 +2,91 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\ContractStatus;
+use App\Enums\PaymentStatus;
 use App\Models\Contract;
+use App\Models\ElectricBill;
 use App\Models\Payment;
 use App\Notifications\LeaseExpiringNotification;
-use App\Notifications\OverduePaymentNotification;
+use App\Services\Billing\PaymentService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
 class AnalyzePaymentsCommand extends Command
 {
     protected $signature = 'app:analyze-payments';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Analyze pending payments, send overdue notifications, and check expiring leases';
+    protected $description = 'Mark overdue bills (applying late fees), send reminders, and warn about expiring leases';
 
-    /**
-     * Execute the console command.
-     */
-    public function handle()
+    public function handle(PaymentService $payments): int
     {
-        $this->info('Starting payment analysis...');
+        $this->remindUpcoming();
 
-        // ── 1. Upcoming Payment Reminders ──
-        $upcomingPayments = Payment::where('status', 'pending')
-            ->whereBetween('due_date', [now(), now()->addDays(7)])
-            ->get();
+        // ── Overdue rent and electric bills (after the grace period), with late fees ──
+        $cutoff = today()->subDays(config('billing.late_fee.grace_days', 0));
+        $overdue = 0;
 
-        foreach ($upcomingPayments as $payment) {
-            $tenant = $payment->tenant;
-
-            // Simple Predictive Heuristic: Count past overdue payments
-            $pastOverdueCount = Payment::where('tenant_id', $tenant->id)
-                ->where('status', 'overdue')
-                ->count();
-
-            // High risk threshold
-            $isHighRisk = $pastOverdueCount >= 2;
-
-            $daysUntilDue = now()->diffInDays(Carbon::parse($payment->due_date), false);
-
-            if ($isHighRisk && $daysUntilDue <= 5 && $daysUntilDue >= 0) {
-                Log::info("URGENT REMINDER (High Risk): Tenant {$tenant->name} has a payment of {$payment->amount} due in {$daysUntilDue} days.");
-            } elseif ($daysUntilDue <= 3 && $daysUntilDue >= 0) {
-                Log::info("Standard Reminder: Tenant {$tenant->name} has a payment of {$payment->amount} due in {$daysUntilDue} days.");
-            }
+        foreach ([Payment::class, ElectricBill::class] as $model) {
+            $model::with(['tenant', 'stall'])
+                ->where('status', PaymentStatus::Pending)
+                ->whereDate('due_date', '<', $cutoff)
+                ->each(function ($bill) use ($payments, &$overdue) {
+                    $payments->markOverdue($bill);
+                    $overdue++;
+                });
         }
 
-        // ── 2. Auto-mark Overdue & Send Notifications ──
-        $newlyOverdue = Payment::where('status', 'pending')
-            ->where('due_date', '<', now())
-            ->get();
+        $this->components->info("Marked {$overdue} bill(s) as overdue.");
 
-        foreach ($newlyOverdue as $payment) {
-            $payment->update(['status' => 'overdue']);
+        $this->warnExpiringLeases();
 
-            if ($payment->tenant) {
-                $payment->tenant->notify(new OverduePaymentNotification($payment));
-                $this->line("  → Sent overdue notification to {$payment->tenant->name} for ₱" . number_format($payment->amount, 2));
-            }
-        }
+        return self::SUCCESS;
+    }
 
-        $this->info("Marked {$newlyOverdue->count()} payment(s) as overdue.");
+    private function remindUpcoming(): void
+    {
+        Payment::with('tenant')
+            ->where('status', PaymentStatus::Pending)
+            ->whereBetween('due_date', [today(), today()->addDays(7)])
+            ->get()
+            ->each(function (Payment $payment) {
+                $daysUntilDue = (int) today()->diffInDays($payment->due_date, false);
+                $pastOverdue = Payment::where('tenant_id', $payment->tenant_id)->where('status', PaymentStatus::Overdue)->count();
 
-        // ── 3. Lease Expiration Warnings (30-day window) ──
-        $expiringContracts = Contract::with(['tenant', 'stall'])
-            ->where('status', 'active')
-            ->whereBetween('end_date', [now(), now()->addDays(30)])
-            ->get();
-
-        foreach ($expiringContracts as $contract) {
-            if ($contract->tenant) {
-                // Only notify once — check if we already sent this notification recently
-                $alreadyNotified = $contract->tenant->notifications()
-                    ->where('type', LeaseExpiringNotification::class)
-                    ->where('created_at', '>', now()->subDays(7))
-                    ->whereRaw("JSON_EXTRACT(data, '$.contract_id') = ?", [$contract->id])
-                    ->exists();
-
-                if (!$alreadyNotified) {
-                    $contract->tenant->notify(new LeaseExpiringNotification($contract));
-                    $this->line("  → Sent lease expiring notification to {$contract->tenant->name} for stall \"{$contract->stall->name}\"");
+                if ($pastOverdue >= 2 && $daysUntilDue <= 5) {
+                    Log::info("URGENT REMINDER (high risk): {$payment->tenant?->name} has PHP {$payment->amount} due in {$daysUntilDue} day(s).");
+                } elseif ($daysUntilDue <= 3) {
+                    Log::info("Reminder: {$payment->tenant?->name} has PHP {$payment->amount} due in {$daysUntilDue} day(s).");
                 }
+            });
+    }
+
+    /**
+     * 30-day lease expiry warning, sent at most once a week per contract.
+     */
+    private function warnExpiringLeases(): void
+    {
+        $expiring = Contract::with(['tenant', 'stall'])
+            ->where('status', ContractStatus::Active)
+            ->whereBetween('end_date', [today(), today()->addDays(30)])
+            ->get();
+
+        foreach ($expiring as $contract) {
+            if (! $contract->tenant) {
+                continue;
+            }
+
+            $alreadyNotified = $contract->tenant->notifications()
+                ->where('type', LeaseExpiringNotification::class)
+                ->where('created_at', '>', now()->subDays(7))
+                ->get()
+                ->contains(fn ($n) => ($n->data['contract_id'] ?? null) === $contract->id);
+
+            if (! $alreadyNotified) {
+                $contract->tenant->notify(new LeaseExpiringNotification($contract));
             }
         }
 
-        $this->info("Checked {$expiringContracts->count()} expiring contract(s).");
-        $this->info('Payment analysis completed successfully.');
+        $this->components->info("Checked {$expiring->count()} expiring lease(s).");
     }
 }

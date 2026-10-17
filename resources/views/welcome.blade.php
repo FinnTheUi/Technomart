@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Tecnomart — Smart Stall Rental Platform</title>
-    <meta name="description" content="Tecnomart is the modern platform for stall rental management. Real-time analytics, automated billing, and predictive insights for managers and tenants.">
+    <title>Technomart — Smart Stall Rental Platform</title>
+    <meta name="description" content="Technomart is the modern platform for stall rental management. Real-time analytics, automated billing, and predictive insights for managers and tenants.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         /* ===== RESET & BASE ===== */
@@ -26,7 +26,7 @@
         .nav-cta:hover { transform: translateY(-1px); background: #4338ca; }
 
         /* ===== HERO ===== */
-        .hero { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 120px 24px 80px; text-align: center; }
+        .hero { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 136px 24px 40px; text-align: center; }
         .hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px 6px 12px; border-radius: 999px; background: #e0e7ff; border: 1px solid #c7d2fe; color: #4338ca; font-size: 13px; font-weight: 600; margin-bottom: 32px; animation: fadeUp 0.8s ease-out; }
         .hero-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: #4f46e5; animation: pulse-dot 2s ease-in-out infinite; }
         @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.7); } }
@@ -107,7 +107,7 @@
                     <path d="M 50 30 L 50 74" stroke="white" stroke-width="8" stroke-linecap="round" />
                     <circle cx="50" cy="26" r="4" fill="rgba(255,255,255,0.4)" />
                 </svg>
-                <span>Tecnomart</span>
+                <span>Technomart</span>
             </a>
             <nav class="nav-links">
                 @auth
@@ -150,6 +150,15 @@
         </div>
     </section>
 
+    <!-- Floor Plan Map -->
+    <section style="position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:8px 24px 80px;">
+        <div style="text-align:center;margin-bottom:24px;">
+            <div style="display:inline-block;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#4f46e5;margin-bottom:12px;">Stall Map</div>
+            <h2 style="font-size:clamp(1.5rem,3vw,2.25rem);font-weight:800;color:#0f172a;letter-spacing:-0.025em;">Explore Our Floor Plan</h2>
+            <p style="font-size:15px;color:#475569;margin-top:8px;">Live availability of every stall. Click a stall for details.</p>
+        </div>
+        @include('partials.floor-plan-map', ['floor1Stalls' => $floor1Stalls, 'floor2Stalls' => $floor2Stalls, 'interactive' => false])
+    </section>
 
     <!-- Features -->
     <section class="features">
@@ -158,22 +167,6 @@
             <h2>Everything you need to run your rental business</h2>
         </div>
         <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon indigo">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-                </div>
-                <h3>Predictive Analytics</h3>
-                <p>AI-powered algorithms detect late-payment patterns early, so you can send reminders and protect your cash flow before issues arise.</p>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon emerald">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                </div>
-                <h3>Automated Billing</h3>
-                <p>Process rent payments effortlessly and generate professional digital receipts instantly for every completed transaction.</p>
-            </div>
-
             <div class="feature-card">
                 <div class="feature-icon sky">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
@@ -195,7 +188,7 @@
     <!-- CTA -->
     <section class="cta-section">
         <h2>Ready to modernize your rental operations?</h2>
-        <p>Join Tecnomart today and experience the future of stall management — smarter payments, happier tenants, zero hassle.</p>
+        <p>Join Technomart today and experience the future of stall management — smarter payments, happier tenants, zero hassle.</p>
         <div class="hero-buttons">
             @auth
                 <a href="{{ url('/dashboard') }}" class="btn-primary">Go to Dashboard</a>
@@ -211,9 +204,9 @@
     <!-- Footer -->
     <footer class="site-footer">
         <div class="footer-inner">
-            <span class="copy">&copy; {{ date('Y') }} Tecnomart. All rights reserved.</span>
+            <span class="copy">&copy; {{ date('Y') }} Technomart. All rights reserved.</span>
             <div class="footer-links">
-                <a href="#">Privacy Policy</a>
+                <a href="{{ route('privacy') }}">Privacy Policy</a>
                 <a href="#">Terms of Service</a>
                 <a href="#">Contact</a>
             </div>

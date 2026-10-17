@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Manager Dashboard — Tecnomart</title>
+    <title>Manager Dashboard — Technomart</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    @vite('resources/js/app.js')
     <style>
         .chart-container{position:relative;height:220px}
         /* Risk meter */
@@ -36,6 +36,16 @@
         .alert-review-text { color: #d97706; font-weight: 600; font-size: 15px; }
         .btn-review { background: #fef3c7; color: #d97706; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: 0.2s; border: 1px solid #fde68a; text-decoration: none; }
         .btn-review:hover { background: #fde68a; }
+        a.stall-tile { display: block; text-decoration: none; color: inherit; }
+        #stall-availability, #risk-analytics, #activity-feed, #recent-payments { scroll-margin-top: 20px; }
+        .dash-search { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .dash-search-box { flex: 1; min-width: 180px; position: relative; }
+        .dash-search-box svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #94a3b8; pointer-events: none; }
+        .dash-search-box input { width: 100%; height: 38px; padding: 0 10px 0 34px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 13px; font-family: inherit; outline: none; }
+        .dash-search select { height: 38px; padding: 0 8px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 13px; font-family: inherit; background: #fff; }
+        .dash-search-box input:focus, .dash-search select:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,.12); }
+        .dash-search button { height: 38px; padding: 0 16px; border: none; border-radius: 10px; background: #4f46e5; color: #fff; font-weight: 600; font-size: 13px; cursor: pointer; font-family: inherit; }
+        .dash-clear { align-self: center; font-size: 13px; color: #64748b; font-weight: 600; text-decoration: none; }
     </style>
 </head>
 <body>
@@ -92,25 +102,46 @@
 
         <div class="two-col">
             <!-- Stall Availability Map -->
-            <div class="panel">
+            <div class="panel" id="stall-availability">
                 <div class="panel-header">
                     <div><div class="panel-title">Stall Availability</div><div class="panel-subtitle">Real-time stall status overview</div></div>
                     <a href="{{ route('manager.stalls') }}" style="font-size:13px;color:#4f46e5;font-weight:500;text-decoration:none;">View All →</a>
                 </div>
                 @if($stalls->count() > 0)
+                <form method="GET" action="{{ route('manager.dashboard') }}#stall-availability" class="dash-search" role="search">
+                    <div class="dash-search-box">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/></svg>
+                        <input type="search" name="stall_q" value="{{ $stallFilters['q'] }}" placeholder="Search stall name, e.g. Stall 12" maxlength="50" aria-label="Search stalls by name">
+                    </div>
+                    <select name="stall_status" aria-label="Status" onchange="this.form.submit()">
+                        <option value="">Any status</option>
+                        @foreach(\App\Enums\StallStatus::cases() as $status)
+                            <option value="{{ $status->value }}" @selected($stallFilters['status'] === $status->value)>{{ $status->label() }}</option>
+                        @endforeach
+                    </select>
+                    <button type="submit">Search</button>
+                    @if($stallFilters['q'] !== '' || $stallFilters['status'])
+                        <a href="{{ route('manager.dashboard') }}#stall-availability" class="dash-clear">Clear</a>
+                    @endif
+                </form>
+                @if($stallPage->count() > 0)
                 <div class="stall-grid">
-                    @foreach($stalls as $stall)
-                    <div class="stall-tile {{ $stall->status }}">
+                    @foreach($stallPage as $stall)
+                    <a href="{{ route('manager.stalls.edit', $stall) }}" class="stall-tile {{ $stall->status->value }}">
                         <div class="stall-name">{{ $stall->name }}</div>
                         <div class="stall-price">₱{{ number_format($stall->price, 2) }}/mo</div>
-                        <div class="stall-status" style="color: {{ $stall->status === 'available' ? '#059669' : ($stall->status === 'occupied' ? '#0284c7' : '#d97706') }}">
-                            {{ ucfirst($stall->status) }}
+                        <div class="stall-status" style="color: {{ $stall->status->color() }}">
+                            {{ $stall->status->label() }}
                         </div>
-                    </div>
+                    </a>
                     @endforeach
                 </div>
+                {{ $stallPage->links('partials.pagination') }}
                 @else
-                <p class="empty">No stalls yet. <a href="{{ route('manager.stalls.create') }}" style="color:#4f46e5;">Add your first stall →</a></p>
+                <p class="empty">No stalls match your search.</p>
+                @endif
+                @else
+                <p class="empty">No stalls assigned to you. Stalls are generated from the floor layout for the mall's manager.</p>
                 @endif
             </div>
 
@@ -125,8 +156,19 @@
             </div>
         </div>
 
+        @if($awaitingVerification > 0 || $renewalRequests > 0)
+        <div class="alert alert-success" style="background:#eef2ff;border-color:#c7d2fe;color:#3730a3;">
+            @if($awaitingVerification > 0)
+                <a href="{{ route('manager.payments') }}" style="font-weight:700;">{{ $awaitingVerification }} payment(s) awaiting verification</a>
+            @endif
+            @if($awaitingVerification > 0 && $renewalRequests > 0) &middot; @endif
+            @if($renewalRequests > 0)
+                <a href="{{ route('manager.contracts.index') }}" style="font-weight:700;">{{ $renewalRequests }} lease renewal request(s)</a>
+            @endif
+        </div>
+        @endif
         <!-- Predictive Analytics -->
-        <div class="panel">
+        <div class="panel" id="risk-analytics">
             <div class="panel-header">
                 <div>
                     <div class="panel-title">Predictive Analytics — Late Payment Risk</div>
@@ -135,16 +177,19 @@
             </div>
             @if($riskTenants->count() > 0)
             <table class="data-table">
-                <thead><tr><th>Tenant</th><th>Overdue</th><th>Paid</th><th>Risk Score</th><th>Risk Level</th></tr></thead>
+                <thead><tr><th>Tenant</th><th>Why</th><th>Risk Score</th><th>Risk Level</th></tr></thead>
                 <tbody>
                     @foreach($riskTenants as $rt)
                     <tr>
                         <td><div style="font-weight:600;color:#0f172a;">{{ $rt->name }}</div><div style="font-size:12px;color:#64748b;">{{ $rt->email }}</div></td>
-                        <td><span class="badge badge-red">{{ $rt->overdue_count }}</span></td>
-                        <td><span class="badge badge-green">{{ $rt->paid_count }}</span></td>
+                        <td>
+                            <ul style="margin:0;padding-left:16px;font-size:13px;color:#475569;">
+                                @foreach($rt->factors as $factor)<li>{{ $factor }}</li>@endforeach
+                            </ul>
+                        </td>
                         <td>
                             <div style="display:flex;align-items:center;gap:10px;">
-                                <div class="risk-bar {{ $rt->risk_score >= 50 ? 'risk-high' : ($rt->risk_score >= 25 ? 'risk-medium' : 'risk-low') }}">
+                                <div class="risk-bar risk-{{ strtolower($rt->risk_level) }}">
                                     <div class="risk-bar-fill" style="width:{{ $rt->risk_score }}%"></div>
                                 </div>
                                 <span style="font-size:13px;font-weight:600;color:#0f172a;">{{ $rt->risk_score }}%</span>
@@ -155,6 +200,22 @@
                     @endforeach
                 </tbody>
             </table>
+            <p style="font-size:12px;color:#94a3b8;margin-top:10px;">
+                {{ $riskTenants->first()->source === 'model' ? 'Scored by the logistic-regression model' : 'Scored from payment history (model unavailable)' }}
+                &middot; updated {{ $riskTenants->first()->computed_at->diffForHumans() }}
+            </p>
+            @if($modelMetrics)
+            <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;padding:12px;background:#f8fafc;border-radius:10px;font-size:12px;color:#475569;">
+                <strong>Model evaluation:</strong>
+                <span>{{ $modelMetrics['rows'] }} training rows</span>
+                <span>{{ $modelMetrics['late_rows'] }} late / {{ $modelMetrics['on_time_rows'] }} on-time</span>
+                @foreach(['precision','recall','f1','roc_auc'] as $metric)
+                    @isset($modelMetrics[$metric])<span>{{ strtoupper(str_replace('_',' ', $metric)) }}: {{ number_format($modelMetrics[$metric], 2) }}</span>@endisset
+                @endforeach
+                <span>Trained {{ \Carbon\Carbon::parse($modelMetrics['trained_at'])->diffForHumans() }}</span>
+            </div>
+            @endif
+            {{ $riskTenants->links('partials.pagination') }}
             @else
             <p class="empty">No risk data yet. Payment history will be analyzed as transactions accumulate.</p>
             @endif
@@ -172,7 +233,7 @@
             </div>
 
             <!-- Activity Feed -->
-            <div class="panel" style="max-height: 400px; overflow-y: auto;">
+            <div class="panel" id="activity-feed">
                 <div class="panel-header">
                     <div><div class="panel-title">Activity Feed</div><div class="panel-subtitle">Recent system events</div></div>
                 </div>
@@ -183,6 +244,7 @@
                         <div style="font-size:11px;color:#94a3b8;margin-top:4px;">{{ $log->created_at->diffForHumans() }}</div>
                     </div>
                     @endforeach
+                    {{ $activityFeed->links('partials.pagination') }}
                 @else
                 <p class="empty" style="padding:20px;">No recent activity.</p>
                 @endif
@@ -191,7 +253,7 @@
 
         <div class="two-col">
             <!-- Recent Payments -->
-            <div class="panel">
+            <div class="panel" id="recent-payments">
                 <div class="panel-header">
                     <div><div class="panel-title">Recent Payments</div><div class="panel-subtitle">Latest rent transactions</div></div>
                     <a href="{{ route('manager.payments') }}" style="font-size:13px;color:#4f46e5;font-weight:500;text-decoration:none;">Manage →</a>
@@ -205,11 +267,12 @@
                             <td style="font-weight:500;color:#0f172a;">{{ $p->tenant->name ?? 'N/A' }}</td>
                             <td style="font-weight:500;">₱{{ number_format($p->amount, 2) }}</td>
                             <td style="color:#64748b;">{{ \Carbon\Carbon::parse($p->due_date)->format('M d, Y') }}</td>
-                            <td><span class="badge {{ $p->status === 'paid' ? 'badge-green' : ($p->status === 'pending' ? 'badge-yellow' : 'badge-red') }}">{{ ucfirst($p->status) }}</span></td>
+                            <td><x-status-badge :status="$p->status" /></td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
+                {{ $recentPayments->links('partials.pagination') }}
                 @else
                 <p class="empty">No payment records yet.</p>
                 @endif
@@ -230,7 +293,7 @@
                         </div>
                         <div style="display:flex;gap:8px;align-items:center;">
                             <span class="badge {{ $mr->priority === 'urgent' ? 'badge-red' : ($mr->priority === 'high' ? 'badge-yellow' : 'badge-blue') }}">{{ ucfirst($mr->priority) }}</span>
-                            <span class="badge {{ $mr->status === 'pending' ? 'badge-yellow' : ($mr->status === 'resolved' ? 'badge-green' : 'badge-purple') }}">{{ ucfirst(str_replace('_', ' ', $mr->status)) }}</span>
+                            <x-status-badge :status="$mr->status" />
                         </div>
                     </div>
                     @endforeach

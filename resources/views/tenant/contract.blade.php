@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Contract #{{ $contract->id }} — Tecnomart</title>
+    <title>Contract #{{ $contract->id }} — Technomart</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>
@@ -45,7 +45,7 @@
         <div class="contract-card">
             <div class="contract-title">
                 Stall Lease Agreement
-                <span class="badge {{ $contract->status === 'active' ? 'badge-green' : ($contract->status === 'expired' ? 'badge-red' : 'badge-yellow') }}">{{ ucfirst($contract->status) }}</span>
+                <x-status-badge :status="$contract->status" />
             </div>
             <div class="contract-meta">Generated on {{ $contract->created_at->format('F d, Y') }}</div>
 
@@ -90,6 +90,29 @@
             </form>
             @endif
         </div>
+
+        @if($contract->isActive())
+        <div class="panel">
+            <h3 class="panel-title" style="margin-bottom:12px;">Renew this lease</h3>
+            @if($contract->hasPendingRenewalRequest())
+                <p class="detail-sub">You asked to extend by {{ $contract->renewal_months_requested }} month(s) on {{ $contract->renewal_requested_at->format('M d, Y') }}. Your manager will review the request.</p>
+            @else
+                <p class="detail-sub" style="margin-bottom:12px;">Your lease ends on {{ $contract->end_date->format('M d, Y') }}. Ask your manager to extend it:</p>
+                <form method="POST" action="{{ route('tenant.contracts.requestRenewal', $contract) }}" style="display:flex;gap:10px;align-items:center;">
+                    @csrf
+                    <select name="months" class="form-input" style="max-width:180px;">
+                        @foreach([1, 3, 6, 12] as $m)<option value="{{ $m }}">{{ $m }} month(s)</option>@endforeach
+                    </select>
+                    <button type="submit" class="btn btn-primary">Request renewal</button>
+                </form>
+            @endif
+        </div>
+        @elseif($contract->terminated_at)
+        <div class="panel">
+            <h3 class="panel-title">Lease terminated</h3>
+            <p class="detail-sub">Terminated on {{ $contract->terminated_at->format('M d, Y') }}. Reason: {{ $contract->termination_reason }}</p>
+        </div>
+        @endif
     </div>
 </body>
 </html>

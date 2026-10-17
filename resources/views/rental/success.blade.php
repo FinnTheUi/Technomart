@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $application->payment_method === 'gcash' ? 'Payment Successful' : 'Application Submitted' }} — Tecnomart</title>
+    <title>{{ $application->payment_method === 'gcash' ? 'Payment Successful' : 'Application Submitted' }} — Technomart</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -68,42 +68,30 @@
         <div class="nav-inner">
             <a href="/" class="nav-brand">
                 <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6366F1"/><stop offset="100%" stop-color="#06B6D4"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#logoGrad)"/><path d="M 28 30 L 72 30" stroke="white" stroke-width="8" stroke-linecap="round"/><path d="M 50 30 L 50 74" stroke="white" stroke-width="8" stroke-linecap="round"/><circle cx="50" cy="26" r="4" fill="rgba(255,255,255,0.4)"/></svg>
-                <span>Tecnomart</span>
+                <span>Technomart</span>
             </a>
         </div>
     </header>
 
     <div class="success-container">
-        @if($application->payment_method === 'gcash' && $application->payment_status === 'paid')
-            {{-- ===== GCASH SUCCESS ===== --}}
+        @if(in_array($application->payment_method, ['gcash', 'online'], true))
+            {{-- ===== GCASH / ONLINE PAYMENT ===== --}}
             <div class="success-icon-wrap paid">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
-            <h1 class="success-title">Payment Successful!</h1>
+            <h1 class="success-title">{{ $application->payment_status === \App\Enums\PaymentStatus::Paid ? 'Payment Successful!' : 'Payment Submitted!' }}</h1>
             <p class="success-subtitle">
-                Your GCash payment has been confirmed and your tenant account has been created. Login credentials have been sent to <strong style="color: #0f172a;">{{ $application->email }}</strong>.
+                @if($application->payment_status === \App\Enums\PaymentStatus::Paid)
+                    Your online payment was confirmed.
+                @else
+                    We received your GCash reference number; the manager will verify it.
+                @endif
+                Your application is awaiting manager approval. Once approved, a confirmation will be sent to <strong style="color: #0f172a;">{{ $application->email }}</strong> and you can sign in with the password you chose.
             </p>
-
-            {{-- Credentials --}}
-            <div class="credentials-card">
-                <div class="credentials-title">Your Login Credentials</div>
-                <div class="credential-row">
-                    <div class="credential-label">Email / Username</div>
-                    <div class="credential-value">{{ $application->generated_username }}</div>
-                </div>
-                <div class="credential-row">
-                    <div class="credential-label">Password</div>
-                    <div class="credential-value">{{ $application->generated_password }}</div>
-                </div>
-                <div class="credential-note">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
-                    Please save these credentials. Change your password after first login.
-                </div>
-            </div>
 
             {{-- Receipt --}}
             <div class="receipt-card">
-                <div class="credentials-title">Payment Receipt</div>
+                <div class="credentials-title">Payment Details</div>
                 <div class="receipt-row">
                     <span class="r-label">Stall</span>
                     <span class="r-value">{{ $application->stall->name }}</span>

@@ -1,6 +1,8 @@
 <x-guest-layout>
     <h2>Create your account</h2>
-    <p class="auth-subtitle">Get started with Tecnomart for free</p>
+    <p class="auth-subtitle">Get started with Technomart for free</p>
+
+    @include('auth.partials.google-button', ['label' => 'Sign up with Google'])
 
     <form method="POST" action="{{ route('register') }}">
         @csrf
@@ -64,6 +66,14 @@
         </div>
 
         {{-- Submit --}}
+        <div class="form-group">
+            <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.5;color:#475569;">
+                <input type="checkbox" name="privacy_consent" value="1" required style="margin-top:3px;">
+                <span>I have read and agree to the <a href="{{ route('privacy') }}" target="_blank" class="auth-link">Privacy Notice</a>.</span>
+            </label>
+            @error('privacy_consent')<div class="form-error">You must accept the Privacy Notice to register.</div>@enderror
+        </div>
+
         <button type="submit" class="btn-submit">Create Account</button>
 
         {{-- Links --}}

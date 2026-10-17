@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Rental Application — {{ $stall->name }} — Tecnomart</title>
-    <meta name="description" content="Apply to rent {{ $stall->name }} on Tecnomart.">
+    <title>Rental Application — {{ $stall->name }} — Technomart</title>
+    <meta name="description" content="Apply to rent {{ $stall->name }} on Technomart.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -81,7 +81,7 @@
         <div class="nav-inner">
             <a href="/" class="nav-brand">
                 <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6366F1"/><stop offset="100%" stop-color="#06B6D4"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#logoGrad)"/><path d="M 28 30 L 72 30" stroke="white" stroke-width="8" stroke-linecap="round"/><path d="M 50 30 L 50 74" stroke="white" stroke-width="8" stroke-linecap="round"/><circle cx="50" cy="26" r="4" fill="rgba(255,255,255,0.4)"/></svg>
-                <span>Tecnomart</span>
+                <span>Technomart</span>
             </a>
             <a href="{{ route('stalls.index') }}" class="nav-back">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"/></svg>
@@ -182,7 +182,7 @@
                     <label class="form-checkbox" for="terms">
                         <input type="checkbox" id="terms" name="terms" value="1" {{ old('terms') ? 'checked' : '' }}>
                         <div class="cb-text">
-                            I agree to the <strong>Terms and Conditions</strong> of Tecnomart, including the rental policy, payment terms, and stall usage guidelines. I understand that providing false information may result in application denial.
+                            I agree to the <strong>Terms and Conditions</strong> of Technomart, including the rental policy, payment terms, and stall usage guidelines. I understand that providing false information may result in application denial.
                         </div>
                     </label>
                     @error('terms') <div class="form-error">{{ $message }}</div> @enderror

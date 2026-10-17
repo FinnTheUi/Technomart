@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Maintenance Detail — Tecnomart</title>
+    <title>Maintenance Detail — Technomart</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>
@@ -42,7 +42,7 @@
                 <div class="info-item"><label>Subject</label><div class="val">{{ $maintenanceRequest->subject }}</div></div>
                 <div class="info-item"><label>Stall</label><div class="val">{{ $maintenanceRequest->stall->name ?? 'N/A' }}</div></div>
                 <div class="info-item"><label>Priority</label><div class="val"><span class="badge {{ $maintenanceRequest->priority==='urgent'?'badge-red':($maintenanceRequest->priority==='high'?'badge-yellow':'badge-blue') }}">{{ ucfirst($maintenanceRequest->priority) }}</span></div></div>
-                <div class="info-item"><label>Current Status</label><div class="val"><span class="badge {{ $maintenanceRequest->status==='resolved'?'badge-green':($maintenanceRequest->status==='pending'?'badge-yellow':($maintenanceRequest->status==='in_progress'?'badge-purple':'badge-blue')) }}">{{ ucfirst(str_replace('_',' ',$maintenanceRequest->status)) }}</span></div></div>
+                <div class="info-item"><label>Current Status</label><div class="val"><x-status-badge :status="$maintenanceRequest->status" /></div></div>
                 <div class="info-item"><label>Submitted</label><div class="val">{{ $maintenanceRequest->created_at->format('M d, Y g:i A') }}</div></div>
                 <div class="info-item"><label>Last Updated</label><div class="val">{{ $maintenanceRequest->updated_at->diffForHumans() }}</div></div>
             </div>
@@ -58,7 +58,7 @@
             @php
                 $statuses = ['pending' => 'Submitted', 'in_progress' => 'In Progress', 'resolved' => 'Resolved', 'closed' => 'Closed'];
                 $statusOrder = array_keys($statuses);
-                $currentIndex = array_search($maintenanceRequest->status, $statusOrder);
+                $currentIndex = array_search($maintenanceRequest->status->value, $statusOrder);
             @endphp
             <div class="timeline">
                 @foreach($statuses as $key => $label)

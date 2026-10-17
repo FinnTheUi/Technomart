@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
@@ -65,15 +64,15 @@ class NotificationController extends Controller
             ->take(10)
             ->get()
             ->map(fn ($n) => [
-                'id'      => $n->id,
+                'id' => $n->id,
                 'message' => $n->data['message'] ?? 'New notification',
-                'type'    => $n->data['type'] ?? 'info',
-                'read'    => $n->read_at !== null,
-                'time'    => $n->created_at->diffForHumans(),
+                'type' => $n->data['type'] ?? 'info',
+                'read' => $n->read_at !== null,
+                'time' => $n->created_at->diffForHumans(),
             ]);
 
         return response()->json([
-            'count'         => $unreadCount,
+            'count' => $unreadCount,
             'notifications' => $recent,
         ]);
     }

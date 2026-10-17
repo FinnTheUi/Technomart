@@ -10,6 +10,10 @@ class AuthenticationTest extends TestCase
 {
     use RefreshDatabase;
 
+    // ──────────────────────────────────────────
+    //  LOGIN
+    // ──────────────────────────────────────────
+
     public function test_login_screen_can_be_rendered(): void
     {
         $response = $this->get('/login');
@@ -17,9 +21,12 @@ class AuthenticationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_users_can_authenticate_using_the_login_screen(): void
+    public function test_user_can_login_with_valid_credentials(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'role' => 'tenant',
+            'is_active' => true,
+        ]);
 
         $response = $this->post('/login', [
             'email' => $user->email,
@@ -27,24 +34,90 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('dashboard'));
     }
 
-    public function test_users_can_not_authenticate_with_invalid_password(): void
+    public function test_user_cannot_login_with_wrong_password(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'role' => 'tenant',
+            'is_active' => true,
+        ]);
 
-        $this->post('/login', [
+        $response = $this->post('/login', [
             'email' => $user->email,
             'password' => 'wrong-password',
         ]);
 
         $this->assertGuest();
+        $response->assertSessionHasErrors('email');
     }
 
-    public function test_users_can_logout(): void
+    public function test_user_cannot_login_with_nonexistent_email(): void
     {
-        $user = User::factory()->create();
+        $response = $this->post('/login', [
+            'email' => 'nobody@gmail.com',
+            'password' => 'password',
+        ]);
+
+        $this->assertGuest();
+        $response->assertSessionHasErrors('email');
+    }
+
+    // ──────────────────────────────────────────
+    //  REGISTRATION
+    // ──────────────────────────────────────────
+
+    public function test_new_user_can_register(): void
+    {
+        $response = $this->post('/register', [
+            'name' => 'Test User',
+            'email' => 'test@gmail.com',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
+            'privacy_consent' => '1',
+        ]);
+
+        $this->assertAuthenticated();
+        $this->assertDatabaseHas('users', ['email' => 'test@gmail.com']);
+        $response->assertRedirect(route('dashboard'));
+    }
+
+    public function test_user_cannot_register_with_duplicate_email(): void
+    {
+        User::factory()->create(['email' => 'taken@gmail.com']);
+
+        $response = $this->post('/register', [
+            'name' => 'Duplicate',
+            'email' => 'taken@gmail.com',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
+        ]);
+
+        $this->assertGuest();
+        $response->assertSessionHasErrors('email');
+    }
+
+    public function test_user_cannot_register_with_weak_password(): void
+    {
+        $response = $this->post('/register', [
+            'name' => 'Weak Pass User',
+            'email' => 'weak@gmail.com',
+            'password' => '123',
+            'password_confirmation' => '123',
+        ]);
+
+        $this->assertGuest();
+        $response->assertSessionHasErrors('password');
+    }
+
+    // ──────────────────────────────────────────
+    //  LOGOUT
+    // ──────────────────────────────────────────
+
+    public function test_authenticated_user_can_logout(): void
+    {
+        $user = User::factory()->create(['role' => 'tenant', 'is_active' => true]);
 
         $response = $this->actingAs($user)->post('/logout');
 

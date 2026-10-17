@@ -1,0 +1,41 @@
+<?php
+
+namespace App\Http\Controllers\Manager;
+
+use App\Enums\MaintenanceStatus;
+use App\Http\Controllers\Controller;
+use App\Models\MaintenanceRequest;
+use App\Traits\ActivityLogTrait;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
+
+class MaintenanceController extends Controller
+{
+    use ActivityLogTrait;
+
+    public function index(Request $request): View
+    {
+        return view('manager.inbox', [
+            'requests' => MaintenanceRequest::with(['tenant', 'stall'])
+                ->whereHas('stall', fn ($q) => $q->where('manager_id', $request->user()->id))
+                ->latest()
+                ->get(),
+        ]);
+    }
+
+    public function updateStatus(Request $request, MaintenanceRequest $maintenanceRequest): RedirectResponse
+    {
+        Gate::authorize('update', $maintenanceRequest);
+        $request->validate(['status' => ['required', Rule::enum(MaintenanceStatus::class)]]);
+
+        $oldStatus = $maintenanceRequest->status;
+        $maintenanceRequest->update(['status' => $request->status]);
+
+        $this->logActivity('updated_maintenance', $request->user()->name.' changed maintenance request "'.$maintenanceRequest->subject.'" from '.$oldStatus->value.' to '.$request->status, $maintenanceRequest);
+
+        return back()->with('success', 'Request status updated.');
+    }
+}

@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>My Contracts — Tecnomart</title>
+    <title>My Contracts — Technomart</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
 </head>
@@ -26,7 +26,7 @@
                     <td style="font-weight:600;color:#0f172a;">{{ $c->stall->name ?? 'N/A' }}</td>
                     <td>{{ $c->start_date->format('M d, Y') }}</td>
                     <td>{{ $c->end_date->format('M d, Y') }}</td>
-                    <td><span class="badge {{ $c->status==='active'?'badge-green':($c->status==='expired'?'badge-red':'badge-yellow') }}">{{ ucfirst($c->status) }}</span></td>
+                    <td><x-status-badge :status="$c->status" /></td>
                     <td><span class="badge {{ $c->isSigned()?'badge-green':'badge-yellow' }}">{{ $c->isSigned()?'Signed':'Pending' }}</span></td>
                     <td><a href="{{ route('tenant.contracts.show', $c) }}" class="btn-sm btn-view">View</a></td>
                 </tr>

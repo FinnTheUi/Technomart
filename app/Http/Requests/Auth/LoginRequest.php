@@ -51,10 +51,10 @@ class LoginRequest extends FormRequest
         }
 
         $user = Auth::user();
-        if ($user && !$user->is_active) {
+        if ($user && ! $user->is_active) {
             Auth::logout();
             throw ValidationException::withMessages([
-                'email' => 'Your account is pending manager approval. You will receive an email once approved.',
+                'email' => 'This account is inactive. Please contact the administrator.',
             ]);
         }
 

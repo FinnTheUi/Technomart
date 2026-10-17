@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Available Stalls — Tecnomart</title>
-    <meta name="description" content="Browse available stalls for rent. Find the perfect space for your business with Tecnomart.">
+    <title>Available Stalls — Technomart</title>
+    <meta name="description" content="Browse available stalls for rent. Find the perfect space for your business with Technomart.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -89,6 +89,30 @@
             .stalls-grid { grid-template-columns: 1fr; }
             .nav-brand span { display: none; }
         }
+        /* Live status on each card: bubble color matches the status */
+        .stall-card { position: relative; }
+        .card-status { position: absolute; top: 14px; right: 14px; display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; padding: 4px 10px 4px 6px; border-radius: 999px; background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; z-index: 1; }
+        .card-bubble { width: 8px; height: 8px; border-radius: 50%; }
+        .stall-card.available .card-bubble { background: #10b981; animation: cardPulse 2.4s infinite; }
+        .stall-card.occupied .card-bubble { background: #0ea5e9; }
+        .stall-card.maintenance .card-bubble { background: #f59e0b; }
+        .stall-card.available .card-status { color: #047857; border-color: #a7f3d0; background: #ecfdf5; }
+        .stall-card.occupied .card-status { color: #0369a1; border-color: #bae6fd; background: #f0f9ff; }
+        .stall-card.maintenance .card-status { color: #b45309; border-color: #fde68a; background: #fffbeb; }
+        .stall-card.available .btn-waitlist, .stall-card:not(.available) .btn-select { display: none !important; }
+        @keyframes cardPulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+        /* Search & filters */
+        .stall-toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 40px 0 24px; scroll-margin-top: 96px; }
+        .search-box { flex: 1; min-width: 240px; position: relative; }
+        .search-box svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #94a3b8; pointer-events: none; }
+        .search-box input { width: 100%; height: 46px; padding: 0 14px 0 42px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 14px; font-family: inherit; background: #fff; color: #0f172a; outline: none; transition: border-color .2s, box-shadow .2s; }
+        .search-box input:focus, .stall-toolbar select:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,.12); }
+        .stall-toolbar select { height: 46px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 14px; font-family: inherit; background: #fff; color: #334155; cursor: pointer; outline: none; }
+        .btn-search { height: 46px; padding: 0 22px; border: none; border-radius: 12px; background: #4f46e5; color: #fff; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; transition: background .2s; }
+        .btn-search:hover { background: #4338ca; }
+        .btn-clear { font-size: 14px; font-weight: 600; color: #64748b; padding: 0 6px; }
+        .btn-clear:hover { color: #0f172a; }
+        @media (max-width: 640px) { .stall-toolbar select, .btn-search { flex: 1; } }
     </style>
 </head>
 <body>
@@ -97,7 +121,7 @@
         <div class="nav-inner">
             <a href="/" class="nav-brand">
                 <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6366F1"/><stop offset="100%" stop-color="#06B6D4"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#logoGrad)"/><path d="M 28 30 L 72 30" stroke="white" stroke-width="8" stroke-linecap="round"/><path d="M 50 30 L 50 74" stroke="white" stroke-width="8" stroke-linecap="round"/><circle cx="50" cy="26" r="4" fill="rgba(255,255,255,0.4)"/></svg>
-                <span>Tecnomart</span>
+                <span>Technomart</span>
             </a>
             <nav class="nav-links">
                 <a href="/" class="nav-link">Home</a>
@@ -126,11 +150,43 @@
             <div class="alert" style="background:#d1fae5;border:1px solid #a7f3d0;color:#059669;">{{ session('success') }}</div>
         @endif
 
+        <!-- Floor Plan Map -->
+        <div style="margin-bottom: 48px;">
+            <h2 style="font-size:22px;font-weight:800;color:#0f172a;margin-bottom:6px;">Stall Map</h2>
+            <p style="font-size:14px;color:#64748b;margin-bottom:20px;">See the layout of all stalls. Click any stall for details or to apply.</p>
+            @include('partials.floor-plan-map', ['floor1Stalls' => $floor1Stalls, 'floor2Stalls' => $floor2Stalls, 'interactive' => false])
+        </div>
+
+        <!-- Search & filters -->
+        <form method="GET" action="{{ route('stalls.index') }}#stall-list" class="stall-toolbar" id="stall-list" role="search">
+            <div class="search-box">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/></svg>
+                <input type="search" name="q" value="{{ $filters['q'] }}" placeholder="Search stall name, e.g. Stall 12 or Cart 3" maxlength="50" aria-label="Search by stall name" id="stall-search">
+            </div>
+            <select name="floor" aria-label="Floor" onchange="this.form.submit()">
+                <option value="">All floors</option>
+                @foreach(config('stalls.floors') as $number => $floor)
+                    <option value="{{ $number }}" @selected((string) $filters['floor'] === (string) $number)>{{ $floor['label'] }}</option>
+                @endforeach
+            </select>
+            <select name="status" aria-label="Status" onchange="this.form.submit()">
+                <option value="">Any status</option>
+                @foreach(\App\Enums\StallStatus::cases() as $status)
+                    <option value="{{ $status->value }}" @selected($filters['status'] === $status->value)>{{ $status->label() }}</option>
+                @endforeach
+            </select>
+            <button type="submit" class="btn-search">Search</button>
+            @if($filters['q'] !== '' || $filters['floor'] || $filters['status'])
+                <a href="{{ route('stalls.index') }}#stall-list" class="btn-clear">Clear</a>
+            @endif
+        </form>
+
         <!-- Stalls Grid -->
         @if($stalls->count() > 0)
             <div class="stalls-grid">
                 @foreach($stalls as $stall)
-                    <div class="stall-card" id="stall-{{ $stall->id }}">
+                    <div class="stall-card {{ $stall->status->value }}" id="stall-{{ $stall->id }}" data-stall-id="{{ $stall->id }}">
+                        <span class="card-status"><span class="card-bubble"></span><span class="card-status-label">{{ $stall->status->label() }}</span></span>
                         <div class="stall-card-body">
                             <div class="stall-name">
                                 <div class="stall-icon">
@@ -157,36 +213,40 @@
                                     <span class="amount">₱{{ number_format($stall->price, 2) }}</span>
                                     <span class="period">per month</span>
                                 </div>
-                                @if($stall->status === 'available')
-                                    <a href="{{ route('stalls.apply', $stall) }}" class="btn-select" id="select-stall-{{ $stall->id }}">
-                                        Select Stall
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-                                    </a>
-                                @else
-                                    <button type="button" class="btn-waitlist" onclick="openWaitlistModal({{ $stall->id }}, '{{ addslashes($stall->name) }}')">
-                                        Join Waitlist
-                                        @if($stall->waitlists_count > 0)
-                                            <span class="waitlist-count">{{ $stall->waitlists_count }} waiting</span>
-                                        @endif
-                                    </button>
-                                @endif
+                                {{-- Both actions are rendered; CSS shows the one matching the live status. --}}
+                                <a href="{{ route('stalls.apply', $stall) }}" class="btn-select" id="select-stall-{{ $stall->id }}">
+                                    Select Stall
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                                </a>
+                                <button type="button" class="btn-waitlist" onclick="openWaitlistModal({{ $stall->id }}, '{{ addslashes($stall->name) }}')">
+                                    Join Waitlist
+                                    @if($stall->waitlists_count > 0)
+                                        <span class="waitlist-count">{{ $stall->waitlists_count }} waiting</span>
+                                    @endif
+                                </button>
                             </div>
                         </div>
                     </div>
                 @endforeach
             </div>
+            {{ $stalls->links('partials.pagination') }}
         @else
             <div class="empty-state">
                 <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                <h3>No Stalls Available</h3>
-                <p>All stalls are currently occupied. Please check back later.</p>
+                @if($filters['q'] !== '' || $filters['floor'] || $filters['status'])
+                    <h3>No stalls match your search</h3>
+                    <p>Try a different name or number, or <a href="{{ route('stalls.index') }}#stall-list" style="color:#4f46e5;font-weight:600;">clear the filters</a>.</p>
+                @else
+                    <h3>No Stalls Yet</h3>
+                    <p>Stalls will appear here once they are set up. Please check back later.</p>
+                @endif
             </div>
         @endif
     </div>
 
     <footer class="site-footer">
         <div class="footer-inner">
-            <span class="copy">&copy; {{ date('Y') }} Tecnomart. All rights reserved.</span>
+            <span class="copy">&copy; {{ date('Y') }} Technomart. All rights reserved.</span>
         </div>
     </footer>
 
@@ -230,6 +290,20 @@
                 closeWaitlistModal();
             }
         }
+    </script>
+    <script>
+        // Keep the stall cards in step with the live floor-plan feed.
+        document.addEventListener('stalls:updated', function (e) {
+            e.detail.stalls.forEach(function (stall) {
+                const card = document.querySelector('.stall-card[data-stall-id="' + stall.id + '"]');
+                if (!card) return;
+                card.classList.remove('available', 'occupied', 'maintenance');
+                card.classList.add(stall.status);
+                card.querySelector('.card-status-label').textContent = stall.status_label;
+                const amount = card.querySelector('.stall-price .amount');
+                if (amount) amount.textContent = '₱' + Number(stall.price).toLocaleString(undefined, {minimumFractionDigits: 2});
+            });
+        });
     </script>
 </body>
 </html>

@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Admin Dashboard — Tecnomart</title>
+    <title>Admin Dashboard — Technomart</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    @vite('resources/js/app.js')
     <style>
         .chart-container{position:relative;height:300px}
         .activity-feed{max-height:420px;overflow-y:auto}
@@ -33,6 +33,14 @@
         <div class="page-header">
             <h1>Dashboard Overview</h1>
         </div>
+
+        @if($lowStockCount > 0 || $ordersAwaitingAction > 0)
+        <div class="alert alert-success" style="background:#eef2ff;border-color:#c7d2fe;color:#3730a3;">
+            @if($ordersAwaitingAction > 0)<a href="{{ route('admin.orders.index') }}" style="font-weight:700;">{{ $ordersAwaitingAction }} order(s) to verify or deliver</a>@endif
+            @if($ordersAwaitingAction > 0 && $lowStockCount > 0) &middot; @endif
+            @if($lowStockCount > 0)<a href="{{ route('admin.purchase-orders.index') }}" style="font-weight:700;">{{ $lowStockCount }} product(s) need restocking</a>@endif
+        </div>
+        @endif
 
         <!-- Stats -->
         <div class="stats-grid">
@@ -128,7 +136,7 @@
                         <td>{{ $order->product->name ?? 'N/A' }}</td>
                         <td>{{ $order->quantity }}</td>
                         <td>₱{{ number_format($order->total_price, 2) }}</td>
-                        <td><span class="badge {{ $order->status === 'completed' ? 'badge-green' : ($order->status === 'pending' ? 'badge-yellow' : 'badge-red') }}">{{ ucfirst($order->status) }}</span></td>
+                        <td><x-status-badge :status="$order->status" /></td>
                         <td style="color:#94a3b8;">{{ $order->created_at->format('M d, Y') }}</td>
                     </tr>
                     @endforeach
