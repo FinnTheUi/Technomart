@@ -26,7 +26,7 @@
         @include('partials.floor-plan-map', ['floor1Stalls' => $floor1Stalls, 'floor2Stalls' => $floor2Stalls, 'interactive' => true])
 
         {{-- Stall Summary Table --}}
-        <div class="panel" style="margin-top: 24px;">
+        <div class="panel" id="stall-directory" style="margin-top: 24px;">
             <h3 class="panel-title" style="margin-bottom: 20px;">Stall Directory</h3>
             <table class="data-table">
                 <thead><tr>
@@ -39,8 +39,8 @@
                     <th>Status</th>
                 </tr></thead>
                 <tbody>
-                @foreach($stalls as $stall)
-                <tr>
+                @foreach($directoryStalls as $stall)
+                <tr data-directory-stall="{{ $stall->name }}">
                     <td style="color:#94a3b8;font-weight:600;">{{ $stall->stall_number ?? '—' }}</td>
                     <td style="font-weight:600;color:#0f172a;">{{ $stall->name }}</td>
                     <td>
@@ -58,6 +58,7 @@
                 @endforeach
                 </tbody>
             </table>
+            {{ $directoryStalls->links('partials.pagination') }}
         </div>
     </div>
 </body>

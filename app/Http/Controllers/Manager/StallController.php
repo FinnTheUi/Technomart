@@ -125,10 +125,17 @@ class StallController extends Controller
     {
         $layout->sync($request->user());
 
-        $stalls = Stall::where('manager_id', $request->user()->id)->orderBy('stall_number')->get();
+        $managerStalls = Stall::where('manager_id', $request->user()->id);
+        $stalls = (clone $managerStalls)->orderBy('stall_number')->get();
+        $directoryStalls = (clone $managerStalls)
+            ->orderBy('floor_number')
+            ->orderBy('stall_number')
+            ->paginate(10, ['*'], 'directory_page')
+            ->withQueryString()
+            ->fragment('stall-directory');
 
         return view('manager.floor-plan', [
-            'stalls' => $stalls,
+            'directoryStalls' => $directoryStalls,
             'floor1Stalls' => $stalls->where('floor_number', 1)->keyBy('stall_number'),
             'floor2Stalls' => $stalls->where('floor_number', 2)->keyBy('stall_number'),
         ]);

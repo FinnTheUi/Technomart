@@ -164,4 +164,21 @@ class StallLayoutTest extends TestCase
         $this->actingAs($this->manager)->get('/manager/stalls?page=4')->assertOk()->assertSee('Cart 10')->assertDontSee('Stall 24');
         $this->actingAs($this->manager)->get('/manager/stalls/'.Stall::first()->id.'/edit')->assertOk()->assertSee('Assign tenant');
     }
+
+    public function test_manager_floor_plan_directory_is_paginated_without_paginating_the_map(): void
+    {
+        app(StallLayoutService::class)->sync();
+
+        $firstPage = $this->actingAs($this->manager)->get('/manager/floor-plan');
+        $firstPage->assertOk()
+            ->assertSee('Showing 1')
+            ->assertSee('data-directory-stall="Stall 10"', false)
+            ->assertDontSee('data-directory-stall="Stall 11"', false);
+        $this->assertSame(34, substr_count($firstPage->getContent(), 'class="fp-bubble"'));
+
+        $this->actingAs($this->manager)->get('/manager/floor-plan?directory_page=2')
+            ->assertOk()
+            ->assertSee('data-directory-stall="Stall 11"', false)
+            ->assertDontSee('data-directory-stall="Stall 10"', false);
+    }
 }
