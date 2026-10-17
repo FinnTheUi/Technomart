@@ -113,6 +113,7 @@
         .btn-clear:hover { color: #0f172a; }
         @media (max-width: 640px) { .stall-toolbar select, .btn-search { flex: 1; } }
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     <!-- Navigation -->

@@ -11,6 +11,7 @@
         .filters a.active { background: #4f46e5; border-color: #4f46e5; color: #fff; }
         .empty { text-align: center; padding: 40px; color: #64748b; }
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.admin-sidebar', ['active' => 'orders'])

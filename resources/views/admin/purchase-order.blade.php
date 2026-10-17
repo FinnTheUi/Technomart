@@ -9,6 +9,7 @@
         .po-actions { display: flex; gap: 8px; flex-wrap: wrap; }
         @media print { .sidebar, .po-actions, .back-link { display: none !important; } .main { margin: 0 !important; } }
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.admin-sidebar', ['active' => 'purchase-orders'])

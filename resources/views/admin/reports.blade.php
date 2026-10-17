@@ -4,6 +4,7 @@
     <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Reports — Technomart</title><link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>.report-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}.report-card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:22px}.report-card h2{font-size:17px;margin-bottom:8px}.report-card p{font-size:13px;color:#64748b;min-height:42px}.report-card a{display:inline-block;margin-top:16px;padding:9px 14px;background:#4f46e5;color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700}.filters{display:flex;gap:12px;align-items:end;margin-bottom:22px}.filters label{font-size:12px;color:#64748b}.filters input{display:block;margin-top:5px;padding:9px;border:1px solid #cbd5e1;border-radius:8px}</style>
+    @vite('resources/js/app.js')
 </head>
 <body>
 @include('partials.admin-sidebar', ['active' => 'reports'])

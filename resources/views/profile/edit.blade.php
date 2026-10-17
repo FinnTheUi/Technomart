@@ -24,6 +24,7 @@
         .is-editing .view-mode { display: none; }
         .is-editing .edit-mode { display: block; }
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @if(auth()->user()->role === 'admin')

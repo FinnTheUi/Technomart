@@ -61,6 +61,7 @@
 
         @media (max-width: 640px) { .nav-brand span { display: none; } }
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     <header class="site-nav">

@@ -23,6 +23,7 @@
         .btn-create{padding:10px 22px;border-radius:10px;font-size:14px;font-weight:600;color:#fff;background:#4f46e5;border:none;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;align-self:flex-end;transition:.2s}
         .btn-create:hover{background:#4338ca}
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.admin-sidebar', ['active' => 'users'])

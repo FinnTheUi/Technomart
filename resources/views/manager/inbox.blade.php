@@ -20,6 +20,7 @@
         select.status-select{background:#fff;border:1px solid #cbd5e1;color:#0f172a;padding:6px 10px;border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;cursor:pointer;outline:none}
         select.status-select:focus{border-color:#4f46e5}
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.manager-sidebar', ['active' => 'inbox'])

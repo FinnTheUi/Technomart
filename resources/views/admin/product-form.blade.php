@@ -8,6 +8,7 @@
     <style>
         .panel { max-width: 600px; }
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.admin-sidebar', ['active' => 'products'])

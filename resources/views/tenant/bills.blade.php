@@ -11,6 +11,7 @@
         .late-fee { font-size: 12px; color: #b91c1c; }
         .empty { text-align: center; padding: 40px; color: #64748b; font-size: 14px; }
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.tenant-sidebar', ['active' => 'bills'])

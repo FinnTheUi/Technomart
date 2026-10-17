@@ -54,6 +54,7 @@
         .new-chat-btn { width: 100%; margin-top: 8px; background: #e0e7ff; border: 1px solid #c7d2fe; color: #4338ca; border-radius: 10px; padding: 10px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: 0.2s; }
         .new-chat-btn:hover { background: #c7d2fe; }
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @if(auth()->user()->role === 'admin')

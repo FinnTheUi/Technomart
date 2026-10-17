@@ -16,6 +16,7 @@
         .request-meta { font-size: 13px; color: #64748b; margin-top: 4px; }
         .request-desc { font-size: 14px; color: #334155; line-height: 1.5; }
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.tenant-sidebar', ['active' => 'maintenance'])

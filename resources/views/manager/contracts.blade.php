@@ -13,6 +13,7 @@
         .ending-soon { color: #d97706; font-weight: 600; }
         .empty { text-align: center; padding: 40px; color: #64748b; }
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.manager-sidebar', ['active' => 'contracts'])

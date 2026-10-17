@@ -7,6 +7,7 @@
     <title>Notifications — Technomart</title>
     <meta name="description" content="View all your notifications and alerts from Technomart.">
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
+    @vite('resources/js/app.js')
 </head>
 <body>
     @php $role = auth()->user()->role; @endphp

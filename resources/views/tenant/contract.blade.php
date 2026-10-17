@@ -23,6 +23,7 @@
         .btn-outline { background: #fff; border: 1px solid #cbd5e1; color: #334155; }
         .btn-outline:hover { background: #f1f5f9; }
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.tenant-sidebar', ['active' => 'contracts'])

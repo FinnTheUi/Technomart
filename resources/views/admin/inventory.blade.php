@@ -13,6 +13,7 @@
         .empty { text-align: center; padding: 40px; color: #64748b; }
         @media (max-width: 900px) { .form-grid { grid-template-columns: 1fr; } }
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.admin-sidebar', ['active' => 'inventory'])

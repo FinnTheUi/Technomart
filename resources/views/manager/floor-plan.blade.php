@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Floor Plan — Technomart</title>
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.manager-sidebar', ['active' => 'floor-plan'])

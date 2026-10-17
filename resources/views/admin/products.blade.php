@@ -60,6 +60,7 @@
         .total-val-cell { vertical-align: top; padding-top: 12px !important; }
         .product-name { font-weight: 600; color: #0f172a; }
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.admin-sidebar', ['active' => 'products'])

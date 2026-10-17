@@ -14,6 +14,7 @@
         .tenant{font-weight:600;color:#0f172a}
         .muted{color:#94a3b8;font-size:13px}
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.manager-sidebar', ['active' => 'stalls'])

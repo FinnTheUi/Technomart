@@ -25,6 +25,7 @@
         .bill-total-value { font-size: 24px; font-weight: 800; color: #0f172a; }
         .bill-footer { padding: 16px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; align-items: center; background: #fff; }
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.tenant-sidebar', ['active' => 'electric-bills'])

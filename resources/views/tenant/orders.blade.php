@@ -11,6 +11,7 @@
         .empty { text-align: center; padding: 40px; color: #64748b; font-size: 14px; }
         .note { font-size: 13px; color: #64748b; margin-top: 4px; }
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.tenant-sidebar', ['active' => 'orders'])

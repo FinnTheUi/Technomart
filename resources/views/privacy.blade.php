@@ -6,6 +6,7 @@
     <title>Privacy Notice — Technomart</title>
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>body{background:#f8fafc;color:#334155;font-family:Arial,sans-serif}.privacy{max-width:860px;margin:40px auto;padding:36px;background:#fff;border:1px solid #e2e8f0;border-radius:16px;line-height:1.7}.privacy h1,.privacy h2{color:#0f172a}.privacy h2{margin-top:26px;font-size:18px}.privacy a{color:#4f46e5}.updated{color:#64748b;font-size:13px}</style>
+    @vite('resources/js/app.js')
 </head>
 <body>
 <main class="privacy">

@@ -26,6 +26,7 @@
         .btn-back { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px; background: #fff; border: 1px solid #cbd5e1; color: #334155; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; text-decoration: none; margin-top: 12px; transition: 0.2s; }
         .btn-back:hover { background: #f1f5f9; }
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.tenant-sidebar', ['active' => 'maintenance'])

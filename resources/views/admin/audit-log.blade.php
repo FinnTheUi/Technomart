@@ -20,6 +20,7 @@
         .pagination-wrap .active{background:#eef2ff;color:#4f46e5;border-color:#c7d2fe;font-weight:600}
         .empty-state{text-align:center;color:#64748b;padding:40px}
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.admin-sidebar', ['active' => 'audit-log'])

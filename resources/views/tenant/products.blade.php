@@ -23,6 +23,7 @@
         .btn-order:hover { background: #4338ca; }
         .badge-cat { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; margin-bottom: 12px; }
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.tenant-sidebar', ['active' => 'products'])

@@ -31,6 +31,7 @@
         @media (max-width: 560px) { .receipt { padding: 28px 20px; } .details { grid-template-columns: 1fr; } .stamp { top: 20px; right: 20px; font-size: 16px; } }
         @media print { body { background: #fff; padding: 0; } .receipt { border: none; box-shadow: none; } .actions { display: none; } }
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     <div class="receipt">

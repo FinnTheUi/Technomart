@@ -12,6 +12,7 @@
         .btn-overdue:hover{background:#fee2e2;}
         .calc-field { background-color: #f1f5f9; cursor: not-allowed; font-weight: bold; }
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.manager-sidebar', ['active' => 'electric-bills'])

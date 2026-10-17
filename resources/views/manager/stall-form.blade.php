@@ -12,6 +12,7 @@
         .fixed-info strong { display: block; color: #0f172a; font-size: 15px; }
         .hint { font-size: 12px; color: #64748b; margin-top: 4px; }
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.manager-sidebar', ['active' => 'stalls'])

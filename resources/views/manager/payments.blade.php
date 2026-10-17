@@ -11,6 +11,7 @@
         .btn-overdue{background:#fef2f2;color:#dc2626;border:1px solid #fecdd3;}
         .btn-overdue:hover{background:#fee2e2;}
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.manager-sidebar', ['active' => 'payments'])

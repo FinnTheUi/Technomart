@@ -13,6 +13,7 @@
         .count-badge{background:#eef2ff;color:#4f46e5;font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px;border:1px solid #c7d2fe}
         .empty-state{text-align:center;padding:60px 20px;color:#64748b}
     </style>
+    @vite('resources/js/app.js')
 </head>
 <body>
     @include('partials.admin-sidebar', ['active' => 'locations'])
