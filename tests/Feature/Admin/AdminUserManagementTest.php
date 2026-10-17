@@ -31,6 +31,26 @@ class AdminUserManagementTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function test_users_list_is_paginated(): void
+    {
+        foreach (range(1, 12) as $number) {
+            User::factory()->create([
+                'name' => sprintf('Tenant %02d', $number),
+                'role' => User::ROLE_TENANT,
+            ]);
+        }
+
+        $this->actingAs($this->admin)->get('/admin/users')
+            ->assertOk()
+            ->assertSee('Showing 1')
+            ->assertDontSee('Tenant 10');
+
+        $this->actingAs($this->admin)->get('/admin/users?page=2')
+            ->assertOk()
+            ->assertSee('Tenant 10')
+            ->assertDontSee('Tenant 01');
+    }
+
     public function test_admin_can_update_user_role(): void
     {
         $tenant = User::factory()->create(['role' => 'tenant', 'is_active' => true]);

@@ -131,6 +131,7 @@
                     @endforeach
                 </tbody>
             </table>
+            {{ $users->links('partials.pagination') }}
         </div>
     </div>
 </body>
