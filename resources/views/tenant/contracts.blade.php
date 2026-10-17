@@ -15,7 +15,7 @@
                 <h1>📋 My Contracts</h1>
             </div>
         </div>
-        <div class="panel">
+        <div class="panel" id="contract-records">
             @if($contracts->count() > 0)
             <table class="data-table">
                 <thead><tr><th>#</th><th>Stall</th><th>Start</th><th>End</th><th>Status</th><th>Signed</th><th>Action</th></tr></thead>
@@ -33,6 +33,7 @@
                 @endforeach
                 </tbody>
             </table>
+            {{ $contracts->links('partials.pagination') }}
             @else
             <p style="text-align:center;color:#64748b;padding:40px;font-size:14px;">No contracts found.</p>
             @endif

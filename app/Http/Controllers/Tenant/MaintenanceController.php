@@ -30,7 +30,12 @@ class MaintenanceController extends Controller
             ->get();
 
         return view('tenant.maintenance', [
-            'requests' => MaintenanceRequest::with('stall')->where('tenant_id', $userId)->latest()->get(),
+            'requests' => MaintenanceRequest::with('stall')
+                ->where('tenant_id', $userId)
+                ->latest()
+                ->paginate(10)
+                ->withQueryString()
+                ->fragment('request-records'),
             'stalls' => $stalls,
         ]);
     }

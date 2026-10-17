@@ -97,7 +97,7 @@
             @endif
         </div>
 
-        <div class="panel">
+        <div class="panel" id="purchase-order-records">
             <h3 class="panel-title" style="margin-bottom:16px;">All purchase orders</h3>
             @if($purchaseOrders->count() > 0)
             <table class="data-table">
@@ -116,6 +116,7 @@
                     @endforeach
                 </tbody>
             </table>
+            {{ $purchaseOrders->links('partials.pagination') }}
             @else
             <p class="empty">No purchase orders yet.</p>
             @endif

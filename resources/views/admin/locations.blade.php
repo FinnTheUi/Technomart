@@ -47,7 +47,7 @@
         </div>
 
         <!-- Locations Table -->
-        <div class="panel">
+        <div class="panel" id="location-records">
             <h3 class="panel-title" style="margin-bottom:20px;">All Locations</h3>
             <table class="data-table">
                 <thead><tr><th>#</th><th>Name</th><th>Address</th><th>Stalls</th><th>Created</th><th>Action</th></tr></thead>
@@ -71,6 +71,7 @@
                     @endforelse
                 </tbody>
             </table>
+            {{ $locations->links('partials.pagination') }}
         </div>
     </div>
 </body>

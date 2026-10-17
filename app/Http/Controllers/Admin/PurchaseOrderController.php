@@ -23,7 +23,12 @@ class PurchaseOrderController extends Controller
     public function index(): View
     {
         return view('admin.purchase-orders', [
-            'purchaseOrders' => PurchaseOrder::with('supplier')->withCount('items')->latest()->get(),
+            'purchaseOrders' => PurchaseOrder::with('supplier')
+                ->withCount('items')
+                ->latest()
+                ->paginate(10)
+                ->withQueryString()
+                ->fragment('purchase-order-records'),
             'suppliers' => Supplier::orderBy('name')->get(),
             'products' => Product::orderBy('name')->get(),
             'lowStock' => Product::where('is_active', true)->lowStock()->with('supplier')->orderBy('stock')->get(),

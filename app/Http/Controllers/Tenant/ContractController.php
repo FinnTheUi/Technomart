@@ -20,7 +20,12 @@ class ContractController extends Controller
     public function index(Request $request): View
     {
         return view('tenant.contracts', [
-            'contracts' => Contract::with('stall')->where('tenant_id', $request->user()->id)->latest()->get(),
+            'contracts' => Contract::with('stall')
+                ->where('tenant_id', $request->user()->id)
+                ->latest()
+                ->paginate(10)
+                ->withQueryString()
+                ->fragment('contract-records'),
         ]);
     }
 

@@ -17,7 +17,11 @@ class SupplierController extends Controller
     public function index(): View
     {
         return view('admin.suppliers', [
-            'suppliers' => Supplier::withCount(['products', 'purchaseOrders'])->orderBy('name')->get(),
+            'suppliers' => Supplier::withCount(['products', 'purchaseOrders'])
+                ->orderBy('name')
+                ->paginate(10)
+                ->withQueryString()
+                ->fragment('supplier-records'),
         ]);
     }
 

@@ -37,6 +37,7 @@
         @endif
 
         @if($requests->count() > 0)
+            <div id="request-records">
             @foreach($requests as $req)
             <div class="request-card priority-{{ $req->priority }}">
                 <div class="request-header">
@@ -66,6 +67,8 @@
                 </div>
             </div>
             @endforeach
+            {{ $requests->links('partials.pagination') }}
+            </div>
         @else
             <div style="text-align:center;padding:80px 20px;">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="48" height="48" style="color:#94a3b8;margin-bottom:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>

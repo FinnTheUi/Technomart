@@ -22,7 +22,9 @@ class RentalApplicationController extends Controller
             'applications' => RentalApplication::with('stall')
                 ->whereHas('stall', fn ($q) => $q->where('manager_id', $request->user()->id))
                 ->latest()
-                ->get(),
+                ->paginate(10)
+                ->withQueryString()
+                ->fragment('application-records'),
         ]);
     }
 

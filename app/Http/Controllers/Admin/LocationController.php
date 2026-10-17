@@ -16,7 +16,13 @@ class LocationController extends Controller
 
     public function index(): View
     {
-        return view('admin.locations', ['locations' => Location::withCount('stalls')->get()]);
+        return view('admin.locations', [
+            'locations' => Location::withCount('stalls')
+                ->orderBy('name')
+                ->paginate(10)
+                ->withQueryString()
+                ->fragment('location-records'),
+        ]);
     }
 
     public function store(StoreLocationRequest $request): RedirectResponse

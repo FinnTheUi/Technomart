@@ -22,7 +22,9 @@ class MaintenanceController extends Controller
             'requests' => MaintenanceRequest::with(['tenant', 'stall'])
                 ->whereHas('stall', fn ($q) => $q->where('manager_id', $request->user()->id))
                 ->latest()
-                ->get(),
+                ->paginate(10)
+                ->withQueryString()
+                ->fragment('request-records'),
         ]);
     }
 

@@ -48,7 +48,7 @@
             </form>
         </div>
 
-        <div class="panel">
+        <div class="panel" id="supplier-records">
             @if($suppliers->count() > 0)
             <table class="data-table">
                 <thead><tr><th>Supplier</th><th>Contact</th><th>Products</th><th>Purchase orders</th><th>Actions</th></tr></thead>
@@ -83,6 +83,7 @@
                     @endforeach
                 </tbody>
             </table>
+            {{ $suppliers->links('partials.pagination') }}
             @else
             <p class="empty">No suppliers yet.</p>
             @endif

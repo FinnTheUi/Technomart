@@ -29,7 +29,7 @@
             <div class="alert alert-error">{{ session('error') }}</div>
         @endif
 
-        <div class="panel">
+        <div class="panel" id="application-records">
             @if($applications->count() > 0)
             <table class="data-table">
                 <thead><tr><th>Applicant</th><th>Stall</th><th>Duration</th><th>Total</th><th>Payment</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
@@ -85,6 +85,7 @@
                     @endforeach
                 </tbody>
             </table>
+            {{ $applications->links('partials.pagination') }}
             @else
                 <p class="empty">No rental applications found.</p>
             @endif
