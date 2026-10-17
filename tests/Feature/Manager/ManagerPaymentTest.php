@@ -2,19 +2,21 @@
 
 namespace Tests\Feature\Manager;
 
-use App\Models\User;
-use App\Models\Stall;
+use App\Enums\PaymentStatus;
 use App\Models\Payment;
+use App\Models\Stall;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use App\Enums\PaymentStatus;
 
 class ManagerPaymentTest extends TestCase
 {
     use RefreshDatabase;
 
     private User $manager;
+
     private User $tenant;
+
     private Stall $stall;
 
     protected function setUp(): void

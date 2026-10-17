@@ -2,20 +2,22 @@
 
 namespace Tests\Feature\Tenant;
 
-use App\Models\User;
-use App\Models\Stall;
-use App\Models\Payment;
+use App\Enums\PaymentStatus;
 use App\Models\ElectricBill;
+use App\Models\Payment;
+use App\Models\Stall;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use App\Enums\PaymentStatus;
 
 class TenantBillTest extends TestCase
 {
     use RefreshDatabase;
 
     private User $tenant;
+
     private User $manager;
+
     private Stall $stall;
 
     protected function setUp(): void

@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Manager;
 
-use App\Models\User;
-use App\Models\Stall;
 use App\Models\MaintenanceRequest;
+use App\Models\Stall;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -13,6 +13,7 @@ class ManagerMaintenanceTest extends TestCase
     use RefreshDatabase;
 
     private User $manager;
+
     private Stall $stall;
 
     protected function setUp(): void

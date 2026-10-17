@@ -2,6 +2,9 @@
 
 namespace Tests\Feature\Manager;
 
+use App\Enums\ApplicationStatus;
+use App\Enums\MaintenanceStatus;
+use App\Enums\PaymentStatus;
 use App\Models\Contract;
 use App\Models\MaintenanceRequest;
 use App\Models\Payment;
@@ -11,9 +14,6 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
-use App\Enums\ApplicationStatus;
-use App\Enums\MaintenanceStatus;
-use App\Enums\PaymentStatus;
 
 class ManagerAuthorizationTest extends TestCase
 {

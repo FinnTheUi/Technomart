@@ -2,9 +2,10 @@
 
 namespace Tests\Feature\Manager;
 
-use App\Models\User;
-use App\Models\Stall;
+use App\Models\Payment;
 use App\Models\RentalApplication;
+use App\Models\Stall;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -15,6 +16,7 @@ class ManagerRentalApplicationTest extends TestCase
     use RefreshDatabase;
 
     private User $manager;
+
     private Stall $stall;
 
     protected function setUp(): void
@@ -77,7 +79,7 @@ class ManagerRentalApplicationTest extends TestCase
 
         // Monthly payments were generated (3 months)
         $tenantUser = User::where('email', 'john@gmail.com')->first();
-        $this->assertEquals(3, \App\Models\Payment::where('tenant_id', $tenantUser->id)->count());
+        $this->assertEquals(3, Payment::where('tenant_id', $tenantUser->id)->count());
     }
 
     public function test_manager_can_reject_a_rental_application(): void

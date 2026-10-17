@@ -2,20 +2,22 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Stall;
-use App\Models\Waitlist;
+use App\Enums\PaymentStatus;
 use App\Models\RentalApplication;
+use App\Models\Stall;
+use App\Models\User;
+use App\Models\Waitlist;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use App\Enums\PaymentStatus;
 
 class StallRentalFlowTest extends TestCase
 {
     use RefreshDatabase;
 
     private User $manager;
+
     private Stall $availableStall;
+
     private Stall $occupiedStall;
 
     protected function setUp(): void
@@ -170,6 +172,7 @@ class StallRentalFlowTest extends TestCase
         $response->assertSessionHas('error', 'You are already on the waitlist for this stall.');
         $this->assertEquals(1, Waitlist::where('email', 'charlie@gmail.com')->count());
     }
+
     private function pendingApplication(array $overrides = []): RentalApplication
     {
         return RentalApplication::create(array_merge([

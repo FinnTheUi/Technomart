@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\AttachRequestContext;
+use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\RoleMiddleware;
 use App\Support\SafeMail;
 use Illuminate\Foundation\Application;

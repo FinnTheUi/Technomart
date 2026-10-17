@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Tenant;
 
-use App\Models\User;
-use App\Models\Stall;
 use App\Models\Contract;
+use App\Models\Stall;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -13,7 +13,9 @@ class TenantContractTest extends TestCase
     use RefreshDatabase;
 
     private User $tenant;
+
     private Stall $stall;
+
     private Contract $contract;
 
     protected function setUp(): void

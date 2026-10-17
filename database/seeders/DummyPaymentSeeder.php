@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
-use App\Models\Stall;
 use App\Models\Payment;
+use App\Models\Stall;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class DummyPaymentSeeder extends Seeder
 {
@@ -18,21 +18,22 @@ class DummyPaymentSeeder extends Seeder
 
         if ($tenants->isEmpty() || $stalls->isEmpty() || $managers->isEmpty()) {
             echo "Not enough data to seed payments.\n";
+
             return;
         }
 
         foreach ($tenants as $tenant) {
             $stall = $stalls->random();
             $numPayments = rand(10, 30);
-            
+
             // Randomly decide if this tenant is a "good", "average", or "bad" payer
             $payerProfile = rand(1, 10);
-            
+
             for ($i = $numPayments; $i >= 1; $i--) {
                 $dueDate = Carbon::now()->subMonths($i)->startOfMonth()->addDays(rand(1, 5));
                 $status = 'paid';
                 $paidDate = null;
-                
+
                 // Determine payment status based on profile
                 if ($payerProfile > 8) {
                     // Bad payer: high chance of overdue
@@ -56,7 +57,7 @@ class DummyPaymentSeeder extends Seeder
                         $paidDate = $dueDate->copy()->subDays(rand(1, 3));
                     }
                 }
-                
+
                 Payment::create([
                     'tenant_id' => $tenant->id,
                     'manager_id' => $stall->manager_id,
