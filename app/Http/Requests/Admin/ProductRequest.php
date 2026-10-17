@@ -18,7 +18,6 @@ class ProductRequest extends FormRequest
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'category' => 'nullable|string|max:100',
-            'supplier_id' => 'nullable|exists:suppliers,id',
             'reorder_level' => 'nullable|integer|min:0',
         ];
     }
@@ -27,7 +26,7 @@ class ProductRequest extends FormRequest
     public function productAttributes(): array
     {
         return array_merge(
-            $this->safe()->only(['name', 'description', 'price', 'category', 'supplier_id']),
+            $this->safe()->only(['name', 'description', 'price', 'category']),
             ['reorder_level' => $this->filled('reorder_level') ? (int) $this->input('reorder_level') : 10],
         );
     }

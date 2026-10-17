@@ -26,6 +26,14 @@ class AdminProductManagementTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function test_product_form_does_not_show_supplier_field(): void
+    {
+        $this->actingAs($this->admin)->get('/admin/products/create')
+            ->assertOk()
+            ->assertDontSee('name="supplier_id"', false)
+            ->assertDontSee('>Supplier</label>', false);
+    }
+
     public function test_stock_inventory_is_paginated_and_uses_the_generic_title(): void
     {
         foreach (range(1, 12) as $number) {

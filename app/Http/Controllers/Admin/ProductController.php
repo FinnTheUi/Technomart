@@ -6,7 +6,6 @@ use App\Enums\StockMovementType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductRequest;
 use App\Models\Product;
-use App\Models\Supplier;
 use App\Services\Inventory\InventoryReport;
 use App\Services\Inventory\InventoryService;
 use App\Traits\ActivityLogTrait;
@@ -33,7 +32,7 @@ class ProductController extends Controller
 
     public function create(): View
     {
-        return view('admin.product-form', ['product' => null, 'suppliers' => Supplier::orderBy('name')->get()]);
+        return view('admin.product-form', ['product' => null]);
     }
 
     public function store(ProductRequest $request): RedirectResponse
@@ -55,7 +54,7 @@ class ProductController extends Controller
 
     public function edit(Product $product): View
     {
-        return view('admin.product-form', ['product' => $product, 'suppliers' => Supplier::orderBy('name')->get()]);
+        return view('admin.product-form', ['product' => $product]);
     }
 
     public function update(ProductRequest $request, Product $product): RedirectResponse

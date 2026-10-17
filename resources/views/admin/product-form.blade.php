@@ -56,23 +56,11 @@
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Supplier</label>
-                        <select name="supplier_id" class="form-input">
-                            <option value="">— None —</option>
-                            @foreach($suppliers as $supplier)
-                                <option value="{{ $supplier->id }}" @selected(old('supplier_id', $product->supplier_id ?? null) == $supplier->id)>{{ $supplier->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('supplier_id') <div class="form-error">{{ $message }}</div> @enderror
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Reorder level</label>
-                        <input type="number" name="reorder_level" class="form-input" min="0" value="{{ old('reorder_level', $product->reorder_level ?? 10) }}">
-                        <div style="font-size:12px;color:#64748b;margin-top:4px;">Admins are alerted when stock falls to this level.</div>
-                        @error('reorder_level') <div class="form-error">{{ $message }}</div> @enderror
-                    </div>
+                <div class="form-group">
+                    <label class="form-label">Reorder level</label>
+                    <input type="number" name="reorder_level" class="form-input" min="0" value="{{ old('reorder_level', $product->reorder_level ?? 10) }}">
+                    <div style="font-size:12px;color:#64748b;margin-top:4px;">Admins are alerted when stock falls to this level.</div>
+                    @error('reorder_level') <div class="form-error">{{ $message }}</div> @enderror
                 </div>
                 <div class="form-group">
                     <label class="form-label">Category</label>
