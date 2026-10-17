@@ -6,7 +6,8 @@
     <title>{{ $product ? 'Edit Product' : 'Add Product' }} — Technomart</title>
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>
-        .panel { max-width: 600px; }
+        .product-form-shell { width:100%; max-width:760px; margin:0 auto; }
+        .product-form-shell .panel { width:100%; }
     </style>
     @vite('resources/js/app.js')
 </head>
@@ -14,6 +15,7 @@
     @include('partials.admin-sidebar', ['active' => 'products'])
 
     <div class="main">
+        <div class="product-form-shell">
         <a href="{{ route('admin.products') }}" class="back-link">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             Back to Products
@@ -70,6 +72,7 @@
 
                 <button type="submit" class="btn-submit">{{ $product ? 'Update Product' : 'Add Product' }}</button>
             </form>
+        </div>
         </div>
     </div>
 </body>
