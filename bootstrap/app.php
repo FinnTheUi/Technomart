@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureUserIsActive;
+use App\Http\Middleware\AttachRequestContext;
 use App\Http\Middleware\RoleMiddleware;
 use App\Support\SafeMail;
 use Illuminate\Foundation\Application;
@@ -21,7 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         // Deactivated accounts are signed out on their next request.
-        $middleware->web(append: [EnsureUserIsActive::class]);
+        $middleware->web(append: [AttachRequestContext::class, EnsureUserIsActive::class]);
 
         // Webhooks authenticate by signature, not by session.
         $middleware->validateCsrfTokens(except: ['webhooks/*']);

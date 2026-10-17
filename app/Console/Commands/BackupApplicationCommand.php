@@ -30,6 +30,7 @@ class BackupApplicationCommand extends Command
         $directory = config('filesystems.backup_path', storage_path('app/backups'));
         File::ensureDirectoryExists($directory);
         $path = $directory.'/technomart-'.now()->format('Ymd-His').'.zip';
+        $password = (string) config('filesystems.backup_password', '');
         $zip = new ZipArchive;
         if ($zip->open($path, ZipArchive::CREATE | ZipArchive::EXCL) !== true) {
             $this->components->error('Could not create backup archive.');
@@ -43,14 +44,29 @@ class BackupApplicationCommand extends Command
         if (is_file(base_path('ml/risk_model.pkl'))) {
             $zip->addFile(base_path('ml/risk_model.pkl'), 'ml/risk_model.pkl');
         }
+        if ($password !== '') {
+            $zip->setPassword($password);
+            for ($index = 0; $index < $zip->numFiles; $index++) {
+                $name = $zip->getNameIndex($index);
+                if ($name !== false && ! $zip->setEncryptionName($name, ZipArchive::EM_AES_256, $password)) {
+                    $zip->close();
+                    File::delete($path);
+                    $this->components->error('Backup encryption failed; the incomplete archive was removed.');
+
+                    return self::FAILURE;
+                }
+            }
+        }
         $zip->close();
 
-        if (! $this->archiveIsReadable($path)) {
+        if (! $this->archiveIsReadable($path, $password)) {
             File::delete($path);
             $this->components->error('Backup verification failed; the incomplete archive was removed.');
 
             return self::FAILURE;
         }
+
+        File::put($path.'.sha256', hash_file('sha256', $path).'  '.basename($path).PHP_EOL);
 
         $removed = $this->rotateBackups($directory, max(1, (int) $this->option('keep')));
 
@@ -60,7 +76,7 @@ class BackupApplicationCommand extends Command
         return self::SUCCESS;
     }
 
-    private function archiveIsReadable(string $path): bool
+    private function archiveIsReadable(string $path, string $password): bool
     {
         $zip = new ZipArchive;
         $opened = $zip->open($path);
@@ -68,7 +84,11 @@ class BackupApplicationCommand extends Command
             return false;
         }
 
-        $hasDatabase = $zip->locateName('database/database.sqlite') !== false;
+        if ($password !== '') {
+            $zip->setPassword($password);
+        }
+        $hasDatabase = $zip->locateName('database/database.sqlite') !== false
+            && $zip->getFromName('database/database.sqlite') !== false;
         $zip->close();
 
         return $hasDatabase;
@@ -83,6 +103,7 @@ class BackupApplicationCommand extends Command
 
         foreach ($expired as $path) {
             File::delete($path);
+            File::delete($path.'.sha256');
         }
 
         return $expired->count();

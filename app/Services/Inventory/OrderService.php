@@ -67,11 +67,15 @@ class OrderService
 
     public function markDelivered(Order $order, User $admin): void
     {
-        if ($order->status !== OrderStatus::Paid) {
-            throw new RuntimeException('Only paid orders can be marked as delivered.');
-        }
+        DB::transaction(function () use ($order) {
+            $locked = Order::lockForUpdate()->findOrFail($order->id);
+            if ($locked->status !== OrderStatus::Paid) {
+                throw new RuntimeException('Only paid orders can be marked as delivered.');
+            }
 
-        $order->update(['status' => OrderStatus::Delivered, 'delivered_at' => now()]);
+            $locked->update(['status' => OrderStatus::Delivered, 'delivered_at' => now()]);
+            $order->setRawAttributes($locked->getAttributes(), true);
+        });
         ActivityLogger::log('delivered_order', $admin->name.' delivered order #'.$order->id, $order, null, $admin);
     }
 

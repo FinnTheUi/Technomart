@@ -108,11 +108,15 @@ class InventoryService
 
     public function markOrdered(PurchaseOrder $po, User $user): void
     {
-        if ($po->status !== PurchaseOrderStatus::Draft) {
-            throw new RuntimeException('Only draft purchase orders can be sent to the supplier.');
-        }
+        DB::transaction(function () use ($po) {
+            $locked = PurchaseOrder::lockForUpdate()->findOrFail($po->id);
+            if ($locked->status !== PurchaseOrderStatus::Draft) {
+                throw new RuntimeException('Only draft purchase orders can be sent to the supplier.');
+            }
 
-        $po->update(['status' => PurchaseOrderStatus::Ordered, 'ordered_at' => now()]);
+            $locked->update(['status' => PurchaseOrderStatus::Ordered, 'ordered_at' => now()]);
+            $po->setRawAttributes($locked->getAttributes(), true);
+        });
         ActivityLogger::log('ordered_purchase_order', $user->name.' sent purchase order '.$po->po_number.' to the supplier', $po, null, $user);
     }
 
@@ -140,11 +144,15 @@ class InventoryService
 
     public function cancelPurchaseOrder(PurchaseOrder $po, User $user): void
     {
-        if (! $po->isOpen()) {
-            throw new RuntimeException('This purchase order can no longer be cancelled.');
-        }
+        DB::transaction(function () use ($po) {
+            $locked = PurchaseOrder::lockForUpdate()->findOrFail($po->id);
+            if (! $locked->isOpen()) {
+                throw new RuntimeException('This purchase order can no longer be cancelled.');
+            }
 
-        $po->update(['status' => PurchaseOrderStatus::Cancelled, 'cancelled_at' => now()]);
+            $locked->update(['status' => PurchaseOrderStatus::Cancelled, 'cancelled_at' => now()]);
+            $po->setRawAttributes($locked->getAttributes(), true);
+        });
         ActivityLogger::log('cancelled_purchase_order', $user->name.' cancelled purchase order '.$po->po_number, $po, null, $user);
     }
 }

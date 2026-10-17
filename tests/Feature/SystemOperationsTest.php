@@ -26,25 +26,67 @@ class SystemOperationsTest extends TestCase
         File::put($database, 'sqlite-test-content');
         $originalDatabase = config('database.connections.sqlite.database');
         $originalBackupPath = config('filesystems.backup_path');
+        $originalBackupPassword = config('filesystems.backup_password');
         config([
             'database.default' => 'sqlite',
             'database.connections.sqlite.database' => $database,
             'filesystems.backup_path' => $root.'/archives',
+            'filesystems.backup_password' => '',
         ]);
 
         try {
             $this->artisan('app:backup')->assertSuccessful();
-            $archives = File::files($root.'/archives');
+            $archives = File::glob($root.'/archives/*.zip');
             $this->assertCount(1, $archives);
+            $this->assertFileExists($archives[0].'.sha256');
+            $this->assertStringStartsWith(hash_file('sha256', $archives[0]), File::get($archives[0].'.sha256'));
 
             $zip = new ZipArchive;
-            $this->assertTrue($zip->open($archives[0]->getPathname()) === true);
+            $this->assertTrue($zip->open($archives[0]) === true);
             $this->assertNotFalse($zip->locateName('database/database.sqlite'));
             $zip->close();
         } finally {
             config([
                 'database.connections.sqlite.database' => $originalDatabase,
                 'filesystems.backup_path' => $originalBackupPath,
+                'filesystems.backup_password' => $originalBackupPassword,
+            ]);
+            File::deleteDirectory($root);
+        }
+    }
+
+    public function test_backup_can_encrypt_and_verify_the_database(): void
+    {
+        $root = storage_path('framework/testing/encrypted-backup-'.uniqid());
+        File::ensureDirectoryExists($root);
+        $database = $root.'/database.sqlite';
+        File::put($database, 'sensitive-content');
+        $original = [
+            'database' => config('database.connections.sqlite.database'),
+            'path' => config('filesystems.backup_path'),
+            'password' => config('filesystems.backup_password'),
+        ];
+        config([
+            'database.default' => 'sqlite',
+            'database.connections.sqlite.database' => $database,
+            'filesystems.backup_path' => $root.'/archives',
+            'filesystems.backup_password' => 'test-backup-password',
+        ]);
+
+        try {
+            $this->artisan('app:backup')->assertSuccessful();
+            $archive = File::glob($root.'/archives/*.zip')[0];
+            $zip = new ZipArchive;
+            $this->assertTrue($zip->open($archive) === true);
+            $this->assertFalse($zip->getFromName('database/database.sqlite'));
+            $zip->setPassword('test-backup-password');
+            $this->assertSame('sensitive-content', $zip->getFromName('database/database.sqlite'));
+            $zip->close();
+        } finally {
+            config([
+                'database.connections.sqlite.database' => $original['database'],
+                'filesystems.backup_path' => $original['path'],
+                'filesystems.backup_password' => $original['password'],
             ]);
             File::deleteDirectory($root);
         }

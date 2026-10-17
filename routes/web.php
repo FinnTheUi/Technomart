@@ -40,10 +40,10 @@ Route::middleware('signed')->prefix('rental/{application}')->name('rental.')->gr
 });
 
 // ── Payment gateway webhook (authenticated by signature; CSRF-exempt in bootstrap/app.php) ──
-Route::post('/webhooks/paymongo', PayMongoWebhookController::class)->middleware('throttle:120,1')->name('webhooks.paymongo');
+Route::post('/webhooks/paymongo', PayMongoWebhookController::class)->middleware('throttle:webhooks')->name('webhooks.paymongo');
 
 // ── Admin ──
-Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin', 'throttle:writes'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [Admin\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/reports', [Admin\ReportController::class, 'index'])->name('reports.index');
     Route::get('/system-health', Admin\SystemHealthController::class)->name('system-health');
@@ -97,7 +97,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 });
 
 // ── Manager ──
-Route::middleware(['auth', 'verified', 'role:manager'])->prefix('manager')->name('manager.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:manager', 'throttle:writes'])->prefix('manager')->name('manager.')->group(function () {
     Route::get('/dashboard', [Manager\DashboardController::class, 'index'])->name('dashboard');
 
     // Stalls & floor plan
@@ -135,7 +135,7 @@ Route::middleware(['auth', 'verified', 'role:manager'])->prefix('manager')->name
 });
 
 // ── Tenant ──
-Route::middleware(['auth', 'verified', 'role:tenant'])->prefix('tenant')->name('tenant.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:tenant', 'throttle:writes'])->prefix('tenant')->name('tenant.')->group(function () {
     Route::get('/dashboard', [Tenant\DashboardController::class, 'index'])->name('dashboard');
 
     // Supply catalog & orders
@@ -165,7 +165,7 @@ Route::middleware(['auth', 'verified', 'role:tenant'])->prefix('tenant')->name('
 Route::middleware(['auth', 'verified'])->prefix('billing/{type}/{id}')->name('billing.')
     ->whereIn('type', array_keys(PayableResolver::TYPES))->whereNumber('id')
     ->group(function () {
-        Route::patch('/submit', [PaymentFlowController::class, 'submit'])->middleware('throttle:10,1')->name('submit');
+        Route::patch('/submit', [PaymentFlowController::class, 'submit'])->middleware('throttle:payments')->name('submit');
         Route::post('/checkout', [PaymentFlowController::class, 'checkout'])->name('checkout');
         Route::get('/checkout/return', [PaymentFlowController::class, 'checkoutReturn'])->name('checkout.return');
         Route::patch('/verify', [PaymentFlowController::class, 'verify'])->name('verify');
@@ -183,7 +183,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('messages')->name('messages.')->group(function () {
         Route::get('/', [MessageController::class, 'index'])->name('index');
         Route::get('/{user}', [MessageController::class, 'conversation'])->name('conversation');
-        Route::post('/', [MessageController::class, 'send'])->name('send');
+        Route::post('/', [MessageController::class, 'send'])->middleware('throttle:messages')->name('send');
     });
     Route::get('/api/messages/{user}', [MessageController::class, 'apiMessages'])->name('api.messages');
 

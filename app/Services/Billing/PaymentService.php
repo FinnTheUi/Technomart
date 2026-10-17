@@ -171,16 +171,26 @@ class PaymentService
      */
     public function markOverdue(Payment|ElectricBill $bill, ?User $actor = null): void
     {
-        if ($bill->isPaid() || $bill->isAwaitingVerification()) {
+        $changed = DB::transaction(function () use ($bill) {
+            $locked = $this->lock($bill);
+            if ($locked->isPaid() || $locked->isAwaitingVerification()) {
+                return false;
+            }
+
+            if ($locked->lateFee() == 0) {
+                $locked->late_fee = $this->lateFeeFor($locked->baseAmount());
+            }
+
+            $locked->status = PaymentStatus::Overdue;
+            $locked->save();
+            $bill->setRawAttributes($locked->getAttributes(), true);
+
+            return true;
+        });
+
+        if (! $changed) {
             return;
         }
-
-        if ($bill->lateFee() == 0) {
-            $bill->late_fee = $this->lateFeeFor($bill->baseAmount());
-        }
-
-        $bill->status = PaymentStatus::Overdue;
-        $bill->save();
 
         if ($actor) {
             ActivityLogger::log('marked_overdue', $actor->name.' marked '.$bill->paymentDescription().' as overdue', $bill, null, $actor);

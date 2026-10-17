@@ -3,6 +3,7 @@
 return [
 
     'backup_path' => env('BACKUP_PATH', storage_path('app/backups')),
+    'backup_password' => env('BACKUP_PASSWORD', ''),
 
     /*
     |--------------------------------------------------------------------------

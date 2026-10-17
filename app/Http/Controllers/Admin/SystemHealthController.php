@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Support\EncryptedSecret;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\View\View;
 use Symfony\Component\Process\Process;
 use Throwable;
@@ -37,10 +38,20 @@ class SystemHealthController extends Controller
         }
         $checks[] = $this->check('Risk model', is_file(base_path('ml/risk_model.pkl')), 'ml/risk_model.pkl');
 
+        $checks[] = $this->check('PHP runtime', version_compare(PHP_VERSION, '8.3.0', '>='), PHP_VERSION);
+        $freeBytes = disk_free_space(storage_path());
+        $checks[] = $this->check('Storage space', $freeBytes !== false && $freeBytes >= 1024 ** 3, $freeBytes === false ? 'Unable to read disk space' : number_format($freeBytes / 1024 ** 3, 1).' GB free');
+
+        $backups = collect(File::glob(config('filesystems.backup_path').'/technomart-*.zip'));
+        $latestBackup = $backups->sortByDesc(fn (string $path) => File::lastModified($path))->first();
+        $backupFresh = $latestBackup && File::lastModified($latestBackup) >= now()->subDays(2)->timestamp;
+        $checks[] = $this->check('Backup freshness', (bool) $backupFresh, $latestBackup ? 'Latest: '.date('Y-m-d H:i:s', File::lastModified($latestBackup)) : 'No backup found');
+
         $heartbeat = cache()->get('system.scheduler_last_seen');
         $fresh = $heartbeat && now()->diffInMinutes($heartbeat) <= 3;
         $checks[] = $this->check('Scheduler', $fresh, $heartbeat ? 'Last seen '.$heartbeat : 'No heartbeat yet; run php artisan schedule:work');
-        $checks[] = $this->check('Queue', true, DB::table('jobs')->count().' pending / '.DB::table('failed_jobs')->count().' failed (worker activity cannot be proven while idle)', true);
+        $failedJobs = DB::table('failed_jobs')->count();
+        $checks[] = $this->check('Queue', $failedJobs === 0, DB::table('jobs')->count().' pending / '.$failedJobs.' failed (worker activity cannot be proven while idle)', true);
 
         return view('admin.system-health', ['checks' => $checks]);
     }
