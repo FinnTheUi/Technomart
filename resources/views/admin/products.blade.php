@@ -91,7 +91,7 @@
             <div class="panel-header">
                 <div>
                     <div class="panel-title">Catalog</div>
-                    <div class="panel-subtitle">Stock changes are recorded in the <a href="{{ route('admin.inventory.index') }}" style="color:#4f46e5;">stock ledger</a>. Restock through <a href="{{ route('admin.purchase-orders.index') }}" style="color:#4f46e5;">purchase orders</a>.</div>
+                    <div class="panel-subtitle">Manage product details, pricing, availability and current stock.</div>
                 </div>
             </div>
             <table class="data-table">

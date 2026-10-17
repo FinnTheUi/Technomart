@@ -37,7 +37,7 @@
         <div class="alert alert-success" style="background:#eef2ff;border-color:#c7d2fe;color:#3730a3;">
             @if($ordersAwaitingAction > 0)<a href="{{ route('admin.orders.index') }}" style="font-weight:700;">{{ $ordersAwaitingAction }} order(s) to verify or deliver</a>@endif
             @if($ordersAwaitingAction > 0 && $lowStockCount > 0) &middot; @endif
-            @if($lowStockCount > 0)<a href="{{ route('admin.purchase-orders.index') }}" style="font-weight:700;">{{ $lowStockCount }} product(s) need restocking</a>@endif
+            @if($lowStockCount > 0)<a href="{{ route('admin.products') }}" style="font-weight:700;">{{ $lowStockCount }} product(s) have low stock</a>@endif
         </div>
         @endif
 

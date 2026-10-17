@@ -51,4 +51,16 @@ class FrontendExperienceTest extends TestCase
             $this->assertStringNotContainsString($host, $templates);
         }
     }
+
+    public function test_admin_navigation_matches_the_requested_modules(): void
+    {
+        $sidebar = File::get(resource_path('views/partials/admin-sidebar.blade.php'));
+
+        $this->assertStringContainsString("route('profile.edit')", $sidebar);
+        $this->assertStringContainsString('>Profile</a>', $sidebar);
+        $this->assertStringNotContainsString("route('admin.system-health')", $sidebar);
+        $this->assertStringNotContainsString("route('admin.suppliers.index')", $sidebar);
+        $this->assertStringNotContainsString("route('admin.purchase-orders.index')", $sidebar);
+        $this->assertStringNotContainsString("route('admin.inventory.index')", $sidebar);
+    }
 }

@@ -28,11 +28,11 @@
 </head>
 <body>
     @if(auth()->user()->role === 'admin')
-        @include('partials.admin-sidebar', ['active' => ''])
+        @include('partials.admin-sidebar', ['active' => 'profile'])
     @elseif(auth()->user()->role === 'manager')
-        @include('partials.manager-sidebar', ['active' => ''])
+        @include('partials.manager-sidebar', ['active' => 'profile'])
     @elseif(auth()->user()->role === 'tenant')
-        @include('partials.tenant-sidebar', ['active' => ''])
+        @include('partials.tenant-sidebar', ['active' => 'profile'])
     @endif
 
     <div class="main">
