@@ -32,17 +32,23 @@ class StallController extends Controller
     public function index(Request $request, StallLayoutService $layout): View
     {
         $layout->sync($request->user());
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:50'],
+        ]);
+        $search = trim((string) ($filters['q'] ?? ''));
 
         $stallPage = Stall::with('activeContract.tenant')
             ->where('manager_id', $request->user()->id)
+            ->searchName($search)
             ->orderBy('floor_number')
             ->orderBy('stall_number')
-            ->paginate(12)
+            ->paginate(10)
             ->withQueryString();
 
         return view('manager.stalls', [
             'stalls' => $stallPage->getCollection()->groupBy('floor_number'),
             'stallPage' => $stallPage,
+            'search' => $search,
         ]);
     }
 

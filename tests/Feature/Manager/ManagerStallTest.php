@@ -49,13 +49,27 @@ class ManagerStallTest extends TestCase
         $firstPage = $this->actingAs($this->manager)->get('/manager/stalls');
         $firstPage->assertOk()
             ->assertSee('Showing 1')
-            ->assertSee('>Stall 12<', false)
-            ->assertDontSee('>Stall 13<', false);
+            ->assertSee('>Stall 10<', false)
+            ->assertDontSee('>Stall 11<', false);
 
         $this->actingAs($this->manager)->get('/manager/stalls?page=2')
             ->assertOk()
-            ->assertSee('>Stall 13<', false)
-            ->assertDontSee('>Stall 12<', false);
+            ->assertSee('>Stall 11<', false)
+            ->assertDontSee('>Stall 10<', false);
+    }
+
+    public function test_manager_can_search_stalls_and_clear_the_search(): void
+    {
+        $this->actingAs($this->manager)->get('/manager/stalls?q=Stall+23')
+            ->assertOk()
+            ->assertSee('value="Stall 23"', false)
+            ->assertSee('>Stall 23<', false)
+            ->assertDontSee('>Stall 22<', false)
+            ->assertSee('Clear');
+
+        $this->actingAs($this->manager)->get('/manager/stalls?q=missing')
+            ->assertOk()
+            ->assertSee('No stalls match your search.');
     }
 
     public function test_manager_cannot_set_a_negative_price(): void

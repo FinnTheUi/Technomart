@@ -13,6 +13,12 @@
         .num-chip{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:28px;border-radius:8px;background:#eef2ff;color:#4338ca;font-weight:800;font-size:13px}
         .tenant{font-weight:600;color:#0f172a}
         .muted{color:#94a3b8;font-size:13px}
+        .stall-search{display:flex;gap:10px;align-items:center;margin-bottom:18px}
+        .stall-search input{width:min(100%,420px);height:42px;padding:0 14px;border:1px solid #cbd5e1;border-radius:10px;font:inherit;outline:none}
+        .stall-search input:focus{border-color:#4f46e5;box-shadow:0 0 0 3px rgba(79,70,229,.12)}
+        .stall-search button{height:42px;padding:0 18px;border:0;border-radius:10px;background:#4f46e5;color:#fff;font:inherit;font-weight:700;cursor:pointer}
+        .stall-search .clear-search{color:#475569;font-size:14px;font-weight:600;text-decoration:none}
+        @media(max-width:600px){.stall-search{align-items:stretch;flex-wrap:wrap}.stall-search input{width:100%}}
     </style>
     @vite('resources/js/app.js')
 </head>
@@ -34,6 +40,14 @@
         @if(session('error'))
             <div class="alert alert-error">{{ session('error') }}</div>
         @endif
+
+        <form method="GET" action="{{ route('manager.stalls') }}" class="stall-search" role="search">
+            <input type="search" name="q" value="{{ $search }}" placeholder="Search by stall name or number" maxlength="50" aria-label="Search stalls by name or number">
+            <button type="submit">Search</button>
+            @if($search !== '')
+                <a href="{{ route('manager.stalls') }}" class="clear-search">Clear</a>
+            @endif
+        </form>
 
         @forelse($stalls as $floor => $floorStalls)
         <div class="panel">
@@ -81,7 +95,7 @@
         </div>
         @empty
         <div class="panel">
-            <p style="text-align:center;padding:40px;color:#64748b;">No stalls are assigned to you. The floor layout's stalls belong to the mall's manager.</p>
+            <p style="text-align:center;padding:40px;color:#64748b;">{{ $search !== '' ? 'No stalls match your search.' : "No stalls are assigned to you. The floor layout's stalls belong to the mall's manager." }}</p>
         </div>
         @endforelse
         {{ $stallPage->links('partials.pagination') }}
