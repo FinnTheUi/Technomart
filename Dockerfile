@@ -33,12 +33,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libjpeg62-turbo-dev \
         libpng-dev \
         libpq-dev \
+        libsqlite3-dev \
         libzip-dev \
         python3 \
         python3-venv \
         unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j"$(nproc)" gd opcache pcntl pdo_mysql pdo_pgsql zip \
+    && docker-php-ext-install -j"$(nproc)" gd opcache pcntl pdo_mysql pdo_pgsql pdo_sqlite zip \
     && a2enmod rewrite headers \
     && python3 -m venv /opt/venv \
     && rm -rf /var/lib/apt/lists/*
@@ -64,6 +65,7 @@ RUN chmod +x /usr/local/bin/cloud-run-entrypoint \
         storage/logs \
         bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
+    && rm -f bootstrap/cache/*.php \
     && php artisan package:discover --ansi \
     && ln -sfn /var/www/html/storage/app/public /var/www/html/public/storage
 
