@@ -107,7 +107,7 @@
             <div class="fp-info-row"><span>Monthly rent</span><span id="fpPopPrice"></span></div>
         </div>
         @if(!($interactive ?? false))
-        <a href="#" id="fpPopApply" class="fp-popover-action">
+        <a href="{{ route('stalls.index') }}" id="fpPopApply" class="fp-popover-action">
             Select This Stall
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
         </a>

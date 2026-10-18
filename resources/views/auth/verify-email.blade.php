@@ -8,6 +8,11 @@
     @if (session('status') == 'verification-link-sent')
         <div class="session-status">A new verification link has been sent to your email address.</div>
     @endif
+    @if (session('status') == 'account-details-updated-and-sent')
+        <div class="session-status">Your signup details were updated and a new verification link was sent.</div>
+    @elseif (session('status') == 'account-details-updated')
+        <div class="session-status">Your signup details were updated.</div>
+    @endif
 
     @error('mail')
         <div class="form-error form-error-block">{{ $message }}</div>
@@ -19,7 +24,7 @@
     </form>
 
     <div class="auth-links">
-        <a href="{{ route('profile.edit') }}" class="auth-link">Wrong email? Update your profile</a>
+        <a href="{{ route('verification.account.edit') }}" class="auth-link">Wrong details? Go back and edit your signup information</a>
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit" class="auth-link" style="background:none;border:none;cursor:pointer;font-family:inherit;">Log out</button>

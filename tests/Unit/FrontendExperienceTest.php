@@ -39,6 +39,8 @@ class FrontendExperienceTest extends TestCase
         $this->assertStringContainsString("form.setAttribute('aria-busy', 'true')", $javascript);
         $this->assertStringContainsString('@media print', $css);
         $this->assertStringContainsString(':focus-visible', $css);
+        $this->assertStringContainsString('.sidebar-nav{display:flex;flex-direction:column;gap:4px;flex:1;min-height:0;overflow-y:auto', $css);
+        $this->assertStringContainsString('.sidebar-footer{border-top:1px solid #e2e8f0;padding-top:16px;margin-top:12px;flex-shrink:0}', $css);
     }
 
     public function test_templates_do_not_depend_on_remote_frontend_cdns(): void
@@ -62,5 +64,29 @@ class FrontendExperienceTest extends TestCase
         $this->assertStringNotContainsString("route('admin.suppliers.index')", $sidebar);
         $this->assertStringNotContainsString("route('admin.purchase-orders.index')", $sidebar);
         $this->assertStringNotContainsString("route('admin.inventory.index')", $sidebar);
+    }
+
+    public function test_role_navigation_has_profile_and_current_page_states(): void
+    {
+        $managerSidebar = File::get(resource_path('views/partials/manager-sidebar.blade.php'));
+        $tenantSidebar = File::get(resource_path('views/partials/tenant-sidebar.blade.php'));
+        $applications = File::get(resource_path('views/manager/rental-applications.blade.php'));
+        $notifications = File::get(resource_path('views/partials/notification-bell.blade.php'));
+
+        $this->assertStringContainsString("route('profile.edit')", $managerSidebar);
+        $this->assertStringContainsString("route('profile.edit')", $tenantSidebar);
+        $this->assertStringContainsString("['active' => 'applications']", $applications);
+        $this->assertStringContainsString("=== 'notifications' ? 'active'", $notifications);
+        $this->assertStringContainsString('aria-expanded', $notifications);
+    }
+
+    public function test_public_navigation_contains_no_placeholder_links(): void
+    {
+        $templates = collect(File::allFiles(resource_path('views')))
+            ->map(fn ($file) => File::get($file->getPathname()))
+            ->implode("\n");
+
+        $this->assertStringNotContainsString('href="#"', $templates);
+        $this->assertStringContainsString("route('terms')", File::get(resource_path('views/welcome.blade.php')));
     }
 }

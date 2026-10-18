@@ -111,11 +111,11 @@
             </a>
             <nav class="nav-links">
                 @auth
-                    <a href="{{ url('/dashboard') }}" class="nav-cta">Dashboard</a>
+                    <a href="{{ route('dashboard') }}" class="nav-cta">Dashboard</a>
                 @else
                     <a href="{{ route('login') }}" class="nav-link">Sign In</a>
                     @if (Route::has('register'))
-                        <a href="{{ route('register') }}" class="nav-cta">Get Started Free</a>
+                        <a href="{{ route('stalls.index') }}" class="nav-cta">Choose a Stall</a>
                     @endif
                 @endauth
             </nav>
@@ -136,7 +136,7 @@
 
         <div class="hero-buttons">
             @auth
-                <a href="{{ url('/dashboard') }}" class="btn-primary">
+                <a href="{{ route('dashboard') }}" class="btn-primary">
                     Enter Dashboard
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
                 </a>
@@ -191,7 +191,7 @@
         <p>Join Technomart today and experience the future of stall management — smarter payments, happier tenants, zero hassle.</p>
         <div class="hero-buttons">
             @auth
-                <a href="{{ url('/dashboard') }}" class="btn-primary">Go to Dashboard</a>
+                <a href="{{ route('dashboard') }}" class="btn-primary">Go to Dashboard</a>
             @else
                 <a href="{{ route('stalls.index') }}" class="btn-primary">
                     Browse Available Stalls
@@ -207,8 +207,8 @@
             <span class="copy">&copy; {{ date('Y') }} Technomart. All rights reserved.</span>
             <div class="footer-links">
                 <a href="{{ route('privacy') }}">Privacy Policy</a>
-                <a href="#">Terms of Service</a>
-                <a href="#">Contact</a>
+                <a href="{{ route('terms') }}">Terms of Service</a>
+                <a href="{{ route('privacy') }}#contact">Contact</a>
             </div>
         </div>
     </footer>

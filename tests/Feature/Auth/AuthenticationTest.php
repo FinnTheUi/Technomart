@@ -68,7 +68,7 @@ class AuthenticationTest extends TestCase
     //  REGISTRATION
     // ──────────────────────────────────────────
 
-    public function test_new_user_can_register(): void
+    public function test_direct_registration_redirects_to_stall_selection(): void
     {
         $response = $this->post('/register', [
             'name' => 'Test User',
@@ -78,12 +78,12 @@ class AuthenticationTest extends TestCase
             'privacy_consent' => '1',
         ]);
 
-        $this->assertAuthenticated();
-        $this->assertDatabaseHas('users', ['email' => 'test@gmail.com']);
-        $response->assertRedirect(route('dashboard'));
+        $this->assertGuest();
+        $this->assertDatabaseMissing('users', ['email' => 'test@gmail.com']);
+        $response->assertRedirect(route('stalls.index'));
     }
 
-    public function test_user_cannot_register_with_duplicate_email(): void
+    public function test_direct_registration_never_changes_an_existing_account(): void
     {
         User::factory()->create(['email' => 'taken@gmail.com']);
 
@@ -95,10 +95,11 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertGuest();
-        $response->assertSessionHasErrors('email');
+        $response->assertRedirect(route('stalls.index'));
+        $this->assertSame(1, User::where('email', 'taken@gmail.com')->count());
     }
 
-    public function test_user_cannot_register_with_weak_password(): void
+    public function test_direct_registration_does_not_create_weak_password_account(): void
     {
         $response = $this->post('/register', [
             'name' => 'Weak Pass User',
@@ -108,7 +109,8 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertGuest();
-        $response->assertSessionHasErrors('password');
+        $response->assertRedirect(route('stalls.index'));
+        $this->assertDatabaseMissing('users', ['email' => 'weak@gmail.com']);
     }
 
     // ──────────────────────────────────────────

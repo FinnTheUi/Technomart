@@ -55,7 +55,7 @@
         {{-- Links --}}
         <div class="auth-links">
             @if (Route::has('register'))
-                <a href="{{ route('register') }}" class="auth-link">Don't have an account? <strong>Sign up</strong></a>
+                <a href="{{ route('stalls.index') }}" class="auth-link">Don't have an account? <strong>Choose a stall to apply</strong></a>
             @endif
             @if (Route::has('password.request'))
                 <a href="{{ route('password.request') }}" class="auth-link">Forgot password?</a>

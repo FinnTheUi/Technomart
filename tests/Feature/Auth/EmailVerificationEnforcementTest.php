@@ -7,6 +7,7 @@ use App\Models\Stall;
 use App\Models\User;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -31,19 +32,33 @@ class EmailVerificationEnforcementTest extends TestCase
         $this->actingAs($user)->get('/profile')->assertOk();
     }
 
-    public function test_registration_sends_a_verification_email(): void
+    public function test_unverified_user_can_reopen_and_correct_signup_details(): void
     {
         Notification::fake();
+        $user = User::factory()->unverified()->create(['email' => 'wrong@gmail.com', 'password' => 'old-password']);
 
-        $this->post('/register', [
-            'name' => 'New User',
-            'email' => 'new.user@gmail.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-            'privacy_consent' => '1',
-        ]);
+        $this->actingAs($user)->get('/verify-email/account')
+            ->assertOk()
+            ->assertSee('Edit signup details')
+            ->assertSee('name="password"', false);
 
-        Notification::assertSentTo(User::where('email', 'new.user@gmail.com')->first(), VerifyEmail::class);
+        $this->actingAs($user)->patch('/verify-email/account', [
+            'name' => 'Correct Name',
+            'email' => 'correct@gmail.com',
+            'phone_number' => '09171234567',
+            'address' => 'Correct Address',
+            'current_password' => 'old-password',
+            'password' => 'new-password',
+            'password_confirmation' => 'new-password',
+        ])->assertRedirect(route('verification.notice'))
+            ->assertSessionHas('status', 'account-details-updated-and-sent');
+
+        $user->refresh();
+        $this->assertSame('correct@gmail.com', $user->email);
+        $this->assertSame('Correct Name', $user->name);
+        $this->assertSame('09171234567', $user->phone_number);
+        $this->assertTrue(Hash::check('new-password', $user->password));
+        Notification::assertSentTo($user, VerifyEmail::class);
     }
 
     public function test_tenant_created_on_approval_must_verify_their_email(): void

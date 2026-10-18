@@ -45,22 +45,23 @@ class MailFailureTest extends TestCase
             ->assertRedirect('/verify-email')
             ->assertSessionHasErrors(['mail' => SafeMail::FAILURE_MESSAGE]);
 
-        $this->actingAs($user)->withSession(['errors' => session('errors')])->get('/verify-email')
+        $this->actingAs($user)->get('/verify-email')
             ->assertOk()->assertSee('Resend verification email');
     }
 
-    public function test_registration_still_creates_and_signs_in_the_account(): void
+    public function test_email_correction_survives_a_mail_failure(): void
     {
-        $this->post('/register', [
-            'name' => 'New Person',
+        $user = User::factory()->unverified()->create(['email' => 'wrong@gmail.com']);
+
+        $this->actingAs($user)->from('/verify-email/account')->patch('/verify-email/account', [
+            'name' => $user->name,
             'email' => 'new.person@gmail.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-            'privacy_consent' => '1',
-        ])->assertRedirect(route('verification.notice'))->assertSessionHasErrors('mail');
+            'phone_number' => $user->phone_number,
+            'address' => $user->address,
+        ])->assertRedirect('/verify-email')->assertSessionHasErrors('mail');
 
         $this->assertAuthenticated();
-        $this->assertDatabaseHas('users', ['email' => 'new.person@gmail.com']);
+        $this->assertSame('new.person@gmail.com', $user->fresh()->email);
     }
 
     public function test_forgot_password_shows_a_friendly_error(): void

@@ -58,6 +58,13 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:6,1')
         ->name('verification.send');
 
+    Route::get('verify-email/account', [EmailVerificationNotificationController::class, 'editAccount'])
+        ->name('verification.account.edit');
+
+    Route::patch('verify-email/account', [EmailVerificationNotificationController::class, 'updateAccount'])
+        ->middleware('throttle:6,1')
+        ->name('verification.account.update');
+
     Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
         ->name('password.confirm');
 

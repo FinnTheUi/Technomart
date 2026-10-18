@@ -92,7 +92,7 @@ class PageRenderTest extends TestCase
 
     public function test_public_pages_render(): void
     {
-        foreach (['/', '/stalls', '/login', '/register'] as $url) {
+        foreach (['/', '/stalls', '/login', '/privacy', '/terms'] as $url) {
             $this->get($url)->assertOk();
         }
 

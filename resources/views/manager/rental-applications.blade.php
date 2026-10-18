@@ -13,7 +13,7 @@
     @vite('resources/js/app.js')
 </head>
 <body>
-    @include('partials.manager-sidebar', ['active' => 'rental-applications'])
+    @include('partials.manager-sidebar', ['active' => 'applications'])
 
     <div class="main">
         <div class="page-header">

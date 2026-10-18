@@ -30,7 +30,7 @@
     <h2>Retention and your choices</h2>
     <p>Account details are retained while your account or contract is active. Financial, contract, receipt, and audit records may be retained after deactivation when required for operational, legal, or accountability purposes. You may request correction of inaccurate profile information or account deactivation through Technomart management.</p>
 
-    <h2>Contact</h2>
+    <h2 id="contact">Contact</h2>
     <p>For privacy questions or requests, contact the Technomart administrator using the official contact information provided by management.</p>
 </main>
 </body>

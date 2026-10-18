@@ -66,13 +66,12 @@ class GoogleAuthTest extends TestCase
     {
         config(['services.google.client_secret_encrypted' => null]);
 
-        $this->get('/register')->assertOk()->assertDontSee('Sign up with Google');
+        $this->get('/register')->assertRedirect(route('stalls.index'));
         $this->get('/auth/google/redirect')->assertRedirect(route('login'));
     }
 
-    public function test_google_button_is_shown_when_configured(): void
+    public function test_google_button_is_available_for_existing_account_sign_in(): void
     {
-        $this->get('/register')->assertOk()->assertSee('Sign up with Google');
         $this->get('/login')->assertOk()->assertSee('Sign in with Google');
     }
 
@@ -86,20 +85,16 @@ class GoogleAuthTest extends TestCase
         $this->assertStringNotContainsString('test-client-secret', $response->headers->get('Location'));
     }
 
-    public function test_new_google_user_is_registered_as_verified_tenant(): void
+    public function test_new_google_user_must_apply_for_a_stall_first(): void
     {
         $this->fakeGoogleUser();
 
         $this->get('/auth/google/callback?code=abc&state=xyz')
-            ->assertRedirect(route('dashboard', absolute: false));
+            ->assertRedirect(route('login'))
+            ->assertSessionHasErrors('google');
 
-        $user = User::where('email', 'juan.delacruz@gmail.com')->firstOrFail();
-        $this->assertAuthenticatedAs($user);
-        $this->assertSame('google-123', $user->google_id);
-        $this->assertSame(User::ROLE_TENANT, $user->role);
-        $this->assertNotNull($user->email_verified_at);
-        $this->assertNotNull($user->privacy_consented_at);
-        $this->assertTrue($user->is_active);
+        $this->assertGuest();
+        $this->assertDatabaseMissing('users', ['email' => 'juan.delacruz@gmail.com']);
     }
 
     public function test_existing_email_account_is_linked_instead_of_duplicated(): void
