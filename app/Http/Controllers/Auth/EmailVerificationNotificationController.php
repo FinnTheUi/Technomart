@@ -27,8 +27,8 @@ class EmailVerificationNotificationController extends Controller
         $sent = SafeMail::attempt(fn () => $request->user()->sendEmailVerificationNotification(), ['user' => $request->user()->id]);
 
         return $sent
-            ? back()->with('status', 'verification-link-sent')
-            : back()->withErrors(['mail' => SafeMail::FAILURE_MESSAGE]);
+            ? redirect()->route('verification.notice')->with('status', 'verification-link-sent')
+            : redirect()->route('verification.notice')->withErrors(['mail' => SafeMail::FAILURE_MESSAGE]);
     }
 
     public function editAccount(Request $request): View|RedirectResponse

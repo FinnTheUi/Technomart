@@ -51,7 +51,7 @@ class MailFailureTest extends TestCase
 
     public function test_email_correction_survives_a_mail_failure(): void
     {
-        $user = User::factory()->unverified()->create(['role' => 'tenant', 'email' => 'wrong@gmail.com']);
+        $user = User::factory()->unverified()->create(['name' => 'Test Tenant', 'role' => 'tenant', 'email' => 'wrong@gmail.com']);
 
         $this->withSession(['pending_signup_email' => $user->email]);
 

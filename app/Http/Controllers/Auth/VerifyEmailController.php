@@ -3,26 +3,40 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Auth\Events\Verified;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class VerifyEmailController extends Controller
 {
     /**
      * Mark the authenticated user's email address as verified.
      */
-    public function __invoke(EmailVerificationRequest $request): RedirectResponse
+    public function __invoke(Request $request): RedirectResponse|View
     {
-        $request->session()->forget('pending_signup_email');
-        if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+        if (! $request->hasValidSignature()) {
+            return view('auth.verification-result', ['verified' => false]);
         }
 
-        if ($request->user()->markEmailAsVerified()) {
-            event(new Verified($request->user()));
+        $user = User::find($request->route('id'));
+        if (! $user || ! $user->is_active || ! hash_equals(sha1($user->getEmailForVerification()), (string) $request->route('hash'))) {
+            return view('auth.verification-result', ['verified' => false]);
         }
 
-        return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+        if (! $user->hasVerifiedEmail() && $user->markEmailAsVerified()) {
+            event(new Verified($user));
+        }
+
+        if ($request->user()?->is($user)) {
+            $request->session()->forget('pending_signup_email');
+
+            return redirect()->route('dashboard', ['verified' => 1]);
+        }
+
+        // A different signed-in account must keep its own identity. The link
+        // proves email ownership only; credentials are still needed to sign in.
+        return view('auth.verification-result', ['verified' => true]);
     }
 }

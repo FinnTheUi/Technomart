@@ -46,13 +46,16 @@ Route::middleware('guest')->group(function () {
     });
 });
 
+// Email ownership is proven by the expiring signed link, independently of the
+// browser session Gmail opens. This endpoint never signs the recipient in.
+Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
+    ->middleware('throttle:20,1')
+    ->whereNumber('id')
+    ->name('verification.verify');
+
 Route::middleware('auth')->group(function () {
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
-
-    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
-        ->middleware(['signed', 'throttle:6,1'])
-        ->name('verification.verify');
 
     Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
         ->middleware('throttle:6,1')
