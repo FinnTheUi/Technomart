@@ -1,30 +1,45 @@
 @php
-    $gcashManagers = collect($managers)->filter(fn ($manager) => $manager && $manager->isManager() && $manager->is_active);
+    $gcashManagers = collect($managers)
+        ->filter(fn ($manager) => $manager && $manager->isManager() && $manager->is_active)
+        ->sortBy(fn ($manager) => $manager->gcash_qr_path ? 0 : 1)->values();
 @endphp
-<div class="gcash-receiving-details" style="margin:12px 0;">
+<section class="gcash-receiving-details" aria-label="GCash receiving account">
+    <p class="gcash-section-label">Scan to pay</p>
     @if($gcashManagers->count() > 1)
-        <p style="font-size:13px;color:#475569;">Pay only once to one of the receiving Managers below, then submit your GCash reference.</p>
+        <label class="gcash-section-label" for="recipient-{{ $gcashKey }}">Receiving Manager</label>
+        <select id="recipient-{{ $gcashKey }}" class="gcash-manager-select" data-gcash-recipient-select>
+            @foreach($gcashManagers as $manager)
+                <option value="{{ $manager->id }}">{{ $manager->name }}</option>
+            @endforeach
+        </select>
     @endif
     @forelse($gcashManagers as $receivingManager)
-        <div style="padding:12px;border:1px solid #cbd5e1;border-radius:10px;margin-bottom:10px;background:#fff;">
-            <p style="font-size:13px;color:#334155;margin:0 0 8px;">Receiving Manager: <strong>{{ $receivingManager->name }}</strong></p>
+        <div class="gcash-recipient" data-gcash-recipient="{{ $receivingManager->id }}" @if(!$loop->first) hidden @endif>
             @if($receivingManager->gcashQrUrl())
-                <a href="{{ $receivingManager->gcashQrUrl() }}" target="_blank" rel="noopener" aria-label="Open {{ $receivingManager->name }} GCash QR at full size">
-                    <img src="{{ $receivingManager->gcashQrUrl() }}" alt="GCash QR code for {{ $receivingManager->name }}" style="display:block;width:260px;max-width:100%;height:auto;background:#fff;">
-                </a>
-                <p style="font-size:12px;color:#64748b;margin-top:8px;">Scan this QR in GCash, or open and save it to upload using GCash's Scan QR feature.</p>
+                <div class="gcash-qr-stage">
+                    <a href="{{ $receivingManager->gcashQrUrl() }}" target="_blank" rel="noopener" aria-label="Enlarge GCash QR for {{ $receivingManager->name }}">
+                        <img src="{{ $receivingManager->gcashQrUrl() }}" alt="GCash QR code for {{ $receivingManager->name }}" loading="lazy">
+                    </a>
+                </div>
+                <div class="gcash-image-actions">
+                    <a href="{{ $receivingManager->gcashQrUrl() }}" target="_blank" rel="noopener"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg>Enlarge QR</a>
+                    <a href="{{ $receivingManager->gcashQrUrl() }}" download><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m-4-4 4 4 4-4M4 17v4h16v-4"/></svg>Save image</a>
+                </div>
             @else
-                <p style="font-size:13px;color:#64748b;">This Manager has not uploaded a QR code yet. Contact them for payment instructions.</p>
+                <div class="gcash-empty">This Manager has not uploaded a QR code yet. Contact them for payment instructions.</div>
             @endif
-            @if($receivingManager->gcash_account_name)
-                <p style="font-size:13px;">GCash account: <strong>{{ $receivingManager->gcash_account_name }}</strong></p>
-            @endif
-            @if($receivingManager->gcash_account_number)
-                <p style="font-size:13px;">GCash number: <strong>{{ $receivingManager->gcash_account_number }}</strong></p>
-            @endif
+            <dl class="gcash-recipient-details">
+                <div><dt>Receiving Manager</dt><dd>{{ $receivingManager->name }}</dd></div>
+                @if($receivingManager->gcash_account_name)
+                    <div><dt>Account name</dt><dd>{{ $receivingManager->gcash_account_name }}</dd></div>
+                @endif
+                @if($receivingManager->gcash_account_number)
+                    <div><dt>GCash number</dt><dd>{{ $receivingManager->gcash_account_number }}</dd></div>
+                @endif
+            </dl>
         </div>
     @empty
-        <p style="font-size:13px;color:#64748b;">Contact Technomart for the GCash receiving details.</p>
+        <div class="gcash-empty">Contact Technomart for the GCash receiving details.</div>
     @endforelse
-    <p style="font-size:12px;color:#64748b;">Check the recipient and amount in GCash before sending. Submit the 13-digit reference after payment; the Manager will verify it.</p>
-</div>
+    <p class="gcash-recipient-note">Check the recipient in GCash before sending. On the same phone? Save the image and upload it in GCash's Scan QR feature.@if($gcashManagers->count() > 1) Send payment to one Manager only.@endif</p>
+</section>

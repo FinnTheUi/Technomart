@@ -89,4 +89,18 @@ class GcashQrTest extends TestCase
         $manager->forceFill(['gcash_qr_path' => null])->save();
         $this->get('/tenant/orders')->assertOk()->assertSee('has not uploaded a QR code yet')->assertSee('Submit for verification');
     }
+
+    public function test_invalid_reference_reopens_only_the_matching_payment_dialog(): void
+    {
+        $manager = User::factory()->create(['role' => 'manager']);
+        $tenant = User::factory()->create(['role' => 'tenant']);
+        $stall = Stall::create(['manager_id' => $manager->id, 'name' => 'Dialog Test', 'price' => 1000, 'status' => 'occupied']);
+        $bill = Payment::create(['tenant_id' => $tenant->id, 'manager_id' => $manager->id, 'stall_id' => $stall->id, 'amount' => 1000, 'due_date' => today(), 'status' => 'pending']);
+        $this->actingAs($tenant)->from('/tenant/bills')->patch('/billing/payment/'.$bill->id.'/submit', [
+            'reference_number' => '123', 'gcash_payment_key' => 'payment-'.$bill->id,
+        ])->assertRedirect('/tenant/bills')->assertSessionHasErrors('reference_number')->assertSessionHasInput('reference_number', '123');
+        $this->get('/tenant/bills')->assertOk()->assertSee('data-gcash-reopen', false)
+            ->assertSee('id="gcash-dialog-payment-'.$bill->id.'"', false)->assertSee('aria-haspopup="dialog"', false);
+        $this->assertSame('pending', $bill->fresh()->status->value);
+    }
 }

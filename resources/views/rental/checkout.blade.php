@@ -16,7 +16,7 @@
         .nav-brand svg { width: 36px; height: 36px; }
         .nav-brand span { font-weight: 800; font-size: 18px; color: #0f172a; }
 
-        .checkout-container { position: relative; z-index: 1; max-width: 580px; margin: 0 auto; padding: 120px 24px 80px; }
+        .checkout-container { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 120px 24px 80px; }
 
         .checkout-header { text-align: center; margin-bottom: 36px; }
         .checkout-header h1 { font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
@@ -138,28 +138,14 @@
             </form>
             @endif
 
-            <div class="payment-btn" style="display:block;cursor:default;" id="gcash-reference">
-                <div style="display:flex;gap:16px;align-items:flex-start;">
-                    <div class="payment-icon payment-icon-gcash">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                    </div>
-                    <div class="payment-info" style="flex:1;">
-                        <div class="payment-name">Send via GCash</div>
-                        <div class="payment-desc">
-                            Amount to send: PHP {{ number_format($totalAmount, 2) }}.
-                            The manager checks it before approving your application.
-                            @include('partials.billing.gcash-qr', ['managers' => collect([$application->stall->manager])])
-                        </div>
-                        <form method="POST" action="{{ $application->signedUrl('rental.payOnline') }}" style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
-                            @csrf
-                            <input type="text" name="reference_number" inputmode="numeric" maxlength="20" required placeholder="13-digit reference no." value="{{ old('reference_number') }}"
-                                   style="flex:1;min-width:180px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;font-size:14px;font-family:inherit;">
-                            <button type="submit" id="btn-pay-gcash" style="padding:10px 18px;border:none;border-radius:10px;background:#0ea5e9;color:#fff;font-weight:700;cursor:pointer;font-family:inherit;">Submit</button>
-                        </form>
-                        @error('reference_number')<div style="color:#dc2626;font-size:13px;margin-top:6px;">{{ $message }}</div>@enderror
-                    </div>
+            @php $gcashKey = 'rental-'.$application->id; @endphp
+            <section class="gcash-payment gcash-checkout" id="gcash-reference" aria-labelledby="checkout-gcash-title">
+                @include('partials.billing.gcash-header', ['gcashEyebrow' => 'First month rental payment', 'gcashHeadingId' => 'checkout-gcash-title', 'gcashHeaderAmount' => $totalAmount, 'closable' => false])
+                <div class="gcash-payment-layout">
+                    @include('partials.billing.gcash-qr', ['managers' => collect([$application->stall->manager])])
+                    @include('partials.billing.gcash-reference-form', ['gcashAmount' => $totalAmount, 'gcashAction' => $application->signedUrl('rental.payOnline'), 'gcashIsBill' => false])
                 </div>
-            </div>
+            </section>
 
             <form method="POST" action="{{ $application->signedUrl('rental.payInPerson') }}">
                 @csrf

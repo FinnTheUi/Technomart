@@ -1,6 +1,8 @@
 
 
 import Alpine from 'alpinejs';
+import '../css/gcash-payments.css';
+import './gcash-payments';
 import Chart from 'chart.js/auto';
 
 window.Alpine = Alpine;

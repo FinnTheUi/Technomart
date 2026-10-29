@@ -1,52 +1,39 @@
-{{--
-    Payer actions for any payable document (rent bill, electric bill, supply order).
-    @param  \App\Contracts\Payable  $payable
-    @param  bool  $onlinePayments  PayMongo checkout available
---}}
 @php
     $params = ['type' => $payable::payableType(), 'id' => $payable->getKey()];
+    $gcashKey = $payable::payableType().'-'.$payable->getKey();
+    $dialogId = 'gcash-dialog-'.$gcashKey;
 @endphp
-
 @if($payable->isPaid() && $payable->receipt_number)
     <a href="{{ route('receipts.show', $params) }}" class="btn-sm btn-view">Receipt {{ $payable->receipt_number }}</a>
 @elseif($payable->isPaid())
-    <span class="detail-sub">Paid · Receipt is being prepared</span>
+    <span class="detail-sub">Paid &middot; Receipt is being prepared</span>
 @elseif($payable->isAwaitingVerification())
     <span class="detail-sub">Awaiting verification<br>Ref {{ $payable->reference_number }}</span>
 @elseif($payable->canBePaid())
     <div class="pay-box">
         @if($payable->rejection_reason)
-            <div class="pay-rejected">Previous payment not verified: {{ $payable->rejection_reason }}</div>
+            <p class="pay-rejected">Previous payment not verified: {{ $payable->rejection_reason }}</p>
         @endif
-
+        <button type="button" class="gcash-pay-trigger" data-gcash-open="{{ $dialogId }}" aria-haspopup="dialog" aria-controls="{{ $dialogId }}">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M8 8h3v3H8V8zm5 5h3v3h-3v-3zm-5 1v2m6-8h2"/></svg>
+            Pay with GCash
+        </button>
         @if($onlinePayments ?? false)
             <form method="POST" action="{{ route('billing.checkout', $params) }}">
                 @csrf
-                <button type="submit" class="btn-pay">Pay online &middot; ₱{{ number_format($payable->amountDue(), 2) }}</button>
+                <button type="submit" class="btn-sm btn-view">Pay online</button>
             </form>
         @endif
-
-        <details class="pay-details">
-            <summary>Pay via GCash / Submit reference</summary>
-            @include('partials.billing.gcash-qr', ['managers' => $payable->reviewers()])
-            <p class="detail-sub">Amount to send: PHP {{ number_format($payable->amountDue(), 2) }}</p>
-            <form method="POST" action="{{ route('billing.submit', $params) }}" enctype="multipart/form-data">
-                @csrf @method('PATCH')
-                <input type="text" name="reference_number" class="form-input" inputmode="numeric" placeholder="13-digit reference no." required maxlength="20">
-                <label class="detail-sub">Screenshot (optional) <input type="file" name="proof" accept="image/*"></label>
-                <button type="submit" class="btn-sm btn-approve">Submit for verification</button>
-            </form>
-        </details>
     </div>
+    <dialog id="{{ $dialogId }}" class="gcash-dialog" aria-labelledby="{{ $dialogId }}-title" @if(old('gcash_payment_key') === $gcashKey) data-gcash-reopen @endif>
+        <div class="gcash-payment">
+            @include('partials.billing.gcash-header', ['gcashEyebrow' => $payable->paymentDescription(), 'gcashHeadingId' => $dialogId.'-title', 'gcashHeaderAmount' => $payable->amountDue(), 'closable' => true])
+            <div class="gcash-payment-layout">
+                @include('partials.billing.gcash-qr', ['managers' => $payable->reviewers()])
+                @include('partials.billing.gcash-reference-form', ['gcashAmount' => $payable->amountDue(), 'gcashAction' => route('billing.submit', $params), 'gcashIsBill' => true])
+            </div>
+        </div>
+    </dialog>
 @else
     <span class="detail-sub">&mdash;</span>
 @endif
-
-@once
-    <style>
-        .pay-box { display: flex; flex-direction: column; gap: 8px; min-width: 220px; }
-        .pay-details summary { cursor: pointer; font-size: 13px; color: #4f46e5; font-weight: 600; }
-        .pay-details form { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
-        .pay-rejected { font-size: 12px; color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 6px 8px; }
-    </style>
-@endonce
