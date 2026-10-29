@@ -52,6 +52,7 @@ Route::middleware(['auth', 'verified', 'role:admin', 'throttle:writes'])->prefix
 // ── Manager ──
 Route::middleware(['auth', 'verified', 'role:manager', 'throttle:writes'])->prefix('manager')->name('manager.')->group(function () {
     Route::get('/dashboard', [Manager\DashboardController::class, 'index'])->name('dashboard');
+    Route::put('/payment-settings/gcash', [Manager\GcashSettingsController::class, 'update'])->name('gcash.update');
 
     // Business administration belongs to the manager; administrators are dashboard-only.
     Route::get('/reports', [Admin\ReportController::class, 'index'])->name('reports.index');

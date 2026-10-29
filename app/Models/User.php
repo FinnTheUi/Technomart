@@ -80,6 +80,11 @@ class User extends Authenticatable implements MustVerifyEmail
             : Storage::disk('public')->url($this->avatar_url);
     }
 
+    public function gcashQrUrl(): ?string
+    {
+        return $this->gcash_qr_path ? Storage::disk('public')->url($this->gcash_qr_path) : null;
+    }
+
     public function managedStalls(): HasMany
     {
         return $this->hasMany(Stall::class, 'manager_id');

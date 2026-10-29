@@ -10,16 +10,20 @@ use RuntimeException;
 class ImageSanitizer
 {
     /** Re-encode an uploaded image to remove metadata and non-image payloads. */
-    public function store(UploadedFile $file, string $directory, string $disk = 'public'): string
+    public function store(UploadedFile $file, string $directory, string $disk = 'public', bool $lossless = false): string
     {
         $image = @imagecreatefromstring((string) file_get_contents($file->getRealPath()));
         if ($image === false) {
             throw new RuntimeException('The uploaded image could not be processed.');
         }
 
-        $path = trim($directory, '/').'/'.Str::uuid().'.jpg';
+        $path = trim($directory, '/').'/'.Str::uuid().($lossless ? '.png' : '.jpg');
         ob_start();
-        imagejpeg($image, null, 88);
+        if ($lossless) {
+            imagepng($image);
+        } else {
+            imagejpeg($image, null, 88);
+        }
         $contents = ob_get_clean();
         imagedestroy($image);
 

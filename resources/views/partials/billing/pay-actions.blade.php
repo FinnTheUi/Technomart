@@ -5,7 +5,6 @@
 --}}
 @php
     $params = ['type' => $payable::payableType(), 'id' => $payable->getKey()];
-    $gcash = config('billing.gcash');
 @endphp
 
 @if($payable->isPaid() && $payable->receipt_number)
@@ -28,10 +27,9 @@
         @endif
 
         <details class="pay-details">
-            <summary>Paid via GCash? Submit reference</summary>
-            @if($gcash['account_number'])
-                <p class="detail-sub">Send ₱{{ number_format($payable->amountDue(), 2) }} to <strong>{{ $gcash['account_name'] }}</strong> ({{ $gcash['account_number'] }}), then enter the 13-digit reference number.</p>
-            @endif
+            <summary>Pay via GCash / Submit reference</summary>
+            @include('partials.billing.gcash-qr', ['managers' => $payable->reviewers()])
+            <p class="detail-sub">Amount to send: PHP {{ number_format($payable->amountDue(), 2) }}</p>
             <form method="POST" action="{{ route('billing.submit', $params) }}" enctype="multipart/form-data">
                 @csrf @method('PATCH')
                 <input type="text" name="reference_number" class="form-input" inputmode="numeric" placeholder="13-digit reference no." required maxlength="20">

@@ -156,6 +156,8 @@
             </div>
         </div>
 
+        @include('profile.partials.gcash-settings')
+
         <!-- CHANGE PASSWORD -->
         <div class="panel" style="margin-top: 24px;">
             <h3 class="panel-title" style="margin-bottom: 20px;">Change Password</h3>

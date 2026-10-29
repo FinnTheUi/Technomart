@@ -146,12 +146,9 @@
                     <div class="payment-info" style="flex:1;">
                         <div class="payment-name">Send via GCash</div>
                         <div class="payment-desc">
-                            @if($gcash['account_number'])
-                                Send ₱{{ number_format($totalAmount, 2) }} to <strong>{{ $gcash['account_name'] }}</strong> ({{ $gcash['account_number'] }}), then enter the 13-digit reference number from your GCash receipt.
-                            @else
-                                Send ₱{{ number_format($totalAmount, 2) }} to Technomart's GCash account, then enter the 13-digit reference number from your GCash receipt.
-                            @endif
+                            Amount to send: PHP {{ number_format($totalAmount, 2) }}.
                             The manager checks it before approving your application.
+                            @include('partials.billing.gcash-qr', ['managers' => collect([$application->stall->manager])])
                         </div>
                         <form method="POST" action="{{ $application->signedUrl('rental.payOnline') }}" style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
                             @csrf
