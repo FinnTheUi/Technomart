@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Stock Ledger â€” Technomart</title>
+    <title>Stock Ledger | Technomart</title>
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>
         .form-grid { display: grid; grid-template-columns: 2fr 1fr 2fr auto; gap: 12px; align-items: end; }
@@ -22,7 +22,7 @@
         <div class="page-header">
             <div>
                 <h1>Stock Ledger</h1>
-                <p>Every stock change â€” purchases received, orders, cancellations and manual counts.</p>
+                <p>Every stock change: purchases received, orders, cancellations and manual counts.</p>
             </div>
         </div>
 
@@ -38,7 +38,7 @@
             <strong>{{ $lowStock->total() }} product(s) at or below reorder level:</strong>
             {{ $lowStock->map(fn ($p) => $p->name.' ('.$p->stock.')')->implode(', ') }}
             {{ $lowStock->links('partials.pagination') }}
-            â€” <a href="{{ route('manager.purchase-orders.index') }}" style="font-weight:700;">create a purchase order</a>
+            <a href="{{ route('manager.purchase-orders.index') }}" style="font-weight:700;">create a purchase order</a>
         </div>
         @endif
 
@@ -76,7 +76,7 @@
                     @foreach($movements as $m)
                     <tr>
                         <td style="color:#64748b;">{{ $m->created_at->format('M d, Y g:i A') }}</td>
-                        <td style="font-weight:600;color:#0f172a;">{{ $m->product->name ?? 'â€”' }}</td>
+                        <td style="font-weight:600;color:#0f172a;">{{ $m->product->name ?? 'Unavailable product' }}</td>
                         <td><x-status-badge :status="$m->type" /></td>
                         <td class="{{ $m->quantity >= 0 ? 'qty-in' : 'qty-out' }}">{{ sprintf('%+d', $m->quantity) }}</td>
                         <td>{{ $m->balance_after }}</td>
