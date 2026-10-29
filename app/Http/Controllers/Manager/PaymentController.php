@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Manager;
 
 use App\Enums\PaymentStatus;
+use App\Enums\ContractStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\StorePaymentRequest;
 use App\Models\Payment;
-use App\Models\Stall;
-use App\Models\User;
+use App\Models\Contract;
 use App\Notifications\BillIssuedNotification;
 use App\Services\Billing\PaymentService;
 use App\Services\NavigationBadgeService;
@@ -29,6 +29,10 @@ class PaymentController extends Controller
     {
         $managerId = $request->user()->id;
         $badges->markPayableRead($request->user(), 'payment');
+        $activeContracts = Contract::with(['tenant:id,name', 'stall:id,name,price,manager_id'])
+            ->where('status', ContractStatus::Active)
+            ->whereHas('stall', fn ($query) => $query->where('manager_id', $managerId))
+            ->latest('id')->get()->unique('stall_id');
 
         return view('manager.payments', [
             'payments' => Payment::with(['tenant', 'stall', 'latestActivity'])
@@ -38,8 +42,11 @@ class PaymentController extends Controller
                 ->paginate(10)
                 ->withQueryString()
                 ->fragment('payment-records'),
-            'tenants' => User::where('role', User::ROLE_TENANT)->orderBy('name')->get(),
-            'stalls' => Stall::where('manager_id', $managerId)->get(),
+            'tenants' => $activeContracts->pluck('tenant')->filter()->unique('id')->sortBy('name')->values(),
+            'stalls' => $activeContracts->pluck('stall')->filter()->unique('id')->sortBy('name')->values(),
+            'tenantStallAssignments' => $activeContracts->map(fn (Contract $contract) => [
+                'tenant_id' => $contract->tenant_id, 'stall_id' => $contract->stall_id,
+            ])->values(),
         ]);
     }
 

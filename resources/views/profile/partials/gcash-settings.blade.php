@@ -1,5 +1,5 @@
 @if($user->isManager())
-<div class="panel" style="margin-top:24px;">
+<div class="panel" id="gcash-payment-details" style="margin-top:24px;">
     <h3 class="panel-title">GCash payment details</h3>
     <p style="color:#64748b;margin:8px 0 16px;">Upload your GCash receiving QR. Users will see it when paying your rental applications, rent and electric bills. Your QR is also available for supply-order payments.</p>
     @if(session('status') === 'gcash-updated')

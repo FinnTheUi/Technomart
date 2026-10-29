@@ -20,10 +20,15 @@
         <div class="page-header">
             <div>
                 <h1>Payment Management</h1>
+                <a href="{{ route('profile.edit') }}#gcash-payment-details" class="btn-sm btn-view">Manage GCash QR</a>
             </div>
         </div>
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+
+        @if($errors->any())
+            <div class="alert alert-error">{{ $errors->first() }}</div>
         @endif
 
         <!-- Create Payment Bill -->
@@ -33,16 +38,16 @@
                 <div class="form-row-inline">
                     <div class="form-group">
                         <label class="form-label">Tenant</label>
-                        <select name="tenant_id" class="form-select" required>
+                        <select id="payment_tenant_id" name="tenant_id" class="form-select" required>
                             <option value="">Select tenant...</option>
-                            @foreach($tenants as $t)<option value="{{ $t->id }}">{{ $t->name }}</option>@endforeach
+                            @foreach($tenants as $t)<option value="{{ $t->id }}" @selected(old('tenant_id') == $t->id)>{{ $t->name }}</option>@endforeach
                         </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Stall</label>
-                        <select name="stall_id" class="form-select" required>
+                        <select id="payment_stall_id" name="stall_id" class="form-select" required>
                             <option value="">Select stall...</option>
-                            @foreach($stalls as $s)<option value="{{ $s->id }}">{{ $s->name }} (₱{{ number_format($s->price,2) }})</option>@endforeach
+                            @foreach($stalls as $s)<option value="{{ $s->id }}" @selected(old('stall_id') == $s->id)>{{ $s->name }} (₱{{ number_format($s->price,2) }})</option>@endforeach
                         </select>
                     </div>
                     <div class="form-group">
@@ -55,6 +60,7 @@
                     </div>
                     <button type="submit" class="btn-submit">Create Bill</button>
                 </div>
+                <p id="payment-assignment-hint" role="status" style="font-size:13px;color:#64748b;margin-top:10px;">Tenant and stall are linked using active lease records.</p>
             </form>
         </div>
 
@@ -88,5 +94,31 @@
             @endif
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tenant = document.getElementById('payment_tenant_id');
+            const stall = document.getElementById('payment_stall_id');
+            const hint = document.getElementById('payment-assignment-hint');
+            const assignments = @json($tenantStallAssignments);
+
+            function selectTenantStall() {
+                const matches = assignments.filter(item => String(item.tenant_id) === tenant.value);
+                const current = matches.find(item => String(item.stall_id) === stall.value);
+                stall.value = current ? String(current.stall_id) : (matches.length ? String(matches[0].stall_id) : '');
+                hint.textContent = matches.length > 1
+                    ? 'This tenant leases multiple stalls. The latest lease is selected by default; choose another linked stall if needed.'
+                    : 'Tenant and stall are linked using active lease records.';
+            }
+            function selectStallTenant() {
+                const match = assignments.find(item => String(item.stall_id) === stall.value);
+                tenant.value = match ? String(match.tenant_id) : '';
+                hint.textContent = 'Tenant and stall are linked using active lease records.';
+            }
+            tenant.addEventListener('change', selectTenantStall);
+            stall.addEventListener('change', selectStallTenant);
+            if (stall.value) selectStallTenant();
+            else if (tenant.value) selectTenantStall();
+        });
+    </script>
 </body>
 </html>
