@@ -85,6 +85,7 @@
                 <span style="float:right;font-size:11px;">{{ $entry->created_at->diffForHumans() }}</span>
             </div>
             @endforeach
+            {{ $timeline->links('partials.pagination') }}
             @endif
         </div>
 

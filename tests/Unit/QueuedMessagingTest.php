@@ -7,7 +7,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
- * Every notification and mailable must be queued so slow mail servers never block a request.
+ * Mail-capable notifications and mailables are queued; database-only alerts may be immediate.
  */
 class QueuedMessagingTest extends TestCase
 {
@@ -28,6 +28,13 @@ class QueuedMessagingTest extends TestCase
     #[DataProvider('messageClasses')]
     public function test_message_is_queued(string $class): void
     {
+        if ($class === \App\Notifications\SystemEventNotification::class) {
+            $notification = new $class('info', 'Test', '/');
+            $this->assertSame(['database'], $notification->via(new \stdClass));
+
+            return;
+        }
+
         $this->assertTrue(is_subclass_of($class, ShouldQueue::class), "{$class} should implement ShouldQueue.");
     }
 

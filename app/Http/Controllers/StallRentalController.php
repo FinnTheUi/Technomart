@@ -90,6 +90,16 @@ class StallRentalController extends Controller
             'payment_status' => PaymentStatus::Pending,
         ]);
 
+        if (! \App\Models\User::where('email', $application->email)->exists()) {
+            $request->session()->put('pending_signup_email', $application->email);
+        } else {
+            $request->session()->forget('pending_signup_email');
+        }
+
+        $stall->manager?->notify(new \App\Notifications\SystemEventNotification(
+            'application_submitted', $application->name.' submitted a rental application for '.$stall->name.'.', route('manager.rental-applications'),
+        ));
+
         return redirect()->to($application->signedUrl('rental.checkout'));
     }
 

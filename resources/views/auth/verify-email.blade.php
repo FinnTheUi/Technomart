@@ -1,7 +1,7 @@
 <x-guest-layout>
     <h2>Verify your email</h2>
     <p class="auth-subtitle">
-        Thanks for signing up! Click the link we emailed to <strong>{{ auth()->user()->email }}</strong> to activate your account.
+        Confirm your email address using the verification link sent to <strong>{{ auth()->user()->email }}</strong>.
         Didn't get it? Check your spam folder, or send a new one.
     </p>
 
@@ -24,7 +24,9 @@
     </form>
 
     <div class="auth-links">
-        <a href="{{ route('verification.account.edit') }}" class="auth-link">Wrong details? Go back and edit your signup information</a>
+        @if(auth()->user()->canEditPendingSignup())
+            <a href="{{ route('verification.account.edit') }}" class="auth-link">Wrong details? Go back and edit your signup information</a>
+        @endif
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit" class="auth-link" style="background:none;border:none;cursor:pointer;font-family:inherit;">Log out</button>

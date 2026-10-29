@@ -31,7 +31,8 @@ class PurchaseOrderController extends Controller
                 ->fragment('purchase-order-records'),
             'suppliers' => Supplier::orderBy('name')->get(),
             'products' => Product::orderBy('name')->get(),
-            'lowStock' => Product::where('is_active', true)->lowStock()->with('supplier')->orderBy('stock')->get(),
+            'lowStock' => Product::where('is_active', true)->lowStock()->with('supplier')->orderBy('stock')->orderBy('id')
+                ->paginate(10, ['*'], 'restock_page')->withQueryString(),
         ]);
     }
 

@@ -35,7 +35,9 @@ class EmailVerificationEnforcementTest extends TestCase
     public function test_unverified_user_can_reopen_and_correct_signup_details(): void
     {
         Notification::fake();
-        $user = User::factory()->unverified()->create(['email' => 'wrong@gmail.com', 'password' => 'old-password']);
+        $user = User::factory()->unverified()->create(['role' => 'tenant', 'email' => 'wrong@gmail.com', 'password' => 'old-password']);
+
+        $this->withSession(['pending_signup_email' => $user->email]);
 
         $this->actingAs($user)->get('/verify-email/account')
             ->assertOk()

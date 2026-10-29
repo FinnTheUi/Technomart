@@ -59,14 +59,14 @@ class DashboardController extends Controller
             'topTenants' => $topTenants,
             'chartLabels' => $topProducts->pluck('name')->toArray(),
             'chartData' => $topProducts->pluck('total_sold')->toArray(),
-            'recentOrders' => Order::with(['user', 'product'])->latest()->limit(5)->get(),
+            'recentOrders' => Order::with(['user', 'product'])->latest('id')->paginate(5, ['*'], 'orders_page')->withQueryString(),
             ...$this->monthlyRevenue(),
             'stallOccupancy' => [
                 'available' => $stallCounts[StallStatus::Available->value] ?? 0,
                 'occupied' => $stallCounts[StallStatus::Occupied->value] ?? 0,
                 'maintenance' => $stallCounts[StallStatus::Maintenance->value] ?? 0,
             ],
-            'activityFeed' => ActivityLog::with('user')->latest()->limit(15)->get(),
+            'activityFeed' => ActivityLog::with('user')->latest('id')->paginate(10, ['*'], 'activity_page')->withQueryString(),
         ]);
     }
 

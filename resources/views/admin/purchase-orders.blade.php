@@ -38,7 +38,7 @@
 
         @if($lowStock->isNotEmpty())
         <div class="panel">
-            <h3 class="panel-title" style="margin-bottom:12px;">Needs restocking</h3>
+            <h3 class="panel-title" style="margin-bottom:12px;">Needs restocking ({{ $lowStock->total() }})</h3>
             <table class="data-table">
                 <thead><tr><th>Product</th><th>Stock</th><th>Reorder at</th><th>Usual supplier</th></tr></thead>
                 <tbody>
@@ -55,6 +55,7 @@
         </div>
         @endif
 
+        {{ $lowStock->links('partials.pagination') }}
         <div class="panel">
             <h3 class="panel-title" style="margin-bottom:16px;">New purchase order</h3>
             @if($suppliers->isEmpty())

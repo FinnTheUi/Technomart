@@ -35,8 +35,9 @@
 
         @if($lowStock->isNotEmpty())
         <div class="alert alert-error">
-            <strong>{{ $lowStock->count() }} product(s) at or below reorder level:</strong>
+            <strong>{{ $lowStock->total() }} product(s) at or below reorder level:</strong>
             {{ $lowStock->map(fn ($p) => $p->name.' ('.$p->stock.')')->implode(', ') }}
+            {{ $lowStock->links('partials.pagination') }}
             â€” <a href="{{ route('manager.purchase-orders.index') }}" style="font-weight:700;">create a purchase order</a>
         </div>
         @endif

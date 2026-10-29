@@ -89,7 +89,7 @@
             <div class="chat-sidebar">
                 <div class="chat-sidebar-header">
                     <h2>Messages</h2>
-                    <p>{{ $conversations->count() }} conversation(s)</p>
+                    <p>{{ $conversations->total() }} conversation(s)</p>
                 </div>
                 <div class="contact-list">
                     @forelse($conversations as $contact)
@@ -110,7 +110,12 @@
                     </div>
                     @endforelse
                 </div>
+                {{ $conversations->links('partials.pagination') }}
                 <div class="new-chat-section">
+                    <form method="GET" action="{{ url()->current() }}">
+                        <input type="search" name="contact_search" value="{{ request('contact_search') }}" placeholder="Search contacts" aria-label="Search contacts" maxlength="100">
+                        <button type="submit" class="new-chat-btn">Search</button>
+                    </form>
                     <form action="" method="GET" id="newChatForm">
                         <select name="user_id" id="newChatSelect" onchange="if(this.value) window.location.href='/messages/'+this.value">
                             <option value="">Start new conversation...</option>
@@ -119,6 +124,7 @@
                             @endforeach
                         </select>
                     </form>
+                    {{ $contactableUsers->links('partials.pagination') }}
                 </div>
             </div>
 
@@ -133,6 +139,7 @@
                     <span class="role-badge">{{ ucfirst($user->role) }}</span>
                 </div>
                 <div class="chat-messages" id="chatMessages">
+                    {{ $messages->links('partials.pagination') }}
                     @forelse($messages as $msg)
                     <div class="message-bubble {{ $msg->sender_id === auth()->id() ? 'mine' : 'theirs' }}">
                         {{ $msg->message }}
@@ -166,12 +173,13 @@
         if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
 
         // Poll for new messages every 5 seconds
-        @if(isset($user))
+        @if(isset($user) && $messages->currentPage() === 1)
         setInterval(async () => {
             try {
-                const res = await fetch('/api/messages/{{ $user->id }}');
+                const res = await fetch('/api/messages/{{ $user->id }}?after_id={{ $messages->last()?->id ?? 0 }}', { headers: { 'Accept': 'application/json' } });
+                if (!res.ok) return;
                 const data = await res.json();
-                if (data.length !== document.querySelectorAll('.message-bubble').length) {
+                if (data.length > 0) {
                     location.reload();
                 }
             } catch(e) {}

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Manager;
 use App\Enums\MaintenanceStatus;
 use App\Http\Controllers\Controller;
 use App\Models\MaintenanceRequest;
+use App\Notifications\SystemEventNotification;
 use App\Traits\ActivityLogTrait;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -37,6 +38,13 @@ class MaintenanceController extends Controller
         $maintenanceRequest->update(['status' => $request->status]);
 
         $this->logActivity('updated_maintenance', $request->user()->name.' changed maintenance request "'.$maintenanceRequest->subject.'" from '.$oldStatus->value.' to '.$request->status, $maintenanceRequest);
+
+        if ($oldStatus !== $maintenanceRequest->status) {
+            $maintenanceRequest->tenant?->notify(new SystemEventNotification(
+                'maintenance_updated', 'Your maintenance request "'.$maintenanceRequest->subject.'" is now '.$maintenanceRequest->status->value.'.',
+                route('tenant.maintenance.detail', $maintenanceRequest),
+            ));
+        }
 
         return back()->with('success', 'Request status updated.');
     }

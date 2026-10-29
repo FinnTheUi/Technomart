@@ -138,6 +138,7 @@
             @endif
         </div>
 
+        {{ $recentOrders->links('partials.pagination') }}
         <!-- Monthly Revenue + Stall Occupancy + Activity Feed -->
         <div class="three-col">
             <div class="panel">
@@ -162,6 +163,7 @@
                     @empty
                     <p style="color:#94a3b8;font-size:13px;text-align:center;padding:40px 0;">No activity recorded yet.</p>
                     @endforelse
+                    {{ $activityFeed->links('partials.pagination') }}
                 </div>
             </div>
         </div>

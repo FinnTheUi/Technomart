@@ -18,7 +18,7 @@ class MessagingAuthorizationTest extends TestCase
         $tenant = User::factory()->create(['role' => 'tenant']);
 
         $this->actingAs($manager)->get('/messages')->assertOk()
-            ->assertViewHas('contactableUsers', fn ($users) => $users->modelKeys() === [$tenant->id]);
+            ->assertViewHas('contactableUsers', fn ($users) => $users->getCollection()->modelKeys() === [$tenant->id]);
         $this->post('/messages', ['receiver_id' => $admin->id, 'message' => 'Blocked'])->assertForbidden();
         $this->post('/messages', ['receiver_id' => $inactive->id, 'message' => 'Blocked'])->assertForbidden();
     }

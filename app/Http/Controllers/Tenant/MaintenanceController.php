@@ -8,6 +8,7 @@ use App\Http\Requests\Tenant\StoreMaintenanceRequest;
 use App\Models\ActivityLog;
 use App\Models\MaintenanceRequest;
 use App\Models\Stall;
+use App\Notifications\SystemEventNotification;
 use App\Services\Uploads\ImageSanitizer;
 use App\Traits\ActivityLogTrait;
 use Illuminate\Http\RedirectResponse;
@@ -50,6 +51,10 @@ class MaintenanceController extends Controller
 
         $this->logActivity('submitted_maintenance', $request->user()->name.' submitted maintenance request: "'.$maintenanceRequest->subject.'"', $maintenanceRequest);
 
+        $maintenanceRequest->stall?->manager?->notify(new SystemEventNotification(
+            'maintenance_submitted', $request->user()->name.' submitted maintenance request: '.$maintenanceRequest->subject, route('manager.inbox'),
+        ));
+
         return back()->with('success', 'Maintenance request submitted! The manager will be notified.');
     }
 
@@ -63,7 +68,7 @@ class MaintenanceController extends Controller
             'timeline' => ActivityLog::where('subject_type', MaintenanceRequest::class)
                 ->where('subject_id', $maintenanceRequest->id)
                 ->orderBy('created_at')
-                ->get(),
+                ->paginate(20, ['*'], 'timeline_page')->withQueryString(),
         ]);
     }
 }

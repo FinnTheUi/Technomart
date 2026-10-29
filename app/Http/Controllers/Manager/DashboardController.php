@@ -15,8 +15,6 @@ use App\Services\Analytics\TenantRiskAnalyzer;
 use App\Services\Rental\StallLayoutService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -67,7 +65,7 @@ class DashboardController extends Controller
                 ->paginate(5, ['*'], 'payments_page')->withQueryString()->fragment('recent-payments'),
 
             // Predictive analytics: cached late-payment risk (refreshed daily by `ml:score`).
-            'riskTenants' => $this->paginateCollection($riskAnalyzer->forManager($managerId, 100), 5, 'risk_page', 'risk-analytics', $request),
+            'riskTenants' => $riskAnalyzer->paginateForManager($managerId),
             'modelMetrics' => File::exists(storage_path('app/ml/model_metrics.json'))
                 ? json_decode(File::get(storage_path('app/ml/model_metrics.json')), true)
                 : null,
@@ -86,16 +84,6 @@ class DashboardController extends Controller
             'activityFeed' => ActivityLog::with('user')->where('user_id', $managerId)->latest()
                 ->paginate(5, ['*'], 'activity_page')->withQueryString()->fragment('activity-feed'),
         ]);
-    }
-
-    private function paginateCollection(Collection $items, int $perPage, string $pageName, string $fragment, Request $request): LengthAwarePaginator
-    {
-        $page = LengthAwarePaginator::resolveCurrentPage($pageName);
-
-        return (new LengthAwarePaginator($items->forPage($page, $perPage)->values(), $items->count(), $perPage, $page, [
-            'path' => $request->url(),
-            'pageName' => $pageName,
-        ]))->withQueryString()->fragment($fragment);
     }
 
     /**

@@ -74,6 +74,16 @@ class FrontendExperienceTest extends TestCase
         $this->assertStringNotContainsString("route('admin.inventory.index')", $sidebar);
     }
 
+    public function test_all_manager_navigation_items_have_icons(): void
+    {
+        $sidebar = File::get(resource_path('views/partials/manager-sidebar.blade.php'));
+        preg_match_all('/<a\s+href="[^"]+"\s+class="nav-item[^>]+>(.*?)<\/a>/s', $sidebar, $matches);
+        $this->assertNotEmpty($matches[1]);
+        foreach ($matches[1] as $item) {
+            $this->assertStringContainsString('<svg', $item);
+        }
+    }
+
     public function test_role_navigation_has_profile_and_current_page_states(): void
     {
         $managerSidebar = File::get(resource_path('views/partials/manager-sidebar.blade.php'));

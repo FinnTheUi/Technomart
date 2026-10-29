@@ -37,6 +37,8 @@ class EmailVerificationNotificationController extends Controller
             return redirect()->route('dashboard');
         }
 
+        abort_unless($request->user()->canEditPendingSignup(), 403);
+
         return view('auth.correct-account', ['user' => $request->user()]);
     }
 
@@ -46,6 +48,8 @@ class EmailVerificationNotificationController extends Controller
         if ($request->user()->hasVerifiedEmail()) {
             return redirect()->route('dashboard');
         }
+
+        abort_unless($request->user()->canEditPendingSignup(), 403);
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:20'],
@@ -74,6 +78,8 @@ class EmailVerificationNotificationController extends Controller
             ...($emailChanged ? ['email_verified_at' => null, 'google_id' => null] : []),
             ...(! empty($validated['password']) ? ['password' => Hash::make($validated['password'])] : []),
         ])->save();
+
+        $request->session()->put('pending_signup_email', $user->email);
 
         if (! $emailChanged) {
             return redirect()->route('verification.notice')->with('status', 'account-details-updated');

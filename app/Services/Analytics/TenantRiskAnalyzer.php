@@ -6,6 +6,7 @@ use App\Enums\PaymentStatus;
 use App\Models\Payment;
 use App\Models\TenantRiskScore;
 use Illuminate\Support\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\Process\Process;
@@ -60,8 +61,25 @@ class TenantRiskAnalyzer
     }
 
     /**
-     * Recompute and store scores for every manager with billing history. Returns rows written.
+     * Paginate all cached scores without truncating the manager's tenant list.
      */
+    public function paginateForManager(int $managerId): LengthAwarePaginator
+    {
+        if (! TenantRiskScore::where('manager_id', $managerId)->exists()) {
+            $this->refreshForManager($managerId);
+        }
+
+        return TenantRiskScore::with('tenant')->where('manager_id', $managerId)
+            ->orderByDesc('score')->orderBy('id')->paginate(5, ['*'], 'risk_page')->withQueryString()->fragment('risk-analytics')
+            ->through(fn (TenantRiskScore $row) => (object) [
+                'id' => $row->tenant_id, 'name' => $row->tenant?->name ?? 'Unknown',
+                'email' => $row->tenant?->email ?? '', 'risk_score' => $row->score,
+                'risk_level' => $row->level, 'source' => $row->source,
+                'factors' => $row->factors ?? [], 'computed_at' => $row->computed_at,
+            ]);
+    }
+
+    /** Recompute and store scores for every manager with billing history. */
     public function refreshAll(): int
     {
         return Payment::distinct()->pluck('manager_id')->sum(fn ($id) => $this->refreshForManager((int) $id));

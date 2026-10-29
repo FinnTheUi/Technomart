@@ -27,7 +27,8 @@ class InventoryController extends Controller
         return view('admin.inventory', [
             'movements' => $movements,
             'products' => Product::orderBy('name')->get(),
-            'lowStock' => Product::where('is_active', true)->lowStock()->orderBy('stock')->get(),
+            'lowStock' => Product::where('is_active', true)->lowStock()->orderBy('stock')->orderBy('id')
+                ->paginate(10, ['*'], 'low_stock_page')->withQueryString(),
         ]);
     }
 

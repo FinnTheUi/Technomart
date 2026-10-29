@@ -94,7 +94,7 @@
 
         list.innerHTML = data.notifications.map(function(n) {
             const icon = getIconForType(n.type);
-            return '<div class="notif-item ' + (n.read ? '' : 'unread') + '" data-id="' + n.id + '" onclick="markNotificationRead(\'' + n.id + '\', this)">' +
+            return '<div role="button" tabindex="0" class="notif-item ' + (n.read ? '' : 'unread') + '" data-id="' + n.id + '" data-url="' + escapeHtml(n.url || '') + '" onclick="markNotificationRead(\'' + n.id + '\', this)" onkeydown="if(event.key===\'Enter\') this.click()">' +
                 '<div class="notif-item-icon ' + icon.cls + '">' + icon.svg + '</div>' +
                 '<div class="notif-item-content">' +
                     '<div class="notif-msg">' + escapeHtml(n.message) + '</div>' +
@@ -108,14 +108,14 @@
     function escapeHtml(text) {
         const d = document.createElement('div');
         d.textContent = text;
-        return d.innerHTML;
+        return d.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     function fetchNotifications() {
-        fetch('/api/notifications', {
+        return fetch('/api/notifications', {
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
         })
-        .then(r => r.json())
+        .then(r => { if (!r.ok) throw new Error('Notification request failed'); return r.json(); })
         .then(data => renderNotifications(data))
         .catch(() => {
             list.innerHTML = '<div class="notif-empty"><p>Could not load notifications</p></div>';
@@ -146,25 +146,27 @@
 
     // Expose global helpers
     window.markNotificationRead = function(id, el) {
-        if (el) {
-            el.classList.remove('unread');
-            const dot = el.querySelector('.notif-dot');
-            if (dot) dot.style.background = '#e2e8f0';
-        }
-        fetch('/notifications/' + id + '/read', {
+        return fetch('/notifications/' + encodeURIComponent(id) + '/read', {
             method: 'PATCH',
             headers: {
                 'X-CSRF-TOKEN': csrfToken,
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest'
             }
-        }).then(() => {
-            let current = parseInt(badge.textContent) || 0;
-            if (current > 1) {
-                badge.textContent = current - 1;
-            } else {
-                badge.classList.add('hidden');
+        }).then(response => {
+            if (!response.ok) throw new Error('Could not mark notification as read');
+            refreshNavigationBadges();
+            const target = el && el.dataset.url;
+            if (target) {
+                const url = new URL(target, window.location.origin);
+                if (url.origin === window.location.origin) {
+                    window.location.assign(url.href);
+                    return;
+                }
             }
+            return fetchNotifications();
+        }).catch(() => {
+            list.innerHTML = '<div class="notif-empty"><p>Could not update notifications. Please try again.</p></div>';
         });
     };
 
@@ -176,13 +178,12 @@
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest'
             }
-        }).then(() => {
-            badge.classList.add('hidden');
-            document.querySelectorAll('.notif-item.unread').forEach(el => {
-                el.classList.remove('unread');
-                const dot = el.querySelector('.notif-dot');
-                if (dot) dot.style.background = '#e2e8f0';
-            });
+        }).then(response => {
+            if (!response.ok) throw new Error('Could not update notifications');
+            refreshNavigationBadges();
+            return fetchNotifications();
+        }).catch(() => {
+            list.innerHTML = '<div class="notif-empty"><p>Could not update notifications. Please try again.</p></div>';
         });
     };
 })();

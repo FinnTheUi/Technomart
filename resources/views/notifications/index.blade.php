@@ -84,6 +84,9 @@
 
                     {{-- Actions --}}
                     <div class="notif-page-actions">
+                        @if(!empty($data['url']) && str_starts_with($data['url'], url('/').'/'))
+                            <a href="{{ $data['url'] }}" class="btn-sm btn-view">View</a>
+                        @endif
                         @if($isUnread)
                             <form method="POST" action="{{ route('notifications.read', $notification->id) }}" style="margin:0;">
                                 @csrf

@@ -7,6 +7,7 @@ use App\Enums\StockMovementType;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use App\Notifications\SystemEventNotification;
 use App\Services\ActivityLogger;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -44,6 +45,10 @@ class OrderService
 
         ActivityLogger::log('placed_order', $tenant->name.' ordered '.$quantity.'x "'.$product->name.'"', $order, null, $tenant);
 
+        User::where('role', User::ROLE_MANAGER)->where('is_active', true)->each(fn (User $manager) => $manager->notify(
+            new SystemEventNotification('order_placed', $tenant->name.' placed supply order #'.$order->id.'.', route('manager.orders.index'), ['payable_type' => 'order', 'payable_id' => $order->id]),
+        ));
+
         return $order;
     }
 
@@ -63,6 +68,8 @@ class OrderService
         });
 
         ActivityLogger::log('cancelled_order', ($actor?->name ?? 'System').' cancelled order #'.$order->id.': '.$reason, $order, null, $actor);
+
+        $order->user?->notify(new SystemEventNotification('order_cancelled', 'Supply order #'.$order->id.' was cancelled: '.$reason, route('tenant.orders'), ['payable_type' => 'order', 'payable_id' => $order->id]));
     }
 
     public function markDelivered(Order $order, User $admin): void
@@ -77,6 +84,8 @@ class OrderService
             $order->setRawAttributes($locked->getAttributes(), true);
         });
         ActivityLogger::log('delivered_order', $admin->name.' delivered order #'.$order->id, $order, null, $admin);
+
+        $order->user?->notify(new SystemEventNotification('order_delivered', 'Supply order #'.$order->id.' has been delivered.', route('tenant.orders'), ['payable_type' => 'order', 'payable_id' => $order->id]));
     }
 
     /**

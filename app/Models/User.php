@@ -47,6 +47,13 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role === self::ROLE_ADMIN;
     }
 
+    public function canEditPendingSignup(): bool
+    {
+        return ! $this->hasVerifiedEmail()
+            && $this->isTenant()
+            && session('pending_signup_email') === $this->email;
+    }
+
     public function isManager(): bool
     {
         return $this->role === self::ROLE_MANAGER;
