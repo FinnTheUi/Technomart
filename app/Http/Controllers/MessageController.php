@@ -53,10 +53,10 @@ class MessageController extends Controller
         $currentUser = auth()->user();
         if ($currentUser->role === 'tenant') {
             // Tenants can message managers
-            $contactableUsers = User::where('role', 'manager')->get();
+            $contactableUsers = User::where('role', 'manager')->where('is_active', true)->get();
         } elseif ($currentUser->role === 'manager') {
-            // Managers can message tenants and admin
-            $contactableUsers = User::whereIn('role', ['tenant', 'admin'])->get();
+            // Administrators have dashboard-only access and cannot receive messages.
+            $contactableUsers = User::where('role', 'tenant')->where('is_active', true)->get();
         } else {
             // Admin can message everyone
             $contactableUsers = User::where('id', '!=', $userId)->get();
@@ -91,9 +91,9 @@ class MessageController extends Controller
         // Get all users that can be messaged
         $currentUser = auth()->user();
         if ($currentUser->role === 'tenant') {
-            $contactableUsers = User::where('role', 'manager')->get();
+            $contactableUsers = User::where('role', 'manager')->where('is_active', true)->get();
         } elseif ($currentUser->role === 'manager') {
-            $contactableUsers = User::whereIn('role', ['tenant', 'admin'])->get();
+            $contactableUsers = User::where('role', 'tenant')->where('is_active', true)->get();
         } else {
             $contactableUsers = User::where('id', '!=', $userId)->get();
         }
@@ -199,8 +199,7 @@ class MessageController extends Controller
         }
 
         return match ($sender->role) {
-            User::ROLE_ADMIN => true,
-            User::ROLE_MANAGER => $receiver->isAdmin() || $receiver->isTenant(),
+            User::ROLE_MANAGER => $receiver->isTenant(),
             User::ROLE_TENANT => $receiver->isManager(),
             default => false,
         };

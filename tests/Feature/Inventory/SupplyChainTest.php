@@ -20,7 +20,7 @@ class SupplyChainTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User $admin;
+    private User $manager;
 
     private Supplier $supplier;
 
@@ -31,14 +31,14 @@ class SupplyChainTest extends TestCase
         parent::setUp();
 
         Notification::fake();
-        $this->admin = User::factory()->create(['role' => 'admin']);
+        $this->manager = User::factory()->create(['role' => 'manager']);
         $this->supplier = Supplier::create(['name' => 'Pepsi Distributor']);
         $this->product = Product::create(['name' => 'Cola', 'price' => 20, 'stock' => 4, 'reorder_level' => 10, 'is_active' => true, 'supplier_id' => $this->supplier->id]);
     }
 
     private function createPurchaseOrder(): PurchaseOrder
     {
-        $this->actingAs($this->admin)->post('/admin/purchase-orders', [
+        $this->actingAs($this->manager)->post('/manager/purchase-orders', [
             'supplier_id' => $this->supplier->id,
             'items' => [
                 ['product_id' => $this->product->id, 'quantity' => 24, 'unit_cost' => 12.5],
@@ -63,14 +63,14 @@ class SupplyChainTest extends TestCase
     {
         $po = $this->createPurchaseOrder();
 
-        $this->actingAs($this->admin)->patch("/admin/purchase-orders/{$po->id}/ordered")->assertSessionHas('success');
-        $this->actingAs($this->admin)->patch("/admin/purchase-orders/{$po->id}/receive")->assertSessionHas('success');
+        $this->actingAs($this->manager)->patch("/manager/purchase-orders/{$po->id}/ordered")->assertSessionHas('success');
+        $this->actingAs($this->manager)->patch("/manager/purchase-orders/{$po->id}/receive")->assertSessionHas('success');
 
         $this->assertSame(28, $this->product->fresh()->stock);
         $this->assertSame(PurchaseOrderStatus::Received, $po->fresh()->status);
         $this->assertTrue(StockMovement::where('type', StockMovementType::Purchase)->where('quantity', 24)->exists());
 
-        $this->actingAs($this->admin)->patch("/admin/purchase-orders/{$po->id}/receive")->assertSessionHas('error');
+        $this->actingAs($this->manager)->patch("/manager/purchase-orders/{$po->id}/receive")->assertSessionHas('error');
         $this->assertSame(28, $this->product->fresh()->stock);
     }
 
@@ -78,15 +78,15 @@ class SupplyChainTest extends TestCase
     {
         $po = $this->createPurchaseOrder();
 
-        $this->actingAs($this->admin)->patch("/admin/purchase-orders/{$po->id}/cancel");
-        $this->actingAs($this->admin)->patch("/admin/purchase-orders/{$po->id}/receive")->assertSessionHas('error');
+        $this->actingAs($this->manager)->patch("/manager/purchase-orders/{$po->id}/cancel");
+        $this->actingAs($this->manager)->patch("/manager/purchase-orders/{$po->id}/receive")->assertSessionHas('error');
 
         $this->assertSame(4, $this->product->fresh()->stock);
     }
 
     public function test_physical_count_records_an_adjustment(): void
     {
-        $this->actingAs($this->admin)->post('/admin/inventory/adjust', [
+        $this->actingAs($this->manager)->post('/manager/inventory/adjust', [
             'product_id' => $this->product->id, 'counted_stock' => 2, 'note' => '2 damaged',
         ])->assertSessionHas('success');
 
@@ -98,21 +98,21 @@ class SupplyChainTest extends TestCase
 
     public function test_editing_stock_on_the_product_form_is_recorded_in_the_ledger(): void
     {
-        $this->actingAs($this->admin)->put("/admin/products/{$this->product->id}", [
+        $this->actingAs($this->manager)->put("/manager/products/{$this->product->id}", [
             'name' => 'Cola', 'price' => 20, 'stock' => 15, 'reorder_level' => 10,
-        ])->assertRedirect(route('admin.products'));
+        ])->assertRedirect(route('manager.products'));
 
         $this->assertSame(15, $this->product->fresh()->stock);
         $this->assertTrue(StockMovement::where('type', StockMovementType::Adjustment)->where('quantity', 11)->exists());
     }
 
-    public function test_low_stock_digest_is_sent_to_admins(): void
+    public function test_low_stock_digest_is_sent_to_managers(): void
     {
         Product::create(['name' => 'Plenty', 'price' => 5, 'stock' => 100, 'reorder_level' => 10, 'is_active' => true]);
 
         $this->artisan('inventory:check-low-stock')->assertSuccessful();
 
-        Notification::assertSentTo($this->admin, LowStockNotification::class,
+        Notification::assertSentTo($this->manager, LowStockNotification::class,
             fn ($n) => $n->products->pluck('name')->all() === ['Cola']);
     }
 
@@ -120,7 +120,7 @@ class SupplyChainTest extends TestCase
     {
         $this->createPurchaseOrder();
 
-        $this->actingAs($this->admin)->delete("/admin/suppliers/{$this->supplier->id}")->assertSessionHas('error');
+        $this->actingAs($this->manager)->delete("/manager/suppliers/{$this->supplier->id}")->assertSessionHas('error');
         $this->assertModelExists($this->supplier);
     }
 
@@ -138,12 +138,12 @@ class SupplyChainTest extends TestCase
         $this->assertEquals(60.0, $today['sales_value']);
     }
 
-    public function test_admin_pages_render(): void
+    public function test_manager_pages_render(): void
     {
         $po = $this->createPurchaseOrder();
 
-        foreach (['/admin/products', '/admin/inventory', '/admin/suppliers', '/admin/purchase-orders', "/admin/purchase-orders/{$po->id}", '/admin/orders', '/admin/dashboard'] as $url) {
-            $this->actingAs($this->admin)->get($url)->assertOk();
+        foreach (['/manager/products', '/manager/inventory', '/manager/suppliers', '/manager/purchase-orders', "/manager/purchase-orders/{$po->id}", '/manager/orders', '/manager/dashboard'] as $url) {
+            $this->actingAs($this->manager)->get($url)->assertOk();
         }
     }
 }

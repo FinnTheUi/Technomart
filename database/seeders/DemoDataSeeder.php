@@ -57,7 +57,7 @@ class DemoDataSeeder extends Seeder
                 ]);
 
                 for ($month = 9; $month >= 0; $month--) {
-                    $due = today()->subMonths($month)->startOfMonth()->addDays(4);
+                    $due = today()->startOfMonth()->subMonths($month)->addDays(4);
                     $late = ($index === 1 && $month % 2 === 0) || ($index === 2 && $month >= 4);
                     $overdue = $month === 0 && $index === 2;
                     Payment::updateOrCreate(

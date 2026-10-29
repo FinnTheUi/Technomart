@@ -12,17 +12,17 @@ class AdminLocationManagementTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User $admin;
+    private User $manager;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        $this->manager = User::factory()->create(['role' => 'manager', 'is_active' => true]);
     }
 
-    public function test_admin_can_create_a_location(): void
+    public function test_manager_can_create_a_location(): void
     {
-        $response = $this->actingAs($this->admin)->post('/admin/locations', [
+        $response = $this->actingAs($this->manager)->post('/manager/locations', [
             'name' => 'Market Branch A',
             'address' => '123 Main Street',
             'description' => 'Main market branch',
@@ -32,20 +32,20 @@ class AdminLocationManagementTest extends TestCase
         $this->assertDatabaseHas('locations', ['name' => 'Market Branch A']);
     }
 
-    public function test_admin_can_delete_a_location(): void
+    public function test_manager_can_delete_a_location(): void
     {
         $location = Location::create([
             'name' => 'To Delete',
             'address' => '456 Street',
         ]);
 
-        $response = $this->actingAs($this->admin)->delete("/admin/locations/{$location->id}");
+        $response = $this->actingAs($this->manager)->delete("/manager/locations/{$location->id}");
 
         $response->assertSessionHas('success');
         $this->assertDatabaseMissing('locations', ['id' => $location->id]);
     }
 
-    public function test_admin_cannot_delete_location_with_assigned_stalls(): void
+    public function test_manager_cannot_delete_location_with_assigned_stalls(): void
     {
         $manager = User::factory()->create(['role' => 'manager', 'is_active' => true]);
         $location = Location::create([
@@ -60,15 +60,15 @@ class AdminLocationManagementTest extends TestCase
             'location_id' => $location->id,
         ]);
 
-        $response = $this->actingAs($this->admin)->delete("/admin/locations/{$location->id}");
+        $response = $this->actingAs($this->manager)->delete("/manager/locations/{$location->id}");
 
         $response->assertSessionHas('error', 'Cannot delete a location that has stalls assigned to it.');
         $this->assertDatabaseHas('locations', ['id' => $location->id]);
     }
 
-    public function test_admin_cannot_create_location_with_missing_name(): void
+    public function test_manager_cannot_create_location_with_missing_name(): void
     {
-        $response = $this->actingAs($this->admin)->post('/admin/locations', [
+        $response = $this->actingAs($this->manager)->post('/manager/locations', [
             'address' => 'Some Address',
         ]);
 

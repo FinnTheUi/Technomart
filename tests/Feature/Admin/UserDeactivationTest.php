@@ -16,14 +16,14 @@ class UserDeactivationTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User $admin;
+    private User $manager;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         Notification::fake();
-        $this->admin = User::factory()->create(['role' => 'admin']);
+        $this->manager = User::factory()->create(['role' => 'manager']);
     }
 
     public function test_user_with_billing_history_is_deactivated_not_deleted(): void
@@ -34,7 +34,7 @@ class UserDeactivationTest extends TestCase
         $contract = Contract::create(['tenant_id' => $tenant->id, 'stall_id' => $stall->id, 'start_date' => today(), 'end_date' => today()->addYear(), 'status' => 'active']);
         $payment = Payment::create(['tenant_id' => $tenant->id, 'manager_id' => $manager->id, 'stall_id' => $stall->id, 'amount' => 1000, 'due_date' => today()->subMonth(), 'status' => 'paid']);
 
-        $this->actingAs($this->admin)->delete("/admin/users/{$tenant->id}")
+        $this->actingAs($this->manager)->delete("/manager/users/{$tenant->id}")
             ->assertSessionHas('success', fn ($message) => str_contains($message, 'deactivated instead of deleted'));
 
         $this->assertModelExists($tenant);
@@ -56,19 +56,19 @@ class UserDeactivationTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_admin_can_reactivate_a_user(): void
+    public function test_manager_can_reactivate_a_user(): void
     {
         $tenant = User::factory()->create(['role' => 'tenant', 'is_active' => false]);
 
-        $this->actingAs($this->admin)->patch("/admin/users/{$tenant->id}/active")->assertSessionHas('success');
+        $this->actingAs($this->manager)->patch("/manager/users/{$tenant->id}/active")->assertSessionHas('success');
 
         $this->assertTrue($tenant->fresh()->is_active);
     }
 
-    public function test_admin_cannot_deactivate_themselves(): void
+    public function test_manager_cannot_deactivate_themselves(): void
     {
-        $this->actingAs($this->admin)->patch("/admin/users/{$this->admin->id}/active")->assertSessionHas('error');
+        $this->actingAs($this->manager)->patch("/manager/users/{$this->manager->id}/active")->assertSessionHas('error');
 
-        $this->assertTrue($this->admin->fresh()->is_active);
+        $this->assertTrue($this->manager->fresh()->is_active);
     }
 }

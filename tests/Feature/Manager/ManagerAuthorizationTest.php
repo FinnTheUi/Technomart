@@ -162,14 +162,14 @@ class ManagerAuthorizationTest extends TestCase
         $this->actingAs($this->manager)->get("/tenant/contracts/{$contract->id}/pdf")->assertForbidden();
     }
 
-    public function test_admin_cannot_change_own_role(): void
+    public function test_manager_cannot_change_own_role(): void
     {
-        $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        $manager = User::factory()->create(['role' => 'manager', 'is_active' => true]);
 
-        $this->actingAs($admin)
-            ->patch("/admin/users/{$admin->id}/role", ['role' => 'tenant'])
+        $this->actingAs($manager)
+            ->patch("/manager/users/{$manager->id}/role", ['role' => 'tenant'])
             ->assertSessionHas('error');
 
-        $this->assertSame('admin', $admin->fresh()->role);
+        $this->assertSame('manager', $manager->fresh()->role);
     }
 }

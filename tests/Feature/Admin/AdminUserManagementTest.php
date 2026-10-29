@@ -13,20 +13,20 @@ class AdminUserManagementTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User $admin;
+    private User $manager;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        $this->manager = User::factory()->create(['role' => 'manager', 'is_active' => true]);
     }
 
-    public function test_admin_can_view_users_list(): void
+    public function test_manager_can_view_users_list(): void
     {
         User::factory()->create(['role' => 'tenant', 'is_active' => true]);
         User::factory()->create(['role' => 'manager', 'is_active' => true]);
 
-        $response = $this->actingAs($this->admin)->get('/admin/users');
+        $response = $this->actingAs($this->manager)->get('/manager/users');
 
         $response->assertStatus(200);
     }
@@ -40,22 +40,22 @@ class AdminUserManagementTest extends TestCase
             ]);
         }
 
-        $this->actingAs($this->admin)->get('/admin/users')
+        $this->actingAs($this->manager)->get('/manager/users')
             ->assertOk()
             ->assertSee('Showing 1')
             ->assertDontSee('Tenant 10');
 
-        $this->actingAs($this->admin)->get('/admin/users?page=2')
+        $this->actingAs($this->manager)->get('/manager/users?page=2')
             ->assertOk()
             ->assertSee('Tenant 10')
             ->assertDontSee('Tenant 01');
     }
 
-    public function test_admin_can_update_user_role(): void
+    public function test_manager_can_update_user_role(): void
     {
         $tenant = User::factory()->create(['role' => 'tenant', 'is_active' => true]);
 
-        $response = $this->actingAs($this->admin)->patch("/admin/users/{$tenant->id}/role", [
+        $response = $this->actingAs($this->manager)->patch("/manager/users/{$tenant->id}/role", [
             'role' => 'manager',
         ]);
 
@@ -66,16 +66,16 @@ class AdminUserManagementTest extends TestCase
         ]);
     }
 
-    public function test_admin_can_create_a_manager(): void
+    public function test_manager_can_create_a_manager(): void
     {
-        $response = $this->actingAs($this->admin)->post('/admin/users/manager', [
+        $response = $this->actingAs($this->manager)->post('/manager/users/manager', [
             'name' => 'New Manager',
             'email' => 'manager@gmail.com',
             'password' => 'Password123!',
             'password_confirmation' => 'Password123!',
         ]);
 
-        $response->assertRedirect(route('admin.users'));
+        $response->assertRedirect(route('manager.users'));
         $response->assertSessionHas('success');
         $this->assertDatabaseHas('users', [
             'email' => 'manager@gmail.com',
@@ -83,11 +83,11 @@ class AdminUserManagementTest extends TestCase
         ]);
     }
 
-    public function test_admin_cannot_create_manager_with_duplicate_email(): void
+    public function test_manager_cannot_create_manager_with_duplicate_email(): void
     {
         User::factory()->create(['email' => 'existing@gmail.com']);
 
-        $response = $this->actingAs($this->admin)->post('/admin/users/manager', [
+        $response = $this->actingAs($this->manager)->post('/manager/users/manager', [
             'name' => 'Duplicate',
             'email' => 'existing@gmail.com',
             'password' => 'Password123!',
@@ -97,29 +97,29 @@ class AdminUserManagementTest extends TestCase
         $response->assertSessionHasErrors('email');
     }
 
-    public function test_admin_can_delete_a_user(): void
+    public function test_manager_can_delete_a_user(): void
     {
         $tenant = User::factory()->create(['role' => 'tenant', 'is_active' => true]);
 
-        $response = $this->actingAs($this->admin)->delete("/admin/users/{$tenant->id}");
+        $response = $this->actingAs($this->manager)->delete("/manager/users/{$tenant->id}");
 
         $response->assertSessionHas('success');
         $this->assertDatabaseMissing('users', ['id' => $tenant->id]);
     }
 
-    public function test_admin_cannot_delete_themselves(): void
+    public function test_manager_cannot_delete_themselves(): void
     {
-        $response = $this->actingAs($this->admin)->delete("/admin/users/{$this->admin->id}");
+        $response = $this->actingAs($this->manager)->delete("/manager/users/{$this->manager->id}");
 
         $response->assertSessionHas('error', 'You cannot delete yourself.');
-        $this->assertDatabaseHas('users', ['id' => $this->admin->id]);
+        $this->assertDatabaseHas('users', ['id' => $this->manager->id]);
     }
 
-    public function test_admin_cannot_assign_invalid_role(): void
+    public function test_manager_cannot_assign_invalid_role(): void
     {
         $tenant = User::factory()->create(['role' => 'tenant', 'is_active' => true]);
 
-        $response = $this->actingAs($this->admin)->patch("/admin/users/{$tenant->id}/role", [
+        $response = $this->actingAs($this->manager)->patch("/manager/users/{$tenant->id}/role", [
             'role' => 'superadmin',
         ]);
 
@@ -130,19 +130,19 @@ class AdminUserManagementTest extends TestCase
         ]);
     }
 
-    public function test_admin_can_resend_verification_to_an_active_unverified_user(): void
+    public function test_manager_can_resend_verification_to_an_active_unverified_user(): void
     {
         Notification::fake();
         $tenant = User::factory()->unverified()->create(['role' => 'tenant', 'is_active' => true]);
 
-        $this->actingAs($this->admin)
-            ->post("/admin/users/{$tenant->id}/resend-verification")
+        $this->actingAs($this->manager)
+            ->post("/manager/users/{$tenant->id}/resend-verification")
             ->assertSessionHas('success');
 
         Notification::assertSentTo($tenant, VerifyEmail::class);
     }
 
-    public function test_admin_can_invalidate_another_users_sessions(): void
+    public function test_manager_can_invalidate_another_users_sessions(): void
     {
         $tenant = User::factory()->create(['role' => 'tenant']);
         DB::table('sessions')->insert([
@@ -150,18 +150,18 @@ class AdminUserManagementTest extends TestCase
             'user_agent' => 'Test', 'payload' => 'data', 'last_activity' => now()->timestamp,
         ]);
 
-        $this->actingAs($this->admin)
-            ->delete("/admin/users/{$tenant->id}/sessions")
+        $this->actingAs($this->manager)
+            ->delete("/manager/users/{$tenant->id}/sessions")
             ->assertSessionHas('success');
 
         $this->assertDatabaseMissing('sessions', ['id' => 'tenant-session']);
         $this->assertDatabaseHas('activity_logs', ['action' => 'invalidated_sessions', 'subject_id' => $tenant->id]);
     }
 
-    public function test_admin_cannot_invalidate_their_own_current_session(): void
+    public function test_manager_cannot_invalidate_their_own_current_session(): void
     {
-        $this->actingAs($this->admin)
-            ->delete("/admin/users/{$this->admin->id}/sessions")
+        $this->actingAs($this->manager)
+            ->delete("/manager/users/{$this->manager->id}/sessions")
             ->assertSessionHas('error');
     }
 }

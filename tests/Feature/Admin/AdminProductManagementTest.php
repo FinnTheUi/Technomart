@@ -11,24 +11,24 @@ class AdminProductManagementTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User $admin;
+    private User $manager;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        $this->manager = User::factory()->create(['role' => 'manager', 'is_active' => true]);
     }
 
-    public function test_admin_can_view_products_page(): void
+    public function test_manager_can_view_products_page(): void
     {
-        $response = $this->actingAs($this->admin)->get('/admin/products');
+        $response = $this->actingAs($this->manager)->get('/manager/products');
 
         $response->assertStatus(200);
     }
 
     public function test_product_form_does_not_show_supplier_field(): void
     {
-        $this->actingAs($this->admin)->get('/admin/products/create')
+        $this->actingAs($this->manager)->get('/manager/products/create')
             ->assertOk()
             ->assertDontSee('name="supplier_id"', false)
             ->assertDontSee('>Supplier</label>', false);
@@ -45,7 +45,7 @@ class AdminProductManagementTest extends TestCase
             ]);
         }
 
-        $response = $this->actingAs($this->admin)->get('/admin/products');
+        $response = $this->actingAs($this->manager)->get('/manager/products');
 
         $response->assertOk()
             ->assertSee('STOCK INVENTORY')
@@ -55,9 +55,9 @@ class AdminProductManagementTest extends TestCase
             ->assertSee('Showing 1');
     }
 
-    public function test_admin_can_create_a_product(): void
+    public function test_manager_can_create_a_product(): void
     {
-        $response = $this->actingAs($this->admin)->post('/admin/products', [
+        $response = $this->actingAs($this->manager)->post('/manager/products', [
             'name' => 'Test Product',
             'description' => 'A test product',
             'price' => 150.00,
@@ -65,14 +65,14 @@ class AdminProductManagementTest extends TestCase
             'category' => 'Supplies',
         ]);
 
-        $response->assertRedirect(route('admin.products'));
+        $response->assertRedirect(route('manager.products'));
         $response->assertSessionHas('success');
         $this->assertDatabaseHas('products', ['name' => 'Test Product', 'price' => 150.00]);
     }
 
-    public function test_admin_cannot_create_product_with_missing_name(): void
+    public function test_manager_cannot_create_product_with_missing_name(): void
     {
-        $response = $this->actingAs($this->admin)->post('/admin/products', [
+        $response = $this->actingAs($this->manager)->post('/manager/products', [
             'price' => 100.00,
             'stock' => 10,
         ]);
@@ -80,9 +80,9 @@ class AdminProductManagementTest extends TestCase
         $response->assertSessionHasErrors('name');
     }
 
-    public function test_admin_cannot_create_product_with_negative_price(): void
+    public function test_manager_cannot_create_product_with_negative_price(): void
     {
-        $response = $this->actingAs($this->admin)->post('/admin/products', [
+        $response = $this->actingAs($this->manager)->post('/manager/products', [
             'name' => 'Bad Product',
             'price' => -50.00,
             'stock' => 10,
@@ -91,7 +91,7 @@ class AdminProductManagementTest extends TestCase
         $response->assertSessionHasErrors('price');
     }
 
-    public function test_admin_can_update_a_product(): void
+    public function test_manager_can_update_a_product(): void
     {
         $product = Product::create([
             'name' => 'Old Name',
@@ -100,13 +100,13 @@ class AdminProductManagementTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->actingAs($this->admin)->put("/admin/products/{$product->id}", [
+        $response = $this->actingAs($this->manager)->put("/manager/products/{$product->id}", [
             'name' => 'Updated Name',
             'price' => 200,
             'stock' => 25,
         ]);
 
-        $response->assertRedirect(route('admin.products'));
+        $response->assertRedirect(route('manager.products'));
         $this->assertDatabaseHas('products', [
             'id' => $product->id,
             'name' => 'Updated Name',
@@ -114,7 +114,7 @@ class AdminProductManagementTest extends TestCase
         ]);
     }
 
-    public function test_admin_can_delete_a_product(): void
+    public function test_manager_can_delete_a_product(): void
     {
         $product = Product::create([
             'name' => 'To Delete',
@@ -123,9 +123,9 @@ class AdminProductManagementTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->actingAs($this->admin)->delete("/admin/products/{$product->id}");
+        $response = $this->actingAs($this->manager)->delete("/manager/products/{$product->id}");
 
-        $response->assertRedirect(route('admin.products'));
+        $response->assertRedirect(route('manager.products'));
         $this->assertDatabaseMissing('products', ['id' => $product->id]);
     }
 }

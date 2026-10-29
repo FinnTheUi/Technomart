@@ -54,12 +54,20 @@ class FrontendExperienceTest extends TestCase
         }
     }
 
+    public function test_templates_do_not_emit_byte_order_marks(): void
+    {
+        foreach (File::allFiles(resource_path('views')) as $file) {
+            $this->assertFalse(str_starts_with(File::get($file->getPathname()), "\xEF\xBB\xBF"), $file->getRelativePathname());
+        }
+    }
+
     public function test_admin_navigation_matches_the_requested_modules(): void
     {
         $sidebar = File::get(resource_path('views/partials/admin-sidebar.blade.php'));
 
         $this->assertStringContainsString("route('profile.edit')", $sidebar);
-        $this->assertStringContainsString('>Profile</a>', $sidebar);
+        $this->assertStringContainsString("route('admin.dashboard')", $sidebar);
+        $this->assertStringNotContainsString("route('manager.products')", $sidebar);
         $this->assertStringNotContainsString("route('admin.system-health')", $sidebar);
         $this->assertStringNotContainsString("route('admin.suppliers.index')", $sidebar);
         $this->assertStringNotContainsString("route('admin.purchase-orders.index')", $sidebar);

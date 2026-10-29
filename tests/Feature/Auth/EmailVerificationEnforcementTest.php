@@ -81,12 +81,12 @@ class EmailVerificationEnforcementTest extends TestCase
         Notification::assertSentTo($tenant, VerifyEmail::class);
     }
 
-    public function test_manager_created_by_admin_receives_a_verification_email(): void
+    public function test_manager_created_by_manager_receives_a_verification_email(): void
     {
         Notification::fake();
-        $admin = User::factory()->create(['role' => 'admin']);
+        $manager = User::factory()->create(['role' => 'manager']);
 
-        $this->actingAs($admin)->post('/admin/users/manager', [
+        $this->actingAs($manager)->post('/manager/users/manager', [
             'name' => 'Manny', 'email' => 'manny@gmail.com', 'password' => 'password123', 'password_confirmation' => 'password123',
         ]);
 

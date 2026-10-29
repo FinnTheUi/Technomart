@@ -21,12 +21,12 @@ class BackendHardeningTest extends TestCase
 
     public function test_audit_entries_capture_request_context_without_secrets(): void
     {
-        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $manager = User::factory()->create(['role' => User::ROLE_MANAGER]);
 
-        $this->actingAs($admin)->withHeaders([
+        $this->actingAs($manager)->withHeaders([
             'X-Request-ID' => '7906b270-e6b2-4bea-8492-0dba953196dd',
             'User-Agent' => 'BackendHardeningTest/1.0',
-        ])->post('/admin/locations', ['name' => 'Audited Location'])->assertRedirect();
+        ])->post('/manager/locations', ['name' => 'Audited Location'])->assertRedirect();
 
         $log = ActivityLog::latest()->firstOrFail();
         $this->assertSame('7906b270-e6b2-4bea-8492-0dba953196dd', $log->request_id);

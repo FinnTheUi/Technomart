@@ -10,6 +10,19 @@ class MessagingAuthorizationTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_manager_contacts_exclude_dashboard_only_admins_and_inactive_users(): void
+    {
+        $manager = User::factory()->create(['role' => 'manager']);
+        $admin = User::factory()->create(['role' => 'admin']);
+        $inactive = User::factory()->create(['role' => 'tenant', 'is_active' => false]);
+        $tenant = User::factory()->create(['role' => 'tenant']);
+
+        $this->actingAs($manager)->get('/messages')->assertOk()
+            ->assertViewHas('contactableUsers', fn ($users) => $users->modelKeys() === [$tenant->id]);
+        $this->post('/messages', ['receiver_id' => $admin->id, 'message' => 'Blocked'])->assertForbidden();
+        $this->post('/messages', ['receiver_id' => $inactive->id, 'message' => 'Blocked'])->assertForbidden();
+    }
+
     public function test_tenant_cannot_message_or_open_another_tenant_conversation(): void
     {
         $tenant = User::factory()->create(['role' => 'tenant']);

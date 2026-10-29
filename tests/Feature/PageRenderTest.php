@@ -37,6 +37,30 @@ class PageRenderTest extends TestCase
 
     private RentalApplication $application;
 
+    private array $checkedLinks = [];
+
+    private function assertPageAndLinks(string $url): void
+    {
+        $response = $this->get($url)->assertOk();
+        $this->assertFalse(str_starts_with($response->getContent(), "\xEF\xBB\xBF"), $url.' starts with a byte-order mark');
+        preg_match_all('/<a\b[^>]*\bhref="([^"]+)"/i', $response->getContent(), $matches);
+        foreach (array_unique($matches[1]) as $href) {
+            $href = html_entity_decode($href, ENT_QUOTES | ENT_HTML5);
+            $parts = parse_url($href);
+            if (! $parts || ! isset($parts['path']) || ! str_starts_with($parts['path'], '/')
+                || (isset($parts['host']) && $parts['host'] !== parse_url(config('app.url'), PHP_URL_HOST))) {
+                continue;
+            }
+            $key = auth()->id().':'.$href;
+            if (isset($this->checkedLinks[$key])) {
+                continue;
+            }
+            $this->checkedLinks[$key] = true;
+            $result = $this->get($href);
+            $this->assertLessThan(400, $result->getStatusCode(), $url.' links to failing URL '.$href);
+        }
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -93,7 +117,7 @@ class PageRenderTest extends TestCase
     public function test_public_pages_render(): void
     {
         foreach (['/', '/stalls', '/login', '/privacy', '/terms'] as $url) {
-            $this->get($url)->assertOk();
+            $this->assertPageAndLinks($url);
         }
 
         $this->get($this->application->signedUrl('rental.success'))->assertOk()->assertSee('Payment Submitted!');
@@ -105,7 +129,8 @@ class PageRenderTest extends TestCase
             '/tenant/maintenance', "/tenant/maintenance/{$this->maintenance->id}", '/tenant/contracts',
             "/tenant/contracts/{$this->contract->id}", "/tenant/contracts/{$this->contract->id}/pdf",
             '/messages', '/notifications', '/profile'] as $url) {
-            $this->actingAs($this->tenant)->get($url)->assertOk();
+            $this->actingAs($this->tenant);
+            $this->assertPageAndLinks($url);
         }
 
         $this->actingAs($this->tenant)->get('/tenant/bills')
@@ -117,8 +142,12 @@ class PageRenderTest extends TestCase
     public function test_manager_pages_render(): void
     {
         foreach (['/manager/dashboard', '/manager/stalls', '/manager/floor-plan', '/manager/payments',
-            '/manager/electric-bills', '/manager/rental-applications', '/manager/contracts', '/manager/inbox'] as $url) {
-            $this->actingAs($this->manager)->get($url)->assertOk();
+            '/manager/electric-bills', '/manager/rental-applications', '/manager/contracts', '/manager/inbox',
+            '/manager/users', '/manager/products', '/manager/products/create', '/manager/orders',
+            '/manager/inventory', '/manager/suppliers', '/manager/purchase-orders', '/manager/audit-log',
+            '/manager/locations', '/manager/reports', '/manager/system-health'] as $url) {
+            $this->actingAs($this->manager);
+            $this->assertPageAndLinks($url);
         }
 
         $this->actingAs($this->manager)->get('/manager/payments')->assertSee('Verify')->assertSee('Record cash');
@@ -128,9 +157,9 @@ class PageRenderTest extends TestCase
 
     public function test_admin_pages_render(): void
     {
-        foreach (['/admin/dashboard', '/admin/users', '/admin/products', '/admin/products/create', '/admin/orders',
-            '/admin/inventory', '/admin/suppliers', '/admin/purchase-orders', '/admin/audit-log', '/admin/locations'] as $url) {
-            $this->actingAs($this->admin)->get($url)->assertOk();
+        foreach (['/admin/dashboard', '/profile'] as $url) {
+            $this->actingAs($this->admin);
+            $this->assertPageAndLinks($url);
         }
     }
 }

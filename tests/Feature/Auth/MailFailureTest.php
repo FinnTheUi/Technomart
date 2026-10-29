@@ -73,11 +73,11 @@ class MailFailureTest extends TestCase
             ->assertSessionHasErrors(['email' => SafeMail::FAILURE_MESSAGE]);
     }
 
-    public function test_admin_can_still_create_a_manager(): void
+    public function test_manager_can_still_create_a_manager(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $manager = User::factory()->create(['role' => 'manager']);
 
-        $this->actingAs($admin)->post('/admin/users/manager', [
+        $this->actingAs($manager)->post('/manager/users/manager', [
             'name' => 'Manny', 'email' => 'manny@gmail.com', 'password' => 'password123', 'password_confirmation' => 'password123',
         ])->assertSessionHas('success', fn ($m) => str_contains($m, 'could not be sent'));
 

@@ -21,7 +21,7 @@ class OrderFlowTest extends TestCase
 
     private User $tenant;
 
-    private User $admin;
+    private User $manager;
 
     private Product $product;
 
@@ -31,7 +31,7 @@ class OrderFlowTest extends TestCase
 
         Notification::fake();
         $this->tenant = User::factory()->create(['role' => 'tenant']);
-        $this->admin = User::factory()->create(['role' => 'admin']);
+        $this->manager = User::factory()->create(['role' => 'manager']);
         $this->product = Product::create(['name' => 'Cola', 'price' => 20, 'stock' => 10, 'is_active' => true]);
     }
 
@@ -90,30 +90,30 @@ class OrderFlowTest extends TestCase
         $this->actingAs(User::factory()->create(['role' => 'tenant']))->patch("/tenant/orders/{$order->id}/cancel")->assertForbidden();
     }
 
-    public function test_admin_verifies_payment_then_delivers(): void
+    public function test_manager_verifies_payment_then_delivers(): void
     {
         $order = $this->order();
         $this->actingAs($this->tenant)->patch("/billing/order/{$order->id}/submit", ['reference_number' => '1234567890123']);
 
-        $this->actingAs($this->admin)->patch("/billing/order/{$order->id}/verify")->assertSessionHas('success');
+        $this->actingAs($this->manager)->patch("/billing/order/{$order->id}/verify")->assertSessionHas('success');
         $order->refresh();
         $this->assertSame(OrderStatus::Paid, $order->status);
         $this->assertNotNull($order->receipt_number);
         $this->assertFalse($order->status->isCancellable());
 
-        $this->actingAs($this->admin)->patch("/admin/orders/{$order->id}/deliver")->assertSessionHas('success');
+        $this->actingAs($this->manager)->patch("/manager/orders/{$order->id}/deliver")->assertSessionHas('success');
         $this->assertSame(OrderStatus::Delivered, $order->fresh()->status);
     }
 
-    public function test_managers_cannot_verify_supply_orders(): void
+    public function test_admins_cannot_verify_supply_orders(): void
     {
         $order = $this->order();
         $this->actingAs($this->tenant)->patch("/billing/order/{$order->id}/submit", ['reference_number' => '1234567890123']);
 
-        $this->actingAs(User::factory()->create(['role' => 'manager']))->patch("/billing/order/{$order->id}/verify")->assertForbidden();
+        $this->actingAs(User::factory()->create(['role' => 'admin']))->patch("/billing/order/{$order->id}/verify")->assertForbidden();
     }
 
-    public function test_admin_orders_are_paginated_ten_per_page(): void
+    public function test_manager_orders_are_paginated_ten_per_page(): void
     {
         foreach (range(1, 11) as $number) {
             Order::create([
@@ -125,7 +125,7 @@ class OrderFlowTest extends TestCase
             ]);
         }
 
-        $this->actingAs($this->admin)->get('/admin/orders?status=pending')
+        $this->actingAs($this->manager)->get('/manager/orders?status=pending')
             ->assertOk()
             ->assertViewHas('orders', fn (LengthAwarePaginator $orders) => $orders->count() === 10
                 && $orders->total() === 11
@@ -133,7 +133,7 @@ class OrderFlowTest extends TestCase
             ->assertSee('Showing 1')
             ->assertSee('status=pending&amp;page=2', false);
 
-        $this->actingAs($this->admin)->get('/admin/orders?status=pending&page=2')
+        $this->actingAs($this->manager)->get('/manager/orders?status=pending&page=2')
             ->assertOk()
             ->assertViewHas('orders', fn (LengthAwarePaginator $orders) => $orders->count() === 1
                 && $orders->total() === 11
@@ -158,8 +158,8 @@ class OrderFlowTest extends TestCase
     {
         $this->order(1); // pending
         $paid = $this->order(2);
-        $this->actingAs($this->admin)->patch("/billing/order/{$paid->id}/record-cash");
+        $this->actingAs($this->manager)->patch("/billing/order/{$paid->id}/record-cash");
 
-        $this->actingAs($this->admin)->get('/admin/dashboard')->assertOk()->assertViewHas('totalRevenue', 40);
+        $this->actingAs(User::factory()->create(['role' => 'admin']))->get('/admin/dashboard')->assertOk()->assertViewHas('totalRevenue', 40);
     }
 }
