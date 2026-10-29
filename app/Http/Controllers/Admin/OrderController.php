@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\Inventory\OrderService;
+use App\Services\NavigationBadgeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -19,9 +20,10 @@ class OrderController extends Controller
 {
     public function __construct(private readonly OrderService $orders) {}
 
-    public function index(Request $request): View
+    public function index(Request $request, NavigationBadgeService $badges): View
     {
         $request->validate(['status' => ['nullable', Rule::enum(OrderStatus::class)]]);
+        $badges->markPayableRead($request->user(), 'order');
 
         return view('admin.orders', [
             'orders' => Order::with(['user', 'product'])
@@ -42,7 +44,7 @@ class OrderController extends Controller
 
     public function cancel(Request $request, Order $order): RedirectResponse
     {
-        return $this->attempt(fn () => $this->orders->cancel($order, $request->user(), 'Cancelled by administrator'), 'Order cancelled and stock returned.');
+        return $this->attempt(fn () => $this->orders->cancel($order, $request->user(), 'Cancelled by manager'), 'Order cancelled and stock returned.');
     }
 
     private function attempt(callable $action, string $success): RedirectResponse
@@ -56,3 +58,4 @@ class OrderController extends Controller
         return back()->with('success', $success);
     }
 }
+

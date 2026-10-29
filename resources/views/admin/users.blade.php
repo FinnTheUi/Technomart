@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Manage Users — Technomart</title>
+    <title>Manage Users â€” Technomart</title>
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>
         .badge-admin{background:#f5f3ff;color:#7c3aed}
@@ -26,7 +26,7 @@
     @vite('resources/js/app.js')
 </head>
 <body>
-    @include('partials.admin-sidebar', ['active' => 'users'])
+    @include('partials.manager-sidebar', ['active' => 'users'])
 
     <div class="main">
         <div class="page-header">
@@ -48,7 +48,7 @@
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                 Create Manager Account
             </div>
-            <form method="POST" action="{{ route('admin.users.storeManager') }}">
+            <form method="POST" action="{{ route('manager.users.storeManager') }}">
                 @csrf
                 <div class="form-row-inline">
                     <div class="form-group">
@@ -91,7 +91,7 @@
                             @unless($user->hasVerifiedEmail())<div style="font-size:11px;color:#94a3b8;">email unverified</div>@endunless
                         </td>
                         <td>
-                            <form method="POST" action="{{ route('admin.users.updateRole', $user) }}" class="actions-cell" id="role-form-{{ $user->id }}">
+                            <form method="POST" action="{{ route('manager.users.updateRole', $user) }}" class="actions-cell" id="role-form-{{ $user->id }}">
                                 @csrf @method('PATCH')
                                 <select name="role" class="role-select">
                                     <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin</option>
@@ -105,20 +105,20 @@
                             @if($user->id !== auth()->id())
                             <div style="display:flex;gap:6px;">
                             @unless($user->hasVerifiedEmail())
-                            <form method="POST" action="{{ route('admin.users.resendVerification', $user) }}">
+                            <form method="POST" action="{{ route('manager.users.resendVerification', $user) }}">
                                 @csrf
                                 <button type="submit" class="btn-save">Resend verification</button>
                             </form>
                             @endunless
-                            <form method="POST" action="{{ route('admin.users.toggleActive', $user) }}" onsubmit="return confirm('{{ $user->is_active ? 'Deactivate' : 'Reactivate' }} {{ $user->name }}?{{ $user->is_active ? ' Active leases will be terminated.' : '' }}');">
+                            <form method="POST" action="{{ route('manager.users.toggleActive', $user) }}" onsubmit="return confirm('{{ $user->is_active ? 'Deactivate' : 'Reactivate' }} {{ $user->name }}?{{ $user->is_active ? ' Active leases will be terminated.' : '' }}');">
                                 @csrf @method('PATCH')
                                 <button type="submit" class="btn-save">{{ $user->is_active ? 'Deactivate' : 'Activate' }}</button>
                             </form>
-                            <form method="POST" action="{{ route('admin.users.invalidateSessions', $user) }}" onsubmit="return confirm('Sign {{ $user->name }} out on all devices?');">
+                            <form method="POST" action="{{ route('manager.users.invalidateSessions', $user) }}" onsubmit="return confirm('Sign {{ $user->name }} out on all devices?');">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn-save">Sign out devices</button>
                             </form>
-                            <form method="POST" action="{{ route('admin.users.delete', $user) }}" onsubmit="return confirm('Delete {{ $user->name }}? Accounts with billing or lease history are deactivated instead, so records are kept.');">
+                            <form method="POST" action="{{ route('manager.users.delete', $user) }}" onsubmit="return confirm('Delete {{ $user->name }}? Accounts with billing or lease history are deactivated instead, so records are kept.');">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn-delete">Delete</button>
                             </form>
@@ -136,3 +136,4 @@
     </div>
 </body>
 </html>
+

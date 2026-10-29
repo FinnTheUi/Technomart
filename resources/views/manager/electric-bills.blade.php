@@ -46,16 +46,16 @@
                 <div class="form-row-inline" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                     <div class="form-group">
                         <label class="form-label">Tenant</label>
-                        <select name="tenant_id" class="form-select" required>
+                        <select name="tenant_id" id="tenant_id" class="form-select" required>
                             <option value="">Select tenant...</option>
-                            @foreach($tenants as $t)<option value="{{ $t->id }}">{{ $t->name }}</option>@endforeach
+                            @foreach($tenants as $t)<option value="{{ $t->id }}" {{ old('tenant_id') == $t->id ? 'selected' : '' }}>{{ $t->name }}</option>@endforeach
                         </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Stall</label>
-                        <select name="stall_id" class="form-select" required>
+                        <select name="stall_id" id="stall_id" class="form-select" required>
                             <option value="">Select stall...</option>
-                            @foreach($stalls as $s)<option value="{{ $s->id }}">{{ $s->name }}</option>@endforeach
+                            @foreach($stalls as $s)<option value="{{ $s->id }}" {{ old('stall_id') == $s->id ? 'selected' : '' }}>{{ $s->name }}</option>@endforeach
                         </select>
                     </div>
                     <div class="form-group">
@@ -166,6 +166,20 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const tenantSelect = document.getElementById('tenant_id');
+            const stallSelect = document.getElementById('stall_id');
+            const assignments = @json($tenantStallAssignments);
+            const stallByTenant = new Map(assignments.map(item => [String(item.tenant_id), String(item.stall_id)]));
+            const tenantByStall = new Map(assignments.map(item => [String(item.stall_id), String(item.tenant_id)]));
+
+            tenantSelect.addEventListener('change', function() {
+                stallSelect.value = stallByTenant.get(this.value) || '';
+            });
+
+            stallSelect.addEventListener('change', function() {
+                tenantSelect.value = tenantByStall.get(this.value) || '';
+            });
+
             const prevInput = document.getElementById('prev_read');
             const presInput = document.getElementById('pres_read');
             const rateInput = document.getElementById('rate');

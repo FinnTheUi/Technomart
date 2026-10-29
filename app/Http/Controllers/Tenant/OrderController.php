@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Services\Billing\OnlinePaymentService;
 use App\Services\Inventory\OrderService;
+use App\Services\NavigationBadgeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -30,8 +31,10 @@ class OrderController extends Controller
         ]);
     }
 
-    public function index(Request $request, OnlinePaymentService $online): View
+    public function index(Request $request, OnlinePaymentService $online, NavigationBadgeService $badges): View
     {
+        $badges->markPayableRead($request->user(), 'order');
+
         return view('tenant.orders', [
             'orders' => Order::with(['product', 'latestActivity'])
                 ->where('user_id', $request->user()->id)

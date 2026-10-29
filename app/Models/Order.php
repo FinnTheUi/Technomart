@@ -71,7 +71,7 @@ class Order extends Model implements Payable
 
     public function reviewers(): Collection
     {
-        return User::where('role', User::ROLE_ADMIN)->where('is_active', true)->get();
+        return User::where('role', User::ROLE_MANAGER)->where('is_active', true)->get();
     }
 
     public function canBePaid(): bool

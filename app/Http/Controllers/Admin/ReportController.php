@@ -80,3 +80,4 @@ class ReportController extends Controller
         return [['ID', 'Date', 'Product', 'Movement', 'Quantity', 'Balance After', 'Recorded By', 'Note'], $rows];
     }
 }
+

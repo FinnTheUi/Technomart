@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Supply Orders — Technomart</title>
+    <title>Supply Orders â€” Technomart</title>
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>
         .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
@@ -14,7 +14,7 @@
     @vite('resources/js/app.js')
 </head>
 <body>
-    @include('partials.admin-sidebar', ['active' => 'orders'])
+    @include('partials.manager-sidebar', ['active' => 'orders'])
 
     <div class="main">
         <div class="page-header">
@@ -36,9 +36,9 @@
 
         <div class="panel" id="order-records">
             <div class="filters">
-                <a href="{{ route('admin.orders.index') }}" class="{{ request('status') ? '' : 'active' }}">All</a>
+                <a href="{{ route('manager.orders.index') }}" class="{{ request('status') ? '' : 'active' }}">All</a>
                 @foreach($statuses as $status)
-                    <a href="{{ route('admin.orders.index', ['status' => $status->value]) }}" class="{{ request('status') === $status->value ? 'active' : '' }}">{{ $status->label() }}</a>
+                    <a href="{{ route('manager.orders.index', ['status' => $status->value]) }}" class="{{ request('status') === $status->value ? 'active' : '' }}">{{ $status->label() }}</a>
                 @endforeach
             </div>
 
@@ -52,20 +52,20 @@
                         <td>{{ $order->user->name ?? 'N/A' }}</td>
                         <td>{{ $order->product->name ?? 'N/A' }}</td>
                         <td>{{ $order->quantity }}</td>
-                        <td style="font-weight:600;">₱{{ number_format($order->total_price, 2) }}</td>
+                        <td style="font-weight:600;">â‚±{{ number_format($order->total_price, 2) }}</td>
                         <td style="color:#64748b;">{{ $order->created_at->format('M d, Y') }}</td>
                         <td><x-status-badge :status="$order->status" /></td>
                         <td>@include('partials.billing.review-actions', ['payable' => $order])</td>
                         <td>
                             <div class="action-cell">
                                 @if($order->status === \App\Enums\OrderStatus::Paid)
-                                    <form method="POST" action="{{ route('admin.orders.deliver', $order) }}">
+                                    <form method="POST" action="{{ route('manager.orders.deliver', $order) }}">
                                         @csrf @method('PATCH')
                                         <button type="submit" class="btn-sm btn-approve">Mark delivered</button>
                                     </form>
                                 @endif
                                 @if($order->status->isCancellable())
-                                    <form method="POST" action="{{ route('admin.orders.cancel', $order) }}" onsubmit="return confirm('Cancel order #{{ $order->id }} and return stock?')">
+                                    <form method="POST" action="{{ route('manager.orders.cancel', $order) }}" onsubmit="return confirm('Cancel order #{{ $order->id }} and return stock?')">
                                         @csrf @method('PATCH')
                                         <button type="submit" class="btn-sm btn-reject">Cancel</button>
                                     </form>
@@ -84,3 +84,4 @@
     </div>
 </body>
 </html>
+

@@ -61,3 +61,4 @@ class SystemHealthController extends Controller
         return compact('name', 'ok', 'detail', 'optional');
     }
 }
+

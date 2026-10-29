@@ -2,8 +2,11 @@
 
 namespace App\Http\Requests\Manager;
 
+use App\Enums\ContractStatus;
 use App\Http\Requests\Manager\Concerns\ValidatesManagerScope;
+use App\Models\Contract;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class StoreElectricBillRequest extends FormRequest
 {
@@ -25,6 +28,25 @@ class StoreElectricBillRequest extends FormRequest
             'prepared_by' => 'nullable|string|max:255',
             'noted_by' => 'nullable|string|max:255',
         ];
+    }
+
+    public function after(): array
+    {
+        return [function (Validator $validator): void {
+            if ($validator->errors()->hasAny(['tenant_id', 'stall_id'])) {
+                return;
+            }
+
+            $matchesActiveLease = Contract::where('tenant_id', $this->integer('tenant_id'))
+                ->where('stall_id', $this->integer('stall_id'))
+                ->where('status', ContractStatus::Active)
+                ->whereHas('stall', fn ($query) => $query->where('manager_id', $this->user()->id))
+                ->exists();
+
+            if (! $matchesActiveLease) {
+                $validator->errors()->add('stall_id', 'The selected stall is not currently leased by the selected tenant.');
+            }
+        }];
     }
 
     public function kwhUsed(): float

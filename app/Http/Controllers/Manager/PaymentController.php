@@ -8,7 +8,9 @@ use App\Http\Requests\Manager\StorePaymentRequest;
 use App\Models\Payment;
 use App\Models\Stall;
 use App\Models\User;
+use App\Notifications\BillIssuedNotification;
 use App\Services\Billing\PaymentService;
+use App\Services\NavigationBadgeService;
 use App\Traits\ActivityLogTrait;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,9 +25,10 @@ class PaymentController extends Controller
 {
     use ActivityLogTrait;
 
-    public function index(Request $request): View
+    public function index(Request $request, NavigationBadgeService $badges): View
     {
         $managerId = $request->user()->id;
+        $badges->markPayableRead($request->user(), 'payment');
 
         return view('manager.payments', [
             'payments' => Payment::with(['tenant', 'stall', 'latestActivity'])
@@ -49,6 +52,7 @@ class PaymentController extends Controller
         ]);
 
         $this->logActivity('created_payment', $request->user()->name.' created a PHP '.number_format($payment->amount, 2).' bill for tenant', $payment);
+        $payment->tenant?->notify(new BillIssuedNotification($payment));
 
         return back()->with('success', 'Payment bill created successfully.');
     }

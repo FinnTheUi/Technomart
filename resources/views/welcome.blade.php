@@ -81,9 +81,24 @@
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 640px) {
+            .site-nav { padding: 0 14px; }
+            .nav-inner { height: 64px; }
+            .nav-links { gap: 4px; }
+            .nav-link { padding: 9px 10px; }
+            .nav-cta { padding: 10px 13px; white-space: nowrap; }
+            .hero { padding: 104px 16px 32px; }
+            .hero h1 { font-size: clamp(2rem, 11vw, 3rem); }
+            .hero h1 br { display: none; }
+            .hero-badge { margin-bottom: 22px; }
             .hero-buttons { flex-direction: column; width: 100%; max-width: 340px; }
             .btn-primary, .btn-secondary { justify-content: center; width: 100%; }
-            .stats-bar { flex-direction: column; align-items: center; }
+            .stats-bar { margin: 0 16px 56px; padding: 24px 20px; display: grid; grid-template-columns:1fr 1fr; }
+            .features { padding: 0 16px 64px; }
+            .features-header { margin-bottom: 28px; }
+            .features-grid { grid-template-columns: 1fr; gap: 16px; }
+            .feature-card { padding: 24px; }
+            .cta-section { padding: 0 16px 64px; }
+            .footer-inner,.footer-links { justify-content: center; text-align: center; }
             .nav-brand span { display: none; }
         }
     </style>

@@ -86,6 +86,18 @@
 
         @media (max-width: 640px) {
             .stalls-grid { grid-template-columns: 1fr; }
+            .site-nav { padding: 0 14px; }
+            .nav-inner { height: 64px; }
+            .nav-links { gap: 4px; }
+            .nav-link { padding: 9px 8px; }
+            .nav-cta { padding: 10px 12px; white-space: nowrap; }
+            .page-container { padding: 96px 14px 56px; }
+            .page-header { margin-bottom: 32px; }
+            .stall-card-body { padding: 22px 18px; }
+            .stall-price-bar { align-items: stretch; flex-direction: column; gap: 16px; }
+            .btn-select,.btn-waitlist { justify-content: center; width: 100%; min-height: 46px; }
+            .modal { padding: 12px; }
+            .modal-content { max-height: calc(100dvh - 24px); overflow-y: auto; padding: 28px 18px 20px; }
             .nav-brand span { display: none; }
         }
         /* Live status on each card: bubble color matches the status */
@@ -111,7 +123,7 @@
         .btn-search:hover { background: #4338ca; }
         .btn-clear { font-size: 14px; font-weight: 600; color: #64748b; padding: 0 6px; }
         .btn-clear:hover { color: #0f172a; }
-        @media (max-width: 640px) { .stall-toolbar select, .btn-search { flex: 1; } }
+        @media (max-width: 640px) { .stall-toolbar{align-items:stretch}.search-box{flex-basis:100%;min-width:0}.stall-toolbar select,.btn-search{flex:1;min-width:0}.btn-clear{display:flex;align-items:center;justify-content:center;min-height:46px} }
     </style>
     @vite('resources/js/app.js')
 </head>

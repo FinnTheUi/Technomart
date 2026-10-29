@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Stock Inventory — Technomart</title>
+    <title>Stock Inventory â€” Technomart</title>
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>
         .btn-add{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:10px;font-size:14px;font-weight:600;color:#fff;background:#4f46e5;border:none;cursor:pointer;transition:.2s;font-family:'Inter',sans-serif}
@@ -63,7 +63,7 @@
     @vite('resources/js/app.js')
 </head>
 <body>
-    @include('partials.admin-sidebar', ['active' => 'products'])
+    @include('partials.manager-sidebar', ['active' => 'products'])
 
     <div class="main">
         <div class="page-header" style="margin-bottom: 20px;">
@@ -72,7 +72,7 @@
                 <p>Daily historical inventory and sales tracking</p>
             </div>
             <div style="display:flex; gap:10px;">
-                <a href="{{ route('admin.products.create') }}" class="btn-add">
+                <a href="{{ route('manager.products.create') }}" class="btn-add">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                     New Product
                 </a>
@@ -100,8 +100,8 @@
                     @forelse($products as $product)
                     <tr>
                         <td style="font-weight:600;color:#0f172a;">{{ $product->name }}<div style="font-size:12px;color:#64748b;font-weight:400;">{{ $product->category }}</div></td>
-                        <td>{{ $product->supplier->name ?? '—' }}</td>
-                        <td>₱{{ number_format($product->price, 2) }}</td>
+                        <td>{{ $product->supplier->name ?? 'â€”' }}</td>
+                        <td>â‚±{{ number_format($product->price, 2) }}</td>
                         <td>
                             <span class="badge {{ $product->isLowStock() ? 'badge-red' : 'badge-green' }}">{{ $product->stock }}</span>
                             @if($product->isLowStock())<div style="font-size:11px;color:#dc2626;font-weight:600;">Reorder</div>@endif
@@ -109,8 +109,8 @@
                         <td>{{ $product->reorder_level }}</td>
                         <td>{{ $product->is_active ? 'Yes' : 'Hidden' }}</td>
                         <td style="display:flex;gap:6px;">
-                            <a href="{{ route('admin.products.edit', $product) }}" class="btn-sm btn-view">Edit</a>
-                            <form method="POST" action="{{ route('admin.products.delete', $product) }}" onsubmit="return confirm('Delete {{ $product->name }}? Products with orders are hidden instead.')">
+                            <a href="{{ route('manager.products.edit', $product) }}" class="btn-sm btn-view">Edit</a>
+                            <form method="POST" action="{{ route('manager.products.delete', $product) }}" onsubmit="return confirm('Delete {{ $product->name }}? Products with orders are hidden instead.')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn-sm btn-reject">Delete</button>
                             </form>
@@ -188,3 +188,4 @@
     </div>
 </body>
 </html>
+

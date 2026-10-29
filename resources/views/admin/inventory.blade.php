@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Stock Ledger — Technomart</title>
+    <title>Stock Ledger â€” Technomart</title>
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>
         .form-grid { display: grid; grid-template-columns: 2fr 1fr 2fr auto; gap: 12px; align-items: end; }
@@ -16,13 +16,13 @@
     @vite('resources/js/app.js')
 </head>
 <body>
-    @include('partials.admin-sidebar', ['active' => 'inventory'])
+    @include('partials.manager-sidebar', ['active' => 'inventory'])
 
     <div class="main">
         <div class="page-header">
             <div>
                 <h1>Stock Ledger</h1>
-                <p>Every stock change — purchases received, orders, cancellations and manual counts.</p>
+                <p>Every stock change â€” purchases received, orders, cancellations and manual counts.</p>
             </div>
         </div>
 
@@ -37,13 +37,13 @@
         <div class="alert alert-error">
             <strong>{{ $lowStock->count() }} product(s) at or below reorder level:</strong>
             {{ $lowStock->map(fn ($p) => $p->name.' ('.$p->stock.')')->implode(', ') }}
-            — <a href="{{ route('admin.purchase-orders.index') }}" style="font-weight:700;">create a purchase order</a>
+            â€” <a href="{{ route('manager.purchase-orders.index') }}" style="font-weight:700;">create a purchase order</a>
         </div>
         @endif
 
         <div class="panel">
             <h3 class="panel-title" style="margin-bottom:16px;">Physical count adjustment</h3>
-            <form method="POST" action="{{ route('admin.inventory.adjust') }}" onsubmit="return confirm('Apply this physical stock count? The adjustment will be permanently recorded in the ledger.')">
+            <form method="POST" action="{{ route('manager.inventory.adjust') }}" onsubmit="return confirm('Apply this physical stock count? The adjustment will be permanently recorded in the ledger.')">
                 @csrf
                 <div class="form-grid">
                     <div class="form-group"><label class="form-label">Product</label>
@@ -75,7 +75,7 @@
                     @foreach($movements as $m)
                     <tr>
                         <td style="color:#64748b;">{{ $m->created_at->format('M d, Y g:i A') }}</td>
-                        <td style="font-weight:600;color:#0f172a;">{{ $m->product->name ?? '—' }}</td>
+                        <td style="font-weight:600;color:#0f172a;">{{ $m->product->name ?? 'â€”' }}</td>
                         <td><x-status-badge :status="$m->type" /></td>
                         <td class="{{ $m->quantity >= 0 ? 'qty-in' : 'qty-out' }}">{{ sprintf('%+d', $m->quantity) }}</td>
                         <td>{{ $m->balance_after }}</td>
@@ -93,3 +93,4 @@
     </div>
 </body>
 </html>
+

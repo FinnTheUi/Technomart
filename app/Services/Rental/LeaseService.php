@@ -9,6 +9,7 @@ use App\Models\Contract;
 use App\Models\Payment;
 use App\Models\Stall;
 use App\Models\User;
+use App\Notifications\BillIssuedNotification;
 use App\Notifications\LeaseStatusNotification;
 use App\Services\ActivityLogger;
 use Carbon\CarbonInterface;
@@ -195,7 +196,7 @@ class LeaseService
 
     private function billMonth(Contract $contract, CarbonInterface $dueDate): Payment
     {
-        return Payment::create([
+        $payment = Payment::create([
             'tenant_id' => $contract->tenant_id,
             'manager_id' => $contract->stall->manager_id,
             'stall_id' => $contract->stall_id,
@@ -203,6 +204,10 @@ class LeaseService
             'due_date' => $dueDate,
             'status' => PaymentStatus::Pending,
         ]);
+
+        $contract->tenant?->notify(new BillIssuedNotification($payment));
+
+        return $payment;
     }
 
     private function releaseStall(Contract $contract): void

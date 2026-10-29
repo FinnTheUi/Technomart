@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Audit Log — Technomart</title>
+    <title>Audit Log â€” Technomart</title>
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>
         .filter-bar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px}
@@ -23,7 +23,7 @@
     @vite('resources/js/app.js')
 </head>
 <body>
-    @include('partials.admin-sidebar', ['active' => 'audit-log'])
+    @include('partials.manager-sidebar', ['active' => 'audit-log'])
 
     <div class="main">
         <div class="page-header">
@@ -33,7 +33,7 @@
         </div>
 
         <div class="panel">
-            <form method="GET" action="{{ route('admin.audit-log') }}">
+            <form method="GET" action="{{ route('manager.audit-log') }}">
                 <div class="filter-bar">
                     <select name="action">
                         <option value="">All Actions</option>
@@ -50,8 +50,8 @@
                     <input type="date" name="date_from" value="{{ request('date_from') }}" placeholder="From">
                     <input type="date" name="date_to" value="{{ request('date_to') }}" placeholder="To">
                     <button type="submit" class="filter-btn">Filter</button>
-                    <a href="{{ route('admin.audit-log') }}" class="filter-clear">Clear</a>
-                    <a href="{{ route('admin.audit-log.export', request()->only(['action', 'user_id', 'date_from', 'date_to'])) }}" class="filter-clear">Export CSV</a>
+                    <a href="{{ route('manager.audit-log') }}" class="filter-clear">Clear</a>
+                    <a href="{{ route('manager.audit-log.export', request()->only(['action', 'user_id', 'date_from', 'date_to'])) }}" class="filter-clear">Export CSV</a>
                 </div>
             </form>
 
@@ -66,7 +66,7 @@
                         <td style="font-weight:600;color:#0f172a;">{{ $log->user->name ?? 'System' }}</td>
                         <td><span class="action-badge">{{ $log->action }}</span></td>
                         <td style="max-width:300px;">{{ Str::limit($log->description, 80) }}</td>
-                        <td style="font-size:12px;color:#64748b;">{{ $log->subject_type ? class_basename($log->subject_type) . ' #' . $log->subject_id : '—' }}</td>
+                        <td style="font-size:12px;color:#64748b;">{{ $log->subject_type ? class_basename($log->subject_type) . ' #' . $log->subject_id : 'â€”' }}</td>
                     </tr>
                     @empty
                     <tr><td colspan="5" class="empty-state">No activity logs found.</td></tr>
@@ -79,3 +79,4 @@
     </div>
 </body>
 </html>
+

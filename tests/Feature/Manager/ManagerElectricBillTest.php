@@ -3,6 +3,7 @@
 namespace Tests\Feature\Manager;
 
 use App\Enums\PaymentStatus;
+use App\Models\Contract;
 use App\Models\ElectricBill;
 use App\Models\Stall;
 use App\Models\User;
@@ -29,6 +30,13 @@ class ManagerElectricBillTest extends TestCase
             'name' => 'Stall A',
             'price' => 5000,
             'status' => 'occupied',
+        ]);
+        Contract::create([
+            'tenant_id' => $this->tenant->id,
+            'stall_id' => $this->stall->id,
+            'start_date' => now()->subMonth(),
+            'end_date' => now()->addYear(),
+            'status' => 'active',
         ]);
     }
 
@@ -71,6 +79,39 @@ class ManagerElectricBillTest extends TestCase
             'stall_id', 'period_from', 'period_to', 'billing_date',
             'reading_present', 'reading_previous', 'rate_per_kwh', 'due_date',
         ]);
+    }
+
+    public function test_manager_cannot_bill_a_tenant_for_a_stall_they_do_not_lease(): void
+    {
+        $otherTenant = User::factory()->create(['role' => 'tenant', 'is_active' => true]);
+
+        $response = $this->actingAs($this->manager)->post('/manager/electric-bills', [
+            'tenant_id' => $otherTenant->id,
+            'stall_id' => $this->stall->id,
+            'period_from' => '2026-07-01',
+            'period_to' => '2026-07-31',
+            'billing_date' => '2026-08-01',
+            'reading_present' => 500,
+            'reading_previous' => 400,
+            'rate_per_kwh' => 12.50,
+            'due_date' => '2026-08-15',
+        ]);
+
+        $response->assertSessionHasErrors('stall_id');
+        $this->assertDatabaseCount('electric_bills', 0);
+    }
+
+    public function test_electric_bill_form_contains_only_active_tenant_stall_assignments(): void
+    {
+        $unassignedTenant = User::factory()->create(['role' => 'tenant', 'is_active' => true]);
+
+        $response = $this->actingAs($this->manager)->get('/manager/electric-bills');
+
+        $response->assertOk()
+            ->assertSee($this->tenant->name)
+            ->assertSee($this->stall->name)
+            ->assertDontSee($unassignedTenant->name)
+            ->assertSee('const assignments', false);
     }
 
     public function test_manager_can_record_a_cash_payment_for_an_electric_bill(): void

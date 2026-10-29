@@ -58,7 +58,7 @@ class PayableResolver
         return match ($payable::payableType()) {
             'payment' => route('manager.payments'),
             'electric_bill' => route('manager.electric-bills'),
-            'order' => route('admin.orders.index'),
+            'order' => route('manager.orders.index'),
         };
     }
 
@@ -67,3 +67,4 @@ class PayableResolver
         return route('receipts.show', ['type' => $payable::payableType(), 'id' => $payable->getKey()]);
     }
 }
+

@@ -45,3 +45,4 @@ class LocationController extends Controller
         return back()->with('success', 'Location deleted successfully.');
     }
 }
+

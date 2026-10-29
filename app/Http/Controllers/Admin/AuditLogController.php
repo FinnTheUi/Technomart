@@ -62,3 +62,4 @@ class AuditLogController extends Controller
             ->when($request->filled('date_to'), fn ($q) => $q->whereDate('created_at', '<=', $request->date_to));
     }
 }
+

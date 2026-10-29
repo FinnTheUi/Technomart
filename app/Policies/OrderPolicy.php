@@ -9,7 +9,7 @@ class OrderPolicy
 {
     public function view(User $user, Order $order): bool
     {
-        return $user->id === $order->user_id || $user->isAdmin();
+        return $user->id === $order->user_id || $user->isManager();
     }
 
     public function pay(User $user, Order $order): bool
@@ -19,12 +19,12 @@ class OrderPolicy
 
     public function cancel(User $user, Order $order): bool
     {
-        return $user->id === $order->user_id || $user->isAdmin();
+        return $user->id === $order->user_id || $user->isManager();
     }
 
-    /** Admins verify order payments and handle delivery. */
+    /** Managers verify order payments and handle delivery. */
     public function review(User $user, Order $order): bool
     {
-        return $user->isAdmin();
+        return $user->isManager();
     }
 }

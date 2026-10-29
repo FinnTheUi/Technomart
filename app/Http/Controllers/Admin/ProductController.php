@@ -49,7 +49,7 @@ class ProductController extends Controller
 
         $this->logActivity('created_product', $request->user()->name.' added product "'.$product->name.'"', $product);
 
-        return redirect()->route('admin.products')->with('success', 'Product added successfully.');
+        return redirect()->route('manager.products')->with('success', 'Product added successfully.');
     }
 
     public function edit(Product $product): View
@@ -68,7 +68,7 @@ class ProductController extends Controller
 
         $this->logActivity('updated_product', $request->user()->name.' updated product "'.$product->name.'"', $product);
 
-        return redirect()->route('admin.products')->with('success', 'Product updated successfully.');
+        return redirect()->route('manager.products')->with('success', 'Product updated successfully.');
     }
 
     public function destroy(Request $request, Product $product): RedirectResponse
@@ -77,12 +77,13 @@ class ProductController extends Controller
             $product->update(['is_active' => false]);
             $this->logActivity('deactivated_product', $request->user()->name.' hid product "'.$product->name.'" (it has order history)', $product);
 
-            return redirect()->route('admin.products')->with('success', 'Product has order history, so it was hidden from the catalog instead of deleted.');
+            return redirect()->route('manager.products')->with('success', 'Product has order history, so it was hidden from the catalog instead of deleted.');
         }
 
         $this->logActivity('deleted_product', $request->user()->name.' deleted product "'.$product->name.'"', null, ['deleted_product_name' => $product->name]);
         $product->delete();
 
-        return redirect()->route('admin.products')->with('success', 'Product deleted successfully.');
+        return redirect()->route('manager.products')->with('success', 'Product deleted successfully.');
     }
 }
+

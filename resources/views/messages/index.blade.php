@@ -53,6 +53,24 @@
         .new-chat-section select:focus { border-color: #4f46e5; }
         .new-chat-btn { width: 100%; margin-top: 8px; background: #e0e7ff; border: 1px solid #c7d2fe; color: #4338ca; border-radius: 10px; padding: 10px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: 0.2s; }
         .new-chat-btn:hover { background: #c7d2fe; }
+
+        @media (max-width: 700px) {
+            .main { height: 100dvh; overflow: hidden; }
+            .chat-layout { height: calc(100dvh - 76px); min-height: 0; flex-direction: column; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; }
+            .chat-sidebar { width: 100%; height: auto; max-height: 34%; flex-shrink: 0; border-right: 0; border-bottom: 1px solid #e2e8f0; }
+            .chat-sidebar-header { padding: 12px 16px; }
+            .chat-sidebar-header h2 { font-size: 17px; }
+            .contact-list { display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden; padding: 10px; }
+            .contact-item { min-width: 210px; margin: 0; padding: 10px; }
+            .new-chat-section { padding: 8px 10px; }
+            .chat-main { min-height: 0; }
+            .chat-header { padding: 10px 12px; }
+            .chat-messages { min-height: 0; padding: 12px; gap: 10px; }
+            .message-bubble { max-width: 88%; padding: 10px 12px; overflow-wrap: anywhere; }
+            .chat-input { padding: 10px; gap: 8px; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+            .chat-input input { min-width: 0; padding: 11px 12px; font-size: 16px; }
+            .chat-input button { min-height: 44px; padding: 10px 16px; }
+        }
     </style>
     @vite('resources/js/app.js')
 </head>

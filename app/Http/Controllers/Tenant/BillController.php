@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ElectricBill;
 use App\Models\Payment;
 use App\Services\Billing\OnlinePaymentService;
+use App\Services\NavigationBadgeService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -16,8 +17,10 @@ class BillController extends Controller
 {
     public function __construct(private readonly OnlinePaymentService $online) {}
 
-    public function index(Request $request): View
+    public function index(Request $request, NavigationBadgeService $badges): View
     {
+        $badges->markPayableRead($request->user(), 'payment');
+
         return view('tenant.bills', [
             'bills' => Payment::with(['stall', 'manager'])
                 ->where('tenant_id', $request->user()->id)
@@ -29,8 +32,10 @@ class BillController extends Controller
         ]);
     }
 
-    public function electricBills(Request $request): View
+    public function electricBills(Request $request, NavigationBadgeService $badges): View
     {
+        $badges->markPayableRead($request->user(), 'electric_bill');
+
         return view('tenant.electric-bills', [
             'bills' => ElectricBill::with(['stall', 'manager'])
                 ->where('tenant_id', $request->user()->id)

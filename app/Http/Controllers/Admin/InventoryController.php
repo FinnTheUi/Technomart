@@ -41,3 +41,4 @@ class InventoryController extends Controller
             : 'Stock already matches the counted quantity.');
     }
 }
+

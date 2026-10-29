@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Tenant;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\RenewContractRequest;
 use App\Models\Contract;
+use App\Services\NavigationBadgeService;
 use App\Services\Rental\LeaseService;
 use App\Traits\ActivityLogTrait;
 use Illuminate\Http\RedirectResponse;
@@ -17,8 +18,10 @@ class ContractController extends Controller
 {
     use ActivityLogTrait;
 
-    public function index(Request $request): View
+    public function index(Request $request, NavigationBadgeService $badges): View
     {
+        $badges->markLeasesRead($request->user());
+
         return view('tenant.contracts', [
             'contracts' => Contract::with('stall')
                 ->where('tenant_id', $request->user()->id)

@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Suppliers — Technomart</title>
+    <title>Suppliers â€” Technomart</title>
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>
         .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
@@ -16,7 +16,7 @@
     @vite('resources/js/app.js')
 </head>
 <body>
-    @include('partials.admin-sidebar', ['active' => 'suppliers'])
+    @include('partials.manager-sidebar', ['active' => 'suppliers'])
 
     <div class="main">
         <div class="page-header">
@@ -35,7 +35,7 @@
 
         <div class="panel">
             <h3 class="panel-title" style="margin-bottom:16px;">Add supplier</h3>
-            <form method="POST" action="{{ route('admin.suppliers.store') }}">
+            <form method="POST" action="{{ route('manager.suppliers.store') }}">
                 @csrf
                 <div class="form-grid">
                     <div class="form-group"><label class="form-label">Name *</label><input type="text" name="name" class="form-input" required value="{{ old('name') }}"></div>
@@ -56,13 +56,13 @@
                     @foreach($suppliers as $supplier)
                     <tr>
                         <td style="font-weight:600;color:#0f172a;">{{ $supplier->name }}<div class="detail-sub">{{ $supplier->address }}</div></td>
-                        <td>{{ $supplier->contact_person ?? '—' }}<div class="detail-sub">{{ $supplier->phone }} {{ $supplier->email }}</div></td>
+                        <td>{{ $supplier->contact_person ?? 'â€”' }}<div class="detail-sub">{{ $supplier->phone }} {{ $supplier->email }}</div></td>
                         <td><span class="count-badge">{{ $supplier->products_count }}</span></td>
                         <td><span class="count-badge">{{ $supplier->purchase_orders_count }}</span></td>
                         <td class="edit-row">
                             <details>
                                 <summary class="btn-sm btn-view" style="list-style:none;cursor:pointer;display:inline-block;">Edit</summary>
-                                <form method="POST" action="{{ route('admin.suppliers.update', $supplier) }}">
+                                <form method="POST" action="{{ route('manager.suppliers.update', $supplier) }}">
                                     @csrf @method('PUT')
                                     <input type="text" name="name" class="form-input" value="{{ $supplier->name }}" required>
                                     <input type="text" name="contact_person" class="form-input" value="{{ $supplier->contact_person }}" placeholder="Contact">
@@ -73,7 +73,7 @@
                                 </form>
                             </details>
                             @if($supplier->purchase_orders_count === 0)
-                            <form method="POST" action="{{ route('admin.suppliers.destroy', $supplier) }}" onsubmit="return confirm('Delete {{ $supplier->name }}?')" style="display:inline;">
+                            <form method="POST" action="{{ route('manager.suppliers.destroy', $supplier) }}" onsubmit="return confirm('Delete {{ $supplier->name }}?')" style="display:inline;">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn-sm btn-reject">Delete</button>
                             </form>
@@ -91,3 +91,4 @@
     </div>
 </body>
 </html>
+

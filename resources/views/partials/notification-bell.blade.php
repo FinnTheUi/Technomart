@@ -34,6 +34,22 @@
     const list = document.getElementById('notifList');
     const csrfToken = '{{ csrf_token() }}';
 
+    function refreshNavigationBadges() {
+        fetch('/api/navigation-badges', {
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(counts => {
+            document.querySelectorAll('[data-nav-badge-key]').forEach(el => {
+                const count = Number(counts[el.dataset.navBadgeKey] || 0);
+                el.textContent = count > 99 ? '99+' : String(count);
+                el.classList.toggle('hidden', count === 0);
+                el.setAttribute('aria-label', (el.title || 'Unread items') + ': ' + count);
+            });
+        })
+        .catch(() => {});
+    }
+
     // Toggle dropdown
     trigger.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -53,6 +69,7 @@
 
     function getIconForType(type) {
         const icons = {
+            'bill_issued':         { cls: 'icon-payment',     svg: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M6 3h12a2 2 0 012 2v14l-3-2-3 2-3-2-3 2-3-2-1 1V5a2 2 0 012-2z"/></svg>' },
             'overdue_payment':     { cls: 'icon-payment',     svg: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1"/></svg>' },
             'application_approved':{ cls: 'icon-application', svg: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' },
             'lease_expiring':      { cls: 'icon-lease',       svg: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' },
@@ -120,10 +137,12 @@
             }
         })
         .catch(() => {});
+        refreshNavigationBadges();
     }, 30000);
 
     // Initial fetch for badge
     fetchNotifications();
+    refreshNavigationBadges();
 
     // Expose global helpers
     window.markNotificationRead = function(id, el) {

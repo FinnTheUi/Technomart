@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Admin Dashboard — Technomart</title>
+    <title>Admin Dashboard â€” Technomart</title>
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     @vite('resources/js/app.js')
     <style>
@@ -32,14 +32,6 @@
         <div class="page-header">
             <h1>Dashboard Overview</h1>
         </div>
-
-        @if($lowStockCount > 0 || $ordersAwaitingAction > 0)
-        <div class="alert alert-success" style="background:#eef2ff;border-color:#c7d2fe;color:#3730a3;">
-            @if($ordersAwaitingAction > 0)<a href="{{ route('admin.orders.index') }}" style="font-weight:700;">{{ $ordersAwaitingAction }} order(s) to verify or deliver</a>@endif
-            @if($ordersAwaitingAction > 0 && $lowStockCount > 0) &middot; @endif
-            @if($lowStockCount > 0)<a href="{{ route('admin.products') }}" style="font-weight:700;">{{ $lowStockCount }} product(s) have low stock</a>@endif
-        </div>
-        @endif
 
         <!-- Stats -->
         <div class="stats-grid">
@@ -75,7 +67,7 @@
                 <div class="stat-icon icon-rose">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
-                <div class="stat-value">₱{{ number_format($totalRevenue, 2) }}</div>
+                <div class="stat-value">â‚±{{ number_format($totalRevenue, 2) }}</div>
                 <div class="stat-label">Total Revenue</div>
             </div>
             <div class="stat-card">
@@ -108,7 +100,7 @@
                             <td><span class="rank-badge {{ $i === 0 ? 'rank-1' : ($i === 1 ? 'rank-2' : ($i === 2 ? 'rank-3' : 'rank-default')) }}">{{ $i + 1 }}</span></td>
                             <td><div style="font-weight:600;color:#0f172a;">{{ $t->name }}</div><div style="font-size:12px;color:#94a3b8;">{{ $t->email }}</div></td>
                             <td>{{ $t->total_bought }}</td>
-                            <td>₱{{ number_format($t->total_spent, 2) }}</td>
+                            <td>â‚±{{ number_format($t->total_spent, 2) }}</td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -134,7 +126,7 @@
                         <td>{{ $order->user->name ?? 'N/A' }}</td>
                         <td>{{ $order->product->name ?? 'N/A' }}</td>
                         <td>{{ $order->quantity }}</td>
-                        <td>₱{{ number_format($order->total_price, 2) }}</td>
+                        <td>â‚±{{ number_format($order->total_price, 2) }}</td>
                         <td><x-status-badge :status="$order->status" /></td>
                         <td style="color:#94a3b8;">{{ $order->created_at->format('M d, Y') }}</td>
                     </tr>
@@ -161,7 +153,7 @@
                 <div class="activity-feed">
                     @forelse($activityFeed as $activity)
                     <div class="activity-item">
-                        <div class="activity-icon" style="background:#eef2ff;color:#4f46e5;">⚡</div>
+                        <div class="activity-icon" style="background:#eef2ff;color:#4f46e5;">âš¡</div>
                         <div class="activity-text">
                             <div class="activity-desc">{{ $activity->description }}</div>
                             <div class="activity-time">{{ $activity->created_at->diffForHumans() }}{{ $activity->user ? ' by ' . $activity->user->name : '' }}</div>
@@ -209,7 +201,7 @@
             data: {
                 labels: @json($monthlyLabels),
                 datasets: [{
-                    label: 'Revenue (₱)',
+                    label: 'Revenue (â‚±)',
                     data: @json($monthlyRevenue),
                     borderColor: '#059669',
                     backgroundColor: 'rgba(5,150,105,0.08)',
@@ -225,7 +217,7 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { color: '#64748b', font: { family: 'Inter' }, callback: v => '₱' + v.toLocaleString() } },
+                    y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { color: '#64748b', font: { family: 'Inter' }, callback: v => 'â‚±' + v.toLocaleString() } },
                     x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { family: 'Inter', size: 11 } } }
                 }
             }
@@ -255,3 +247,4 @@
     </script>
 </body>
 </html>
+

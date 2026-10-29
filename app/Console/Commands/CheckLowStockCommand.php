@@ -12,7 +12,7 @@ class CheckLowStockCommand extends Command
 {
     protected $signature = 'inventory:check-low-stock';
 
-    protected $description = 'Email admins a digest of active products at or below their reorder level';
+    protected $description = 'Email managers a digest of active products at or below their reorder level';
 
     public function handle(): int
     {
@@ -24,10 +24,10 @@ class CheckLowStockCommand extends Command
             return self::SUCCESS;
         }
 
-        $admins = User::where('role', User::ROLE_ADMIN)->where('is_active', true)->get();
-        Notification::send($admins, new LowStockNotification($products));
+        $managers = User::where('role', User::ROLE_MANAGER)->where('is_active', true)->get();
+        Notification::send($managers, new LowStockNotification($products));
 
-        $this->components->warn("{$products->count()} product(s) need restocking; notified {$admins->count()} admin(s).");
+        $this->components->warn("{$products->count()} product(s) need restocking; notified {$managers->count()} manager(s).");
 
         return self::SUCCESS;
     }

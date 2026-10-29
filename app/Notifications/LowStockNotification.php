@@ -37,7 +37,7 @@ class LowStockNotification extends Notification implements ShouldQueue
             $mail->line('- '.$product->name.': '.$product->stock.' left (reorder at '.$product->reorder_level.')');
         }
 
-        return $mail->action('Create a purchase order', route('admin.purchase-orders.index'));
+        return $mail->action('Create a purchase order', route('manager.purchase-orders.index'));
     }
 
     public function toArray(object $notifiable): array
@@ -45,8 +45,9 @@ class LowStockNotification extends Notification implements ShouldQueue
         return [
             'type' => 'low_stock',
             'product_ids' => $this->products->pluck('id')->all(),
-            'url' => route('admin.purchase-orders.index'),
+            'url' => route('manager.purchase-orders.index'),
             'message' => $this->products->count().' product(s) are low on stock: '.$this->products->pluck('name')->take(5)->implode(', ').'.',
         ];
     }
 }
+

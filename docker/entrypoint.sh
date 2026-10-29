@@ -36,9 +36,21 @@ if [ "${DB_CONNECTION:-sqlite}" = "sqlite" ]; then
 fi
 
 # Database-backed sessions, cache, and queues all need their tables before the
-# first HTTP request. Running migrations is safe on every container start:
-# Laravel only applies migrations that have not run yet.
+# first HTTP request. Multiple production processes can start together, so use
+# an atomic directory lock to prevent concurrent SQLite migrations.
+migration_lock="storage/framework/migration.lock"
+until mkdir "$migration_lock" 2>/dev/null; do
+    sleep 1
+done
+
+remove_migration_lock() {
+    rmdir "$migration_lock" 2>/dev/null || true
+}
+trap remove_migration_lock EXIT INT TERM
+
 php artisan migrate --force --no-interaction
+remove_migration_lock
+trap - EXIT INT TERM
 php artisan optimize
 
 exec "$@"

@@ -14,7 +14,7 @@ use Illuminate\View\View;
 use RuntimeException;
 
 /**
- * Restocking: draft → ordered → received (stock added), or cancelled.
+ * Restocking: draft â†’ ordered â†’ received (stock added), or cancelled.
  */
 class PurchaseOrderController extends Controller
 {
@@ -39,7 +39,7 @@ class PurchaseOrderController extends Controller
     {
         $po = $this->inventory->createPurchaseOrder($request->integer('supplier_id'), $request->items(), $request->notes, $request->user());
 
-        return redirect()->route('admin.purchase-orders.show', $po)->with('success', 'Purchase order '.$po->po_number.' created.');
+        return redirect()->route('manager.purchase-orders.show', $po)->with('success', 'Purchase order '.$po->po_number.' created.');
     }
 
     public function show(PurchaseOrder $purchaseOrder): View
@@ -75,3 +75,4 @@ class PurchaseOrderController extends Controller
         return back()->with('success', $success);
     }
 }
+

@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Manager;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\NavigationBadgeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StallAvailabilityController;
@@ -46,12 +47,16 @@ Route::post('/webhooks/paymongo', PayMongoWebhookController::class)->middleware(
 // ── Admin ──
 Route::middleware(['auth', 'verified', 'role:admin', 'throttle:writes'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [Admin\DashboardController::class, 'index'])->name('dashboard');
+});
+
+// ── Manager ──
+Route::middleware(['auth', 'verified', 'role:manager', 'throttle:writes'])->prefix('manager')->name('manager.')->group(function () {
+    Route::get('/dashboard', [Manager\DashboardController::class, 'index'])->name('dashboard');
+
+    // Business administration belongs to the manager; administrators are dashboard-only.
     Route::get('/reports', [Admin\ReportController::class, 'index'])->name('reports.index');
     Route::get('/system-health', Admin\SystemHealthController::class)->name('system-health');
-    Route::get('/reports/{report}.csv', [Admin\ReportController::class, 'download'])
-        ->whereIn('report', ['rent', 'orders', 'inventory'])->name('reports.download');
-
-    // Users
+    Route::get('/reports/{report}.csv', [Admin\ReportController::class, 'download'])->whereIn('report', ['rent', 'orders', 'inventory'])->name('reports.download');
     Route::get('/users', [Admin\UserController::class, 'index'])->name('users');
     Route::post('/users/manager', [Admin\UserController::class, 'storeManager'])->name('users.storeManager');
     Route::patch('/users/{user}/role', [Admin\UserController::class, 'updateRole'])->name('users.updateRole');
@@ -59,47 +64,32 @@ Route::middleware(['auth', 'verified', 'role:admin', 'throttle:writes'])->prefix
     Route::delete('/users/{user}/sessions', [Admin\UserController::class, 'invalidateSessions'])->name('users.invalidateSessions');
     Route::post('/users/{user}/resend-verification', [Admin\UserController::class, 'resendVerification'])->middleware('throttle:6,1')->name('users.resendVerification');
     Route::delete('/users/{user}', [Admin\UserController::class, 'destroy'])->name('users.delete');
-
-    // Products & inventory
     Route::get('/products', [Admin\ProductController::class, 'index'])->name('products');
     Route::get('/products/create', [Admin\ProductController::class, 'create'])->name('products.create');
     Route::post('/products', [Admin\ProductController::class, 'store'])->name('products.store');
     Route::get('/products/{product}/edit', [Admin\ProductController::class, 'edit'])->name('products.edit');
     Route::put('/products/{product}', [Admin\ProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{product}', [Admin\ProductController::class, 'destroy'])->name('products.delete');
-
     Route::get('/inventory', [Admin\InventoryController::class, 'index'])->name('inventory.index');
     Route::post('/inventory/adjust', [Admin\InventoryController::class, 'adjust'])->name('inventory.adjust');
-
-    // Suppliers & purchase orders
     Route::get('/suppliers', [Admin\SupplierController::class, 'index'])->name('suppliers.index');
     Route::post('/suppliers', [Admin\SupplierController::class, 'store'])->name('suppliers.store');
     Route::put('/suppliers/{supplier}', [Admin\SupplierController::class, 'update'])->name('suppliers.update');
     Route::delete('/suppliers/{supplier}', [Admin\SupplierController::class, 'destroy'])->name('suppliers.destroy');
-
     Route::get('/purchase-orders', [Admin\PurchaseOrderController::class, 'index'])->name('purchase-orders.index');
     Route::post('/purchase-orders', [Admin\PurchaseOrderController::class, 'store'])->name('purchase-orders.store');
     Route::get('/purchase-orders/{purchaseOrder}', [Admin\PurchaseOrderController::class, 'show'])->name('purchase-orders.show');
     Route::patch('/purchase-orders/{purchaseOrder}/ordered', [Admin\PurchaseOrderController::class, 'markOrdered'])->name('purchase-orders.ordered');
     Route::patch('/purchase-orders/{purchaseOrder}/receive', [Admin\PurchaseOrderController::class, 'receive'])->name('purchase-orders.receive');
     Route::patch('/purchase-orders/{purchaseOrder}/cancel', [Admin\PurchaseOrderController::class, 'cancel'])->name('purchase-orders.cancel');
-
-    // Tenant supply orders
     Route::get('/orders', [Admin\OrderController::class, 'index'])->name('orders.index');
     Route::patch('/orders/{order}/deliver', [Admin\OrderController::class, 'deliver'])->name('orders.deliver');
     Route::patch('/orders/{order}/cancel', [Admin\OrderController::class, 'cancel'])->name('orders.cancel');
-
-    // Audit log & locations
     Route::get('/audit-log', [Admin\AuditLogController::class, 'index'])->name('audit-log');
     Route::get('/audit-log/export', [Admin\AuditLogController::class, 'export'])->name('audit-log.export');
     Route::get('/locations', [Admin\LocationController::class, 'index'])->name('locations');
     Route::post('/locations', [Admin\LocationController::class, 'store'])->name('locations.store');
     Route::delete('/locations/{location}', [Admin\LocationController::class, 'destroy'])->name('locations.delete');
-});
-
-// ── Manager ──
-Route::middleware(['auth', 'verified', 'role:manager', 'throttle:writes'])->prefix('manager')->name('manager.')->group(function () {
-    Route::get('/dashboard', [Manager\DashboardController::class, 'index'])->name('dashboard');
 
     // Stalls & floor plan
     Route::get('/stalls', [Manager\StallController::class, 'index'])->name('stalls');
@@ -180,7 +170,7 @@ Route::middleware(['auth', 'verified'])->get('/receipts/{type}/{id}', [ReceiptCo
     ->name('receipts.show');
 
 // ── Messaging & notifications (all signed-in users) ──
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:manager,tenant'])->group(function () {
     Route::prefix('messages')->name('messages.')->group(function () {
         Route::get('/', [MessageController::class, 'index'])->name('index');
         Route::get('/{user}', [MessageController::class, 'conversation'])->name('conversation');
@@ -192,6 +182,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.markAllRead');
     Route::get('/api/notifications', [NotificationController::class, 'apiUnread'])->name('api.notifications');
+    Route::get('/api/navigation-badges', NavigationBadgeController::class)->name('api.navigation-badges');
 });
 
 // ── Profile (verification not required, so users can fix their email) ──

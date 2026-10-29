@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Purchase Orders — Technomart</title>
+    <title>Purchase Orders â€” Technomart</title>
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>
         .form-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; margin-bottom: 16px; }
@@ -16,7 +16,7 @@
     @vite('resources/js/app.js')
 </head>
 <body>
-    @include('partials.admin-sidebar', ['active' => 'purchase-orders'])
+    @include('partials.manager-sidebar', ['active' => 'purchase-orders'])
 
     <div class="main">
         <div class="page-header">
@@ -47,7 +47,7 @@
                         <td style="font-weight:600;color:#0f172a;">{{ $product->name }}</td>
                         <td><span class="badge badge-red">{{ $product->stock }}</span></td>
                         <td>{{ $product->reorder_level }}</td>
-                        <td>{{ $product->supplier->name ?? '—' }}</td>
+                        <td>{{ $product->supplier->name ?? 'â€”' }}</td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -58,9 +58,9 @@
         <div class="panel">
             <h3 class="panel-title" style="margin-bottom:16px;">New purchase order</h3>
             @if($suppliers->isEmpty())
-                <p class="detail-sub">Add a <a href="{{ route('admin.suppliers.index') }}" style="color:#4f46e5;">supplier</a> first.</p>
+                <p class="detail-sub">Add a <a href="{{ route('manager.suppliers.index') }}" style="color:#4f46e5;">supplier</a> first.</p>
             @else
-            <form method="POST" action="{{ route('admin.purchase-orders.store') }}">
+            <form method="POST" action="{{ route('manager.purchase-orders.store') }}">
                 @csrf
                 <div class="form-grid">
                     <div class="form-group"><label class="form-label">Supplier *</label>
@@ -72,14 +72,14 @@
                 </div>
 
                 <table class="data-table items-table">
-                    <thead><tr><th>Product</th><th>Quantity</th><th>Unit cost (₱)</th></tr></thead>
+                    <thead><tr><th>Product</th><th>Quantity</th><th>Unit cost (â‚±)</th></tr></thead>
                     <tbody id="po-items">
                         @php $preset = $lowStock->values(); @endphp
                         @for($i = 0; $i < max(3, $preset->count()); $i++)
                         <tr>
                             <td>
                                 <select name="items[{{ $i }}][product_id]" class="form-input">
-                                    <option value="">—</option>
+                                    <option value="">â€”</option>
                                     @foreach($products as $product)
                                         <option value="{{ $product->id }}" @selected(($preset[$i]->id ?? null) === $product->id)>{{ $product->name }}</option>
                                     @endforeach
@@ -106,12 +106,12 @@
                     @foreach($purchaseOrders as $po)
                     <tr>
                         <td style="font-weight:700;">{{ $po->po_number }}</td>
-                        <td>{{ $po->supplier->name ?? '—' }}</td>
+                        <td>{{ $po->supplier->name ?? 'â€”' }}</td>
                         <td>{{ $po->items_count }}</td>
-                        <td>₱{{ number_format($po->total_cost, 2) }}</td>
+                        <td>â‚±{{ number_format($po->total_cost, 2) }}</td>
                         <td><x-status-badge :status="$po->status" /></td>
                         <td style="color:#64748b;">{{ $po->created_at->format('M d, Y') }}</td>
-                        <td><a href="{{ route('admin.purchase-orders.show', $po) }}" class="btn-sm btn-view">Open</a></td>
+                        <td><a href="{{ route('manager.purchase-orders.show', $po) }}" class="btn-sm btn-view">Open</a></td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -137,3 +137,4 @@
     </script>
 </body>
 </html>
+

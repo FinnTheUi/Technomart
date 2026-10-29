@@ -119,8 +119,9 @@ class UserController extends Controller
 
         $this->logActivity('created_manager', $request->user()->name.' created manager account for '.$manager->name, $manager);
 
-        return redirect()->route('admin.users')->with('success', $emailed
+        return redirect()->route('manager.users')->with('success', $emailed
             ? 'Manager account created successfully. A verification email was sent.'
             : 'Manager account created, but the verification email could not be sent. They can use "Resend verification email" after signing in.');
     }
 }
+

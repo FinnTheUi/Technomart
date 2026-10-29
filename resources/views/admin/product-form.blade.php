@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $product ? 'Edit Product' : 'Add Product' }} — Technomart</title>
+    <title>{{ $product ? 'Edit Product' : 'Add Product' }} â€” Technomart</title>
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>
         .product-form-shell { width:100%; max-width:760px; margin:0 auto; }
@@ -12,11 +12,11 @@
     @vite('resources/js/app.js')
 </head>
 <body>
-    @include('partials.admin-sidebar', ['active' => 'products'])
+    @include('partials.manager-sidebar', ['active' => 'products'])
 
     <div class="main">
         <div class="product-form-shell">
-        <a href="{{ route('admin.products') }}" class="back-link">
+        <a href="{{ route('manager.products') }}" class="back-link">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             Back to Products
         </a>
@@ -28,7 +28,7 @@
         </div>
 
         <div class="panel">
-            <form method="POST" action="{{ $product ? route('admin.products.update', $product) : route('admin.products.store') }}">
+            <form method="POST" action="{{ $product ? route('manager.products.update', $product) : route('manager.products.store') }}">
                 @csrf
                 @if($product) @method('PUT') @endif
 
@@ -46,7 +46,7 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Price (₱)</label>
+                        <label class="form-label">Price (â‚±)</label>
                         <input type="number" name="price" class="form-input" step="0.01" min="0" value="{{ old('price', $product->price ?? '') }}" placeholder="0.00" required>
                         @error('price') <div class="form-error">{{ $message }}</div> @enderror
                     </div>
@@ -77,3 +77,4 @@
     </div>
 </body>
 </html>
+

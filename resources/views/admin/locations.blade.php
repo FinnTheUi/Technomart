@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Locations — Technomart</title>
+    <title>Locations â€” Technomart</title>
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
     <style>
         .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
@@ -16,7 +16,7 @@
     @vite('resources/js/app.js')
 </head>
 <body>
-    @include('partials.admin-sidebar', ['active' => 'locations'])
+    @include('partials.manager-sidebar', ['active' => 'locations'])
 
     <div class="main">
         <div class="page-header">
@@ -35,14 +35,14 @@
         <!-- Add Location Form -->
         <div class="panel">
             <h3 class="panel-title" style="margin-bottom:20px;">Add New Location</h3>
-            <form method="POST" action="{{ route('admin.locations.store') }}">
+            <form method="POST" action="{{ route('manager.locations.store') }}">
                 @csrf
                 <div class="form-grid">
                     <div class="form-group"><label class="form-label">Name *</label><input type="text" name="name" class="form-input" required placeholder="e.g. Main Market Branch"></div>
                     <div class="form-group"><label class="form-label">Address</label><input type="text" name="address" class="form-input" placeholder="e.g. 123 Market St, City"></div>
                     <div class="form-group full"><label class="form-label">Description</label><textarea name="description" class="form-textarea" rows="2" placeholder="Brief description..."></textarea></div>
                 </div>
-                <button type="submit" class="btn-add">➕ Add Location</button>
+                <button type="submit" class="btn-add">âž• Add Location</button>
             </form>
         </div>
 
@@ -56,11 +56,11 @@
                     <tr>
                         <td style="font-weight:600;">{{ $loc->id }}</td>
                         <td style="font-weight:600;color:#0f172a;">{{ $loc->name }}</td>
-                        <td>{{ $loc->address ?? '—' }}</td>
+                        <td>{{ $loc->address ?? 'â€”' }}</td>
                         <td><span class="count-badge">{{ $loc->stalls_count }}</span></td>
                         <td>{{ $loc->created_at->format('M d, Y') }}</td>
                         <td>
-                            <form method="POST" action="{{ route('admin.locations.delete', $loc) }}" onsubmit="return confirm('Delete this location?')">
+                            <form method="POST" action="{{ route('manager.locations.delete', $loc) }}" onsubmit="return confirm('Delete this location?')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn-sm btn-reject">Delete</button>
                             </form>
@@ -76,3 +76,4 @@
     </div>
 </body>
 </html>
+

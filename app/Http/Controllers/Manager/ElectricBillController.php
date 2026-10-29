@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Manager;
 
+use App\Enums\ContractStatus;
 use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\StoreElectricBillRequest;
+use App\Models\Contract;
 use App\Models\ElectricBill;
-use App\Models\Stall;
-use App\Models\User;
+use App\Notifications\BillIssuedNotification;
 use App\Services\Billing\PaymentService;
+use App\Services\NavigationBadgeService;
 use App\Traits\ActivityLogTrait;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,9 +21,15 @@ class ElectricBillController extends Controller
 {
     use ActivityLogTrait;
 
-    public function index(Request $request): View
+    public function index(Request $request, NavigationBadgeService $badges): View
     {
         $managerId = $request->user()->id;
+        $badges->markPayableRead($request->user(), 'electric_bill');
+        $activeContracts = Contract::with(['tenant:id,name', 'stall:id,name,manager_id'])
+            ->where('status', ContractStatus::Active)
+            ->whereHas('stall', fn ($query) => $query->where('manager_id', $managerId))
+            ->latest('id')
+            ->get();
 
         return view('manager.electric-bills', [
             'bills' => ElectricBill::with(['tenant', 'stall'])
@@ -31,8 +39,12 @@ class ElectricBillController extends Controller
                 ->paginate(10)
                 ->withQueryString()
                 ->fragment('electric-bill-records'),
-            'tenants' => User::where('role', User::ROLE_TENANT)->orderBy('name')->get(),
-            'stalls' => Stall::where('manager_id', $managerId)->get(),
+            'tenants' => $activeContracts->pluck('tenant')->unique('id')->sortBy('name')->values(),
+            'stalls' => $activeContracts->pluck('stall')->unique('id')->sortBy('name')->values(),
+            'tenantStallAssignments' => $activeContracts->map(fn (Contract $contract) => [
+                'tenant_id' => $contract->tenant_id,
+                'stall_id' => $contract->stall_id,
+            ])->values(),
         ]);
     }
 
@@ -47,6 +59,7 @@ class ElectricBillController extends Controller
         ]);
 
         $this->logActivity('created_electric_bill', $request->user()->name.' issued electric bill PHP '.number_format($bill->total_amount, 2).' to tenant', $bill);
+        $bill->tenant?->notify(new BillIssuedNotification($bill));
 
         return back()->with('success', 'Electric bill created successfully! Total: PHP '.number_format($bill->total_amount, 2));
     }
